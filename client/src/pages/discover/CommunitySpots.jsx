@@ -569,10 +569,10 @@ export default function CommunitySpots() {
                 <button 
                   key={type}
                   onClick={() => setSelectedType(type === 'All' ? 'All' : type)}
-                  className={`h-[30px] px-4.5 rounded-full font-cabinet font-extrabold text-[11px] transition-all shrink-0 capitalize ${
+                  className={`h-[32px] px-5 rounded-full font-cabinet font-extrabold text-[11px] transition-all shrink-0 capitalize ${
                     (selectedType === type) 
                       ? "bg-[#1B4332] text-white shadow-sm" 
-                      : "bg-white border border-sand text-taupe hover:bg-ivory"
+                      : "bg-white border border-sand text-taupe hover:bg-[#FAF5EE]"
                   }`}
                 >
                   {type === 'trip' ? '🎫 Itineraries' : type === 'experience' ? '📸 Stories' : type === 'activity' ? '🪂 Activities' : type === 'destination' ? '📍 Destinations' : 'All Feeds'}
@@ -635,50 +635,14 @@ export default function CommunitySpots() {
                           return (
                             <article 
                               key={post._id || post.id} 
-                              className={`bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col`}
+                              className="bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row md:min-h-[260px]"
                             >
-                              {/* Post Header */}
-                              <div className="p-5 flex justify-between items-start">
-                                <div className="flex gap-3 items-center">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[14px] border border-sand shrink-0 bg-[#FEF3E2] text-charcoal`}>
-                                    {post.authorName === 'Gemini-AI-Guide' ? '🤖' : post.authorName[0]}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-1.5">
-                                      <h4 className="font-cabinet font-extrabold text-[13.5px] text-charcoal leading-none">
-                                        {post.authorName}
-                                      </h4>
-                                      {post.authorName === 'Gemini-AI-Guide' && (
-                                        <span className="bg-violet-100 text-violet-700 text-[8px] font-mono-dm uppercase font-extrabold px-1.5 py-0.5 rounded border border-violet-200">AI Partner</span>
-                                      )}
-                                    </div>
-                                    <span className="font-mono-dm text-[9.5px] text-taupe/50 block mt-1">
-                                      {new Date(post.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · verified traveler
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <Bookmark 
-                                  size={16} 
-                                  className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0 cursor-pointer`}
-                                  onClick={(e) => handleSave(post._id || post.id, e)}
-                                />
-                              </div>
-
-                              {/* Post Image Banner */}
+                              {/* Left Side: Photo */}
                               {post.coverImage && (
-                                <div className="w-full h-[220px] relative overflow-hidden shrink-0 bg-sand/30 border-y border-sand/40">
+                                <div className="w-full md:w-[260px] min-h-[180px] md:min-h-full relative overflow-hidden bg-sand/20 shrink-0 border-r border-sand/30">
                                   <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
                                   
-                                  {/* Safety Stamp */}
-                                  {post.rating && (
-                                    <div className="absolute top-4 right-4 h-[24px] px-2.5 rounded-full bg-white/95 border border-sand shadow-sm flex items-center gap-1">
-                                      <Star size={11} className="text-accent fill-accent" />
-                                      <span className="font-cabinet font-bold text-[11px] text-charcoal">{post.rating}</span>
-                                    </div>
-                                  )}
-
-                                  <div className="absolute bottom-4 left-4 h-[22px] px-2.5 rounded-full bg-charcoal/70 backdrop-blur border border-white/20 flex items-center">
+                                  <div className="absolute bottom-3 left-3 h-[20px] px-2 rounded-full bg-charcoal/70 backdrop-blur border border-white/15 flex items-center">
                                     <span className="font-mono-dm text-[8.5px] text-white uppercase tracking-wider font-extrabold">
                                       {post.type}
                                     </span>
@@ -686,39 +650,68 @@ export default function CommunitySpots() {
                                 </div>
                               )}
 
-                              {/* Card Content Body */}
-                              <div className="p-5 flex-1 flex flex-col justify-between">
+                              {/* Right Side: Text & Actions */}
+                              <div className="p-5 flex-1 flex flex-col justify-between min-w-0">
                                 <div>
-                                  <h3 className="font-display font-extrabold text-[17px] text-charcoal leading-snug">
-                                    {post.title}
-                                  </h3>
+                                  {/* Author / Header */}
+                                  <div className="flex justify-between items-start gap-2 mb-2.5">
+                                    <div className="flex gap-2.5 items-center">
+                                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[12.5px] border border-sand bg-[#FEF3E2] text-charcoal shrink-0">
+                                        {post.authorName === 'Gemini-AI-Guide' ? '🤖' : post.authorName[0]}
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-1.5">
+                                          <h4 className="font-cabinet font-extrabold text-[12.5px] text-charcoal leading-none">
+                                            {post.authorName}
+                                          </h4>
+                                          {post.authorName === 'Gemini-AI-Guide' && (
+                                            <span className="bg-violet-100 text-violet-700 text-[8px] font-mono-dm uppercase font-extrabold px-1.5 py-0.5 rounded border border-violet-200">AI</span>
+                                          )}
+                                        </div>
+                                        <span className="font-mono-dm text-[8.5px] text-taupe/50 mt-0.5 block">
+                                          {new Date(post.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <Bookmark 
+                                      size={15} 
+                                      className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0 cursor-pointer`}
+                                      onClick={(e) => handleSave(post._id || post.id, e)}
+                                    />
+                                  </div>
+
+                                  <div className="flex items-baseline justify-between gap-3">
+                                    <h3 className="font-display font-extrabold text-[16.5px] text-charcoal leading-tight truncate">
+                                      {post.title}
+                                    </h3>
+                                    {post.rating && (
+                                      <div className="flex items-center gap-0.5 shrink-0 text-accent font-cabinet font-bold text-[11px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                                        <Star size={10.5} className="fill-accent" />
+                                        <span>{post.rating}</span>
+                                      </div>
+                                    )}
+                                  </div>
 
                                   {post.destinationName && (
-                                    <div className="flex items-center gap-1 mt-1 text-taupe/65">
-                                      <MapPin size={11.5} className="text-saffron" />
-                                      <span className="font-cabinet font-semibold text-[11.5px]">{post.destinationName}</span>
+                                    <div className="flex items-center gap-1 mt-0.5 text-taupe/65">
+                                      <MapPin size={10.5} className="text-saffron" />
+                                      <span className="font-cabinet font-semibold text-[11px]">{post.destinationName}</span>
                                     </div>
                                   )}
 
-                                  <p className="font-jakarta text-[13px] text-taupe mt-3 leading-relaxed whitespace-pre-wrap">
+                                  <p className="font-jakarta text-[12.5px] text-taupe mt-2.5 leading-relaxed line-clamp-3">
                                     {post.description}
                                   </p>
 
                                   {/* Dynamic visual attachments for Travel Posts */}
                                   {post.type === 'trip' && (
-                                    <div className="mt-4 border border-sand bg-emerald-50/20 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-full relative overflow-hidden border-l-4 border-l-[#1B4332]">
-                                      <div>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-mono-dm text-[8.5px] text-taupe/60 uppercase tracking-widest font-extrabold">Itinerary Ticket Stub</span>
-                                          <CheckCircle2 size={10} className="text-emerald-600" />
-                                        </div>
-                                        <h5 className="font-cabinet font-extrabold text-[14.5px] text-charcoal mt-1 flex items-center gap-1.5">
-                                          {post.duration} Days Plan <ArrowRight size={12} className="text-saffron" /> {post.destinationName}
+                                    <div className="mt-3 bg-[#FAF5EE] border border-sand/65 rounded-xl p-3 flex justify-between items-center gap-3">
+                                      <div className="min-w-0">
+                                        <h5 className="font-cabinet font-extrabold text-[12.5px] text-charcoal truncate">
+                                          {post.duration} Days Plan · Est: ₹{(post.budget || 0).toLocaleString()}
                                         </h5>
-                                        <div className="flex gap-3 mt-2.5">
-                                          <span className="font-mono-dm text-[10px] text-emerald-800 font-bold bg-emerald-100/50 px-2 py-0.5 rounded">Est: ₹{(post.budget || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-[#1B4332] font-bold bg-[#1B4332]/5 px-2 py-0.5 rounded">🛡️ 91/100 Safety</span>
-                                        </div>
+                                        <span className="font-mono-dm text-[9px] text-[#2D6A4F] font-bold">🛡️ 91/100 Safe Spot</span>
                                       </div>
                                       <div className="flex gap-1.5 shrink-0 z-10">
                                         <button 
@@ -726,13 +719,13 @@ export default function CommunitySpots() {
                                             e.stopPropagation();
                                             setDetailModalPost(post);
                                           }}
-                                          className="h-[32px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11px] hover:bg-ivory shadow-sm transition-all"
+                                          className="h-[28px] px-2.5 rounded-lg border border-sand bg-white text-taupe font-cabinet font-extrabold text-[10px] hover:bg-ivory shadow-xs"
                                         >
-                                          Stops Timeline
+                                          Stops
                                         </button>
                                         <button 
                                           onClick={(e) => handleCopyTrip(post, e)}
-                                          className="h-[32px] px-4.5 rounded-xl bg-saffron text-white font-cabinet font-extrabold text-[11px] hover:shadow-saffron/20 shadow-sm hover:scale-[1.02] transition-all"
+                                          className="h-[28px] px-3.5 rounded-lg bg-saffron text-white font-cabinet font-extrabold text-[10px] hover:scale-[1.02] shadow-xs"
                                         >
                                           Import
                                         </button>
@@ -741,13 +734,12 @@ export default function CommunitySpots() {
                                   )}
 
                                   {post.type === 'activity' && post.activityDetails && (
-                                    <div className="mt-4 border border-[#2D6A4F]/20 bg-[#2D6A4F]/5 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-full border-l-4 border-l-[#2D6A4F]">
-                                      <div>
-                                        <span className="font-mono-dm text-[8.5px] text-[#2D6A4F] uppercase tracking-widest font-extrabold">Activity Pass Card</span>
-                                        <h5 className="font-cabinet font-extrabold text-[14px] text-charcoal mt-1">{post.activityDetails.name}</h5>
-                                        <div className="flex gap-3 mt-2.5">
-                                          <span className="font-mono-dm text-[10px] text-charcoal font-bold bg-white px-2 py-0.5 rounded border border-sand/40">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-taupe bg-white px-2 py-0.5 rounded border border-sand/40">{post.activityDetails.duration}</span>
+                                    <div className="mt-3 bg-[#FAF5EE] border border-sand/65 rounded-xl p-3 flex justify-between items-center gap-3">
+                                      <div className="min-w-0">
+                                        <h5 className="font-cabinet font-extrabold text-[12.5px] text-charcoal truncate">{post.activityDetails.name}</h5>
+                                        <div className="flex gap-2 mt-0.5">
+                                          <span className="font-mono-dm text-[9px] text-charcoal font-bold">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
+                                          <span className="font-mono-dm text-[9px] text-taupe">· {post.activityDetails.duration}</span>
                                         </div>
                                       </div>
                                       <button 
@@ -760,7 +752,7 @@ export default function CommunitySpots() {
                                             setAddToTripModalActivity(post);
                                           }
                                         }}
-                                        className="h-[32px] px-4.5 rounded-xl bg-[#2D6A4F] text-white font-cabinet font-extrabold text-[11px] hover:scale-[1.02] transition-all shadow-sm shrink-0"
+                                        className="h-[28px] px-3.5 rounded-lg bg-[#2D6A4F] text-white font-cabinet font-extrabold text-[10px] hover:scale-[1.02] shadow-xs shrink-0"
                                       >
                                         Add to Trip
                                       </button>
@@ -769,9 +761,9 @@ export default function CommunitySpots() {
 
                                   {/* Tags */}
                                   {post.tags && post.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-4">
-                                      {post.tags.map(t => (
-                                        <span key={t} className="font-mono-dm text-[10px] text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded border border-[#1B4332]/10 font-bold">
+                                    <div className="flex flex-wrap gap-1.5 mt-3">
+                                      {post.tags.slice(0, 3).map(t => (
+                                        <span key={t} className="font-mono-dm text-[9px] text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded border border-[#1B4332]/10 font-bold">
                                           #{t}
                                         </span>
                                       ))}
@@ -780,13 +772,13 @@ export default function CommunitySpots() {
                                 </div>
 
                                 {/* Reactions Bar */}
-                                <div className="mt-6 pt-4 border-t border-sand/40 flex items-center justify-between text-taupe/70">
-                                  <div className="flex items-center gap-4">
+                                <div className="mt-4 pt-3 border-t border-sand/40 flex items-center justify-between text-taupe/70">
+                                  <div className="flex items-center gap-3.5">
                                     <button 
                                       onClick={(e) => handleLike(post._id || post.id, e)}
-                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isLiked ? 'text-saffron' : ''}`}
+                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-cabinet font-extrabold text-[11px] ${isLiked ? 'text-saffron' : ''}`}
                                     >
-                                      <ThumbsUp size={14} className={isLiked ? 'fill-saffron text-saffron' : ''} />
+                                      <ThumbsUp size={13} className={isLiked ? 'fill-saffron text-saffron' : ''} />
                                       {post.likes?.length || 0}
                                     </button>
                                     <button 
@@ -794,23 +786,18 @@ export default function CommunitySpots() {
                                         e.stopPropagation();
                                         setExpandedCommentsPostId(isCommentsExpanded ? null : (post._id || post.id));
                                       }}
-                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isCommentsExpanded ? 'text-saffron' : ''}`}
+                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-cabinet font-extrabold text-[11px] ${isCommentsExpanded ? 'text-saffron' : ''}`}
                                     >
-                                      <MessageSquare size={14} />
+                                      <MessageSquare size={13} />
                                       {post.comments?.length || 0}
                                     </button>
                                     <button 
                                       onClick={(e) => handleShare(post, e)}
                                       className="p-1 hover:bg-sand rounded-full transition-all"
-                                      title="Share Post Link"
                                     >
-                                      <Share2 size={14} />
+                                      <Share2 size={13} />
                                     </button>
                                   </div>
-                                  
-                                  <span className="font-mono-dm text-[9.5px] text-taupe/50">
-                                    {new Date(post.createdAt || Date.now()).toLocaleDateString()}
-                                  </span>
                                 </div>
                               </div>
 
