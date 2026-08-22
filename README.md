@@ -8,11 +8,7 @@
 
 | Resource | Link |
 |---|---|
-| 🌐 **Live Deployed Project** | [https://my-itinerary-mu.vercel.app](https://my-itinerary-mu.vercel.app) |
-| ⚙️ **Backend Deployed Link** | [https://my-itinerary-backend.onrender.com](https://my-itinerary-backend.onrender.com) |
 | 🎨 **Figma Design Link** | [View Figma Design](https://www.figma.com/design/Cwx3aXDvJ9tM0QU760L0iw/work?node-id=544-1907&t=TbFlAKX2Bwqk5ct9-1) |
-| 📬 **Postman Documentation** | [View API Documentation](https://demu07-9443935.postman.co/workspace/7bcff791-3c4b-4205-8d3c-3cae430539cb/documentation/50841059-2968335d-159f-497a-bc14-5384b3b4707f) |
-| 🎥 **YouTube Demo Video** | [Watch Demo Video](https://youtu.be/FdB2_mW40Uw?si=1DQ77syh3FKUQrIM) |
 
 ---
 
