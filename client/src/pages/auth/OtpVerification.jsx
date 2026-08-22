@@ -220,3 +220,5 @@ export default function OtpVerification() {
     </AuthLayout>
   );
 }
+
+// added by Rishikesh
