@@ -124,7 +124,12 @@ export const generateItinerary = async (tripData) => {
       JSON structure:
       {
         "tripTitle": "Catchy title",
-        "overview": "Short summary",
+        "overview": "Summary of the trip atmosphere and expectations",
+        "safetyMetrics": {
+          "guardiansCount": 24, // realistic estimated count of active safety guardians in this destination area
+          "hospitalDistanceKm": 1.4, // realistic distance in km to the nearest major hospital
+          "safetyScore": 89 // safety rating index from 1-100 based on area crime indexes and infrastructure
+        },
         "dailyItinerary": [
           {
             "day": 1,
@@ -240,31 +245,44 @@ export const generateItinerary = async (tripData) => {
 
     // Fast Non-Blocking Place Grounding with 1.0s max timeout cap
     const placePromises = [];
-    if (parsedItinerary.dailyItinerary && Array.isArray(parsedItinerary.dailyItinerary)) {
-      for (const day of parsedItinerary.dailyItinerary) {
-        if (day.activities && Array.isArray(day.activities)) {
-          for (const activity of day.activities) {
-            if (activity.location) {
-              placePromises.push(
-                getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
-                  if (groundedData) {
-                    activity.placeId = groundedData.placeId;
-                    activity.lat = groundedData.lat;
-                    activity.lng = groundedData.lng;
-                    activity.photoUrl = groundedData.photoUrl;
+    for (const day of parsedItinerary.dailyItinerary) {
+      for (const activity of day.activities) {
+        if (activity.location) {
+          placePromises.push(
+            getGoogleMapsPlaceInfo(activity.location, tripData.location).then(async (groundedData) => {
+              if (groundedData) {
+                activity.placeId = groundedData.placeId;
+                activity.lat = groundedData.lat;
+                activity.lng = groundedData.lng;
+                activity.photoUrl = groundedData.photoUrl;
+              }
+              
+              // Fallback to Unsplash Source if photoUrl is empty or fails
+              if (!activity.photoUrl) {
+                const searchKeyword = encodeURIComponent(`${activity.location} ${tripData.location}`);
+                activity.photoUrl = `https://images.unsplash.com/photo-1506461883276-594a12b11cc3?auto=format&fit=crop&w=600&q=80`; // Safe architectural default
+                try {
+                  const unsplashRes = await fetch(`https://api.unsplash.com/search/photos?query=${searchKeyword}&per_page=1&client_id=eM58fP_gT7XqZ3iN5fP1N-Z-rB9B9z0n1O1w4s4n1eI`);
+                  if (unsplashRes.ok) {
+                    const unsplashData = await unsplashRes.json();
+                    if (unsplashData.results && unsplashData.results.length > 0) {
+                      activity.photoUrl = unsplashData.results[0].urls.small;
+                    }
                   }
-                })
-              );
-            }
-          }
+                } catch (e) {
+                  // Keep safe default architectural image if search fails
+                }
+              }
+            })
+          );
         }
       }
     }
 
-    // Cap grounding wait time to 1.0s max so response returns almost instantly
+    // Wait max 4 seconds for place grounding and Unsplash fallback, or proceed immediately
     await Promise.race([
       Promise.all(placePromises),
-      new Promise(resolve => setTimeout(resolve, 1000))
+      new Promise(resolve => setTimeout(resolve, 4000))
     ]);
 
     return parsedItinerary;
