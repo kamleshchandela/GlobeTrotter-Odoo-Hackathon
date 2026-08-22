@@ -2,29 +2,29 @@ import express from 'express';
 
 const router = express.Router();
 
-import { Hospital } from '../scripts/seedHealthcare.js';
+import { Hospital } from '../models/Healthcare.js';
 
-// Fetch nearby hospitals by city/state query
+// Fetch nearby hospitals by city/state query using OpenStreetMap Nominatim
 router.get('/hospitals', async (req, res) => {
   try {
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     const city = req.query.city || "Udaipur";
     const state = req.query.state || "Rajasthan";
+    const query = encodeURIComponent(`hospitals in ${city} ${state}`);
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=5`;
 
-    if (apiKey) {
-      try {
-        const query = encodeURIComponent(`hospitals in ${city} ${state}`);
-        const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
+    const response = await fetch(osmUrl, {
+      headers: { "User-Agent": "GlobeTrotterApp/1.0 (contact@globetrotter.app)" }
+    });
 
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.results && data.results.length > 0) {
-            return res.json(data.results.slice(0, 5));
-          }
-        }
-      } catch (e) {
-        console.warn("Google Places API failed, using database fallback...");
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const formatted = data.map(h => ({
+          name: h.display_name.split(',')[0],
+          formatted_address: h.display_name,
+          geometry: { location: { lat: parseFloat(h.lat), lng: parseFloat(h.lon) } }
+        }));
+        return res.json(formatted);
       }
     }
 

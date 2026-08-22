@@ -9,8 +9,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 import mongoose from "mongoose";
 
-const getGoogleMapsPlaceInfo = async (placeName, location) => {
-  const query = `${placeName} in ${location}`;
+const getOsmPlaceInfo = async (placeName, location) => {
+  const query = `${placeName}, ${location}`;
   
   // Check Cache first if database connection is active
   if (mongoose.connection.readyState === 1) {
@@ -22,71 +22,42 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
     }
   }
 
-  // Attempt 1: Google Places API
-  if (process.env.GOOGLE_MAPS_API_KEY) {
-    try {
-      const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
-          "X-Goog-FieldMask": "places.id,places.location,places.displayName,places.photos"
-        },
-        body: JSON.stringify({
-          textQuery: query,
-          maxResultCount: 1
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.places && data.places.length > 0) {
-          const place = data.places[0];
-          let photoUrl = null;
-          if (place.photos && place.photos.length > 0) {
-            photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_MAPS_API_KEY}`;
-          }
-          
-          const result = {
-            placeId: place.id,
-            lat: place.location.latitude,
-            lng: place.location.longitude,
-            photoUrl
-          };
-
-          if (mongoose.connection.readyState === 1) {
-            PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
-          }
-          return result;
-        }
-      }
-    } catch (error) {
-      console.warn("Google Maps API unavailable or billing disabled, falling back to OpenStreetMap Nominatim...");
-    }
-  }
-
-  // Attempt 2: Free OpenStreetMap Nominatim API Fallback
-  try {
-    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+  const fetchNominatim = async (searchQuery) => {
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
     const response = await fetch(osmUrl, {
       headers: { "User-Agent": "GlobeTrotterApp/1.0 (contact@globetrotter.app)" }
     });
     if (response.ok) {
       const data = await response.json();
       if (data && data.length > 0) {
-        const place = data[0];
-        const result = {
-          placeId: `osm-${place.place_id}`,
-          lat: parseFloat(place.lat),
-          lng: parseFloat(place.lon),
-          photoUrl: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80`
-        };
-
-        if (mongoose.connection.readyState === 1) {
-          PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
-        }
-        return result;
+        return data[0];
       }
+    }
+    return null;
+  };
+
+  // OpenStreetMap Nominatim API
+  try {
+    let place = await fetchNominatim(query);
+    
+    // Fallback: If exact place not found, just use the location (city) coordinates
+    if (!place) {
+      console.warn(`Place not found: ${query}. Falling back to location: ${location}`);
+      place = await fetchNominatim(location);
+    }
+
+    if (place) {
+      const result = {
+        placeId: `osm-${place.place_id}`,
+        lat: parseFloat(place.lat),
+        lng: parseFloat(place.lon),
+        photoUrl: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80`
+      };
+
+      if (mongoose.connection.readyState === 1) {
+        PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
+      }
+      return result;
     }
   } catch (osmError) {
     console.error("Nominatim Geocoding Error:", osmError.message);
@@ -95,7 +66,7 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
   return null;
 };
 
-const getGoogleMapsRouteInfo = async (origin, destination) => {
+const getOsmRouteInfo = async (origin, destination) => {
   // Check Cache first to avoid unnecessary network costs
   if (mongoose.connection.readyState === 1) {
     try {
@@ -109,50 +80,7 @@ const getGoogleMapsRouteInfo = async (origin, destination) => {
     }
   }
 
-  // Attempt 1: Google Routes API
-  if (process.env.GOOGLE_MAPS_API_KEY) {
-    try {
-      const response = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
-          "X-Goog-FieldMask": "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
-        },
-        body: JSON.stringify({
-          origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
-          destination: { location: { latLng: { latitude: destination.lat, longitude: destination.lng } } },
-          travelMode: "DRIVE",
-          routingPreference: "TRAFFIC_AWARE"
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.routes && data.routes.length > 0) {
-          const route = data.routes[0];
-          const result = {
-            duration: route.duration,
-            distance: route.distanceMeters,
-            polyline: route.polyline.encodedPolyline
-          };
-          
-          if (mongoose.connection.readyState === 1) {
-            RouteCache.create({
-              originLat: origin.lat, originLng: origin.lng,
-              destLat: destination.lat, destLng: destination.lng,
-              ...result
-            }).catch(err => console.error("Route cache save error", err.message));
-          }
-          return result;
-        }
-      }
-    } catch (error) {
-      console.warn("Google Routes API unavailable, falling back to OSRM...");
-    }
-  }
-
-  // Attempt 2: Free OSRM (Open Source Routing Machine) Fallback
+  // Free OSRM (Open Source Routing Machine) API
   try {
     const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=polyline`;
     const response = await fetch(osrmUrl);
@@ -276,15 +204,15 @@ export const generateItinerary = async (tripData) => {
     const text = result.candidates[0].content.parts[0].text;
     const cleanJson = text.replace(/```json|```/gi, "").trim();
     const parsedItinerary = JSON.parse(cleanJson);
-    console.log("GEMINI_GENERATION_SUCCESS: Starting grounding...");
+    console.log("GEMINI_GENERATION_SUCCESS: Starting OpenStreetMap grounding...");
 
-    // Grounding Layer 1: Validate locations with Google Maps Places in parallel
+    // Grounding Layer 1: Validate locations with OpenStreetMap Nominatim in parallel
     const placePromises = [];
     for (const day of parsedItinerary.dailyItinerary) {
       for (const activity of day.activities) {
         if (activity.location) {
           placePromises.push(
-            getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
+            getOsmPlaceInfo(activity.location, tripData.location).then(groundedData => {
               if (groundedData) {
                 activity.placeId = groundedData.placeId;
                 activity.lat = groundedData.lat;
@@ -298,7 +226,7 @@ export const generateItinerary = async (tripData) => {
     }
     await Promise.all(placePromises);
 
-    // Grounding Layer 2: Validate Routes between activities in parallel
+    // Grounding Layer 2: Validate Routes between activities with OSRM in parallel
     const routePromises = [];
     for (const day of parsedItinerary.dailyItinerary) {
       for (let i = 0; i < day.activities.length - 1; i++) {
@@ -306,7 +234,7 @@ export const generateItinerary = async (tripData) => {
         const end = day.activities[i+1];
         if (start.lat && end.lat) {
           routePromises.push(
-            getGoogleMapsRouteInfo(start, end).then(routeData => {
+            getOsmRouteInfo(start, end).then(routeData => {
               if (routeData) {
                 start.nextActivityRoute = routeData;
               }
