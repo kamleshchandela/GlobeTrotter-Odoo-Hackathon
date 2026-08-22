@@ -426,11 +426,11 @@ export default function CommunitySpots() {
               
               {/* Profile info block */}
               <div className="px-5 pb-4 text-center -mt-9 border-b border-sand/50">
-                <div className="w-[62px] h-[62px] rounded-full bg-white border-[2.5px] border-white shadow-lg mx-auto flex items-center justify-center font-cabinet font-extrabold text-[20px] text-charcoal">
-                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "G"}
+                <div className="w-[62px] h-[62px] rounded-full bg-[#FEF3E2] border-[2.5px] border-white shadow-md mx-auto flex items-center justify-center font-cabinet font-extrabold text-[20px] text-charcoal relative z-10">
+                  {isAuthenticated ? ((authUser?.fullName || authUser?.name)?.[0]?.toUpperCase() || "U") : "G"}
                 </div>
                 <h3 className="font-display font-extrabold text-[15px] text-charcoal mt-2.5 leading-tight">
-                  {isAuthenticated ? authUser?.name : "Guest Traveler"}
+                  {isAuthenticated ? (authUser?.fullName || authUser?.name || "Traveler") : "Guest Traveler"}
                 </h3>
                 <span className="font-mono-dm text-[8.5px] text-saffron bg-[#FEF3E2] border border-amber-100 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-widest mt-1.5 inline-block">
                   Level 3 Contributor
@@ -622,18 +622,27 @@ export default function CommunitySpots() {
                               key={post._id || post.id} 
                               className="bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row md:min-h-[260px]"
                             >
-                              {/* Left Side: Photo */}
-                              {post.coverImage && (
-                                <div className="w-full md:w-[260px] min-h-[180px] md:min-h-full relative overflow-hidden bg-sand/20 shrink-0 border-r border-sand/30">
-                                  <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
-                                  
-                                  <div className="absolute bottom-3 left-3 h-[20px] px-2 rounded-full bg-charcoal/70 backdrop-blur border border-white/15 flex items-center">
-                                    <span className="font-mono-dm text-[8.5px] text-white uppercase tracking-wider font-extrabold">
-                                      {post.type}
-                                    </span>
-                                  </div>
+                              {/* Left Side: Premium Vector/Icon Cover (Emoji-Free & Modern) */}
+                              <div className="w-full md:w-[190px] min-h-[160px] md:min-h-full relative overflow-hidden bg-gradient-to-br from-[#FEF3E2] to-[#FFF8F0] shrink-0 border-b md:border-b-0 md:border-r border-sand/45 flex flex-col items-center justify-center p-5 text-center">
+                                {/* Decorative geometric circle accent */}
+                                <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-sand/15 pointer-events-none" />
+                                <div className="absolute -bottom-10 -right-10 w-28 h-28 rounded-full bg-sand/15 pointer-events-none" />
+                                
+                                {/* Icon container */}
+                                <div className="w-14 h-14 rounded-2xl bg-white border border-sand shadow-xs flex items-center justify-center mb-3 relative z-10">
+                                  {post.type === 'trip' && <Compass className="text-saffron" size={24} />}
+                                  {post.type === 'experience' && <Camera className="text-[#3A86C8]" size={24} />}
+                                  {post.type === 'activity' && <Landmark className="text-[#E8640C]" size={24} />}
+                                  {post.type === 'destination' && <MapPin className="text-[#2D6A4F]" size={24} />}
                                 </div>
-                              )}
+                                
+                                <span className="font-mono-dm text-[8.5px] text-taupe/40 uppercase tracking-widest font-extrabold block relative z-10 mb-0.5">
+                                  {post.type === 'trip' ? 'Itinerary' : post.type === 'experience' ? 'Story' : post.type === 'activity' ? 'Activity' : 'Destination'}
+                                </span>
+                                <h4 className="font-cabinet font-extrabold text-[12.5px] text-charcoal leading-tight max-w-[140px] truncate relative z-10">
+                                  {post.destinationName || 'Globe'}
+                                </h4>
+                              </div>
 
                               {/* Right Side: Text & Actions */}
                               <div className="p-5 flex-1 flex flex-col justify-between min-w-0">
