@@ -29,3 +29,5 @@ const PublicRoutes = () => (
 
 
 export default PublicRoutes;
+
+// added by Rishikesh
