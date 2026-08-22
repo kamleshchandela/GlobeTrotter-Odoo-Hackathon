@@ -6,6 +6,21 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
+const fetchNominatim = async (queryStr) => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryStr)}`, {
+      headers: { "User-Agent": "MyItineraryApp/1.0" }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data && data.length > 0 ? data[0] : null;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
 const getGoogleMapsPlaceInfo = async (placeName, location) => {
   const query = `${placeName} in ${location}`;
 
@@ -65,32 +80,10 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
     }
   }
 
-  // Helper: OpenStreetMap Nominatim Fetcher
-  const fetchNominatim = async (searchQuery) => {
-    try {
-      const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
-      const response = await fetch(osmUrl, {
-        headers: { "User-Agent": "GlobeTrotterApp/1.0 (contact@globetrotter.app)" }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          return data[0];
-        }
-      }
-    } catch (err) {
-      console.warn("Nominatim fetch error:", err.message);
-    }
-    return null;
-  };
-
   // Attempt 2: OpenStreetMap Nominatim API Fallback
   try {
     let place = await fetchNominatim(query);
-    
-    // Fallback: If exact place not found, just use the location (city) coordinates
     if (!place) {
-      console.warn(`Place not found: ${query}. Falling back to location: ${location}`);
       place = await fetchNominatim(location);
     }
 
@@ -102,7 +95,6 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
         photoUrl: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80`
       };
 
-      // Save to cache asynchronously if connected
       if (mongoose.connection.readyState === 1) {
         PlaceCache.create({ query, ...result }).catch(() => {});
       }
@@ -162,58 +154,86 @@ export const generateItinerary = async (tripData) => {
       }
     `;
 
-    const apiKeys = [
-      process.env.GEMINI_API_KEY,
-      process.env.GEMINI_API_KEY_SECONDARY,
-      "AIzaSyB74Hnt8oTLeZ_lPlpoa7MIMpNMovcyhfY"
-    ].filter((key, idx, self) => key && self.indexOf(key) === idx);
+    let text = null;
 
-    const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
-    let response = null;
-    let lastError = null;
+    // 1. TRY GROQ HARDWARE ACCELERATED LLM FIRST (Sub-2-Second Speed!)
+    const groqKey = process.env.GROQ_API_KEY;
+    if (groqKey) {
+      const groqModels = ["openai/gpt-oss-120b", "groq/compound", "qwen/qwen3.6-27b"];
 
-    keyLoop:
-    for (const apiKey of apiKeys) {
-      for (const model of modelsToTry) {
+      for (const gModel of groqModels) {
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          const gRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Authorization": `Bearer ${groqKey}`,
+              "Content-Type": "application/json"
+            },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }]
+              model: gModel,
+              messages: [{ role: "user", content: prompt }],
+              response_format: { type: "json_object" }
             })
           });
 
-          if (res.ok) {
-            response = res;
-            break keyLoop;
-          } else {
-            const errData = await res.json();
-            console.warn(`Gemini key ${apiKey.slice(0, 10)}... model ${model} failed:`, errData.error?.message);
-            lastError = errData.error?.message;
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            if (gData.choices && gData.choices.length > 0) {
+              text = gData.choices[0].message.content;
+              console.log(`[FAST-LLM] Generated via Groq model (${gModel}) successfully!`);
+              break;
+            }
           }
-        } catch (err) {
-          console.warn(`Model ${model} fetch exception:`, err.message);
-          lastError = err.message;
+        } catch (gErr) {
+          console.warn(`Groq model ${gModel} failed, trying next...`, gErr.message);
         }
       }
     }
 
-    if (!response) {
-      throw new Error(lastError || "Gemini API request failed across all candidate keys and models.");
+    // 2. FALLBACK TO GEMINI IF GROQ IS UNAVAILABLE
+    if (!text) {
+      console.log("[LLM FALLBACK] Groq unavailable, falling back to Gemini...");
+      const apiKeys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_SECONDARY
+      ].filter((key, idx, self) => key && self.indexOf(key) === idx);
+
+      const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+
+      keyLoop:
+      for (const apiKey of apiKeys) {
+        for (const model of modelsToTry) {
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+              })
+            });
+
+            if (res.ok) {
+              const result = await res.json();
+              if (result.candidates && result.candidates.length > 0) {
+                text = result.candidates[0].content.parts[0].text;
+                break keyLoop;
+              }
+            }
+          } catch (err) {
+            console.warn(`Gemini model ${model} fetch exception:`, err.message);
+          }
+        }
+      }
     }
 
-    const result = await response.json();
-    if (!result.candidates || result.candidates.length === 0) {
-      throw new Error("Gemini returned no results. Please try again.");
+    if (!text) {
+      throw new Error("AI request failed across Groq and Gemini candidate keys/models.");
     }
 
-    const text = result.candidates[0].content.parts[0].text;
-    
-    // Robust JSON extraction
+    // Extract JSON payload
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error("Could not extract valid JSON from Gemini output.");
+      throw new Error("Could not extract valid JSON from AI output.");
     }
 
     const parsedItinerary = JSON.parse(jsonMatch[0]);
