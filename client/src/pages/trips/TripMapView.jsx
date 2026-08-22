@@ -38,7 +38,7 @@ export default function TripMapView() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showGuardian, setShowGuardian] = useState(false);
   const [toggles, setToggles] = useState([true, true, true, false, true]);
-  const [useOsmFallback, setUseOsmFallback] = useState(false);
+  const [useOsmFallback, setUseOsmFallback] = useState(true);
 
   // If currentTrip is not in Redux (e.g. page refresh), try fetching from DB
   useEffect(() => {

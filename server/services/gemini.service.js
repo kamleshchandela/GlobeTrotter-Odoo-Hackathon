@@ -10,120 +10,177 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 import mongoose from "mongoose";
 
 const getGoogleMapsPlaceInfo = async (placeName, location) => {
-  try {
-    const query = `${placeName} in ${location}`;
-    
-    // Check Cache first if database connection is active
-    if (mongoose.connection.readyState === 1) {
-      try {
-        const cached = await PlaceCache.findOne({ query });
-        if (cached) return cached;
-      } catch (e) {
-        console.warn("PlaceCache read error:", e.message);
-      }
+  const query = `${placeName} in ${location}`;
+  
+  // Check Cache first if database connection is active
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const cached = await PlaceCache.findOne({ query });
+      if (cached) return cached;
+    } catch (e) {
+      console.warn("PlaceCache read error:", e.message);
     }
-
-    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
-        "X-Goog-FieldMask": "places.id,places.location,places.displayName,places.photos"
-      },
-      body: JSON.stringify({
-        textQuery: query,
-        maxResultCount: 1
-      })
-    });
-    
-    if (!response.ok) return null;
-    const data = await response.json();
-    
-    if (data.places && data.places.length > 0) {
-      const place = data.places[0];
-      let photoUrl = null;
-      if (place.photos && place.photos.length > 0) {
-        photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_MAPS_API_KEY}`;
-      }
-      
-      const result = {
-        placeId: place.id,
-        lat: place.location.latitude,
-        lng: place.location.longitude,
-        photoUrl
-      };
-
-      // Save to cache if connected
-      if (mongoose.connection.readyState === 1) {
-        PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
-      }
-
-      return result;
-    }
-    return null;
-  } catch (error) {
-    console.error("Maps API Grounding Error:", error);
-    return null;
   }
+
+  // Attempt 1: Google Places API
+  if (process.env.GOOGLE_MAPS_API_KEY) {
+    try {
+      const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask": "places.id,places.location,places.displayName,places.photos"
+        },
+        body: JSON.stringify({
+          textQuery: query,
+          maxResultCount: 1
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.places && data.places.length > 0) {
+          const place = data.places[0];
+          let photoUrl = null;
+          if (place.photos && place.photos.length > 0) {
+            photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+          }
+          
+          const result = {
+            placeId: place.id,
+            lat: place.location.latitude,
+            lng: place.location.longitude,
+            photoUrl
+          };
+
+          if (mongoose.connection.readyState === 1) {
+            PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
+          }
+          return result;
+        }
+      }
+    } catch (error) {
+      console.warn("Google Maps API unavailable or billing disabled, falling back to OpenStreetMap Nominatim...");
+    }
+  }
+
+  // Attempt 2: Free OpenStreetMap Nominatim API Fallback
+  try {
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+    const response = await fetch(osmUrl, {
+      headers: { "User-Agent": "GlobeTrotterApp/1.0 (contact@globetrotter.app)" }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const place = data[0];
+        const result = {
+          placeId: `osm-${place.place_id}`,
+          lat: parseFloat(place.lat),
+          lng: parseFloat(place.lon),
+          photoUrl: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80`
+        };
+
+        if (mongoose.connection.readyState === 1) {
+          PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
+        }
+        return result;
+      }
+    }
+  } catch (osmError) {
+    console.error("Nominatim Geocoding Error:", osmError.message);
+  }
+
+  return null;
 };
 
 const getGoogleMapsRouteInfo = async (origin, destination) => {
-  try {
-    // Check Cache first to avoid Google Maps API costs
-    if (mongoose.connection.readyState === 1) {
-      try {
-        const cached = await RouteCache.findOne({
-          originLat: origin.lat, originLng: origin.lng,
-          destLat: destination.lat, destLng: destination.lng
-        });
-        if (cached) return cached;
-      } catch (e) {
-        console.warn("RouteCache read error:", e.message);
-      }
+  // Check Cache first to avoid unnecessary network costs
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const cached = await RouteCache.findOne({
+        originLat: origin.lat, originLng: origin.lng,
+        destLat: destination.lat, destLng: destination.lng
+      });
+      if (cached) return cached;
+    } catch (e) {
+      console.warn("RouteCache read error:", e.message);
     }
-
-    const response = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
-        "X-Goog-FieldMask": "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
-      },
-      body: JSON.stringify({
-        origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
-        destination: { location: { latLng: { latitude: destination.lat, longitude: destination.lng } } },
-        travelMode: "DRIVE",
-        routingPreference: "TRAFFIC_AWARE"
-      })
-    });
-    
-    if (!response.ok) return null;
-    const data = await response.json();
-    
-    if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
-      const result = {
-        duration: route.duration, // e.g. "1200s"
-        distance: route.distanceMeters,
-        polyline: route.polyline.encodedPolyline
-      };
-      
-      // Save to cache asynchronously if connected
-      if (mongoose.connection.readyState === 1) {
-        RouteCache.create({
-          originLat: origin.lat, originLng: origin.lng,
-          destLat: destination.lat, destLng: destination.lng,
-          ...result
-        }).catch(err => console.error("Route cache save error", err.message));
-      }
-
-      return result;
-    }
-    return null;
-  } catch (error) {
-    console.error("Routes API Grounding Error:", error);
-    return null;
   }
+
+  // Attempt 1: Google Routes API
+  if (process.env.GOOGLE_MAPS_API_KEY) {
+    try {
+      const response = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask": "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
+        },
+        body: JSON.stringify({
+          origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
+          destination: { location: { latLng: { latitude: destination.lat, longitude: destination.lng } } },
+          travelMode: "DRIVE",
+          routingPreference: "TRAFFIC_AWARE"
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const result = {
+            duration: route.duration,
+            distance: route.distanceMeters,
+            polyline: route.polyline.encodedPolyline
+          };
+          
+          if (mongoose.connection.readyState === 1) {
+            RouteCache.create({
+              originLat: origin.lat, originLng: origin.lng,
+              destLat: destination.lat, destLng: destination.lng,
+              ...result
+            }).catch(err => console.error("Route cache save error", err.message));
+          }
+          return result;
+        }
+      }
+    } catch (error) {
+      console.warn("Google Routes API unavailable, falling back to OSRM...");
+    }
+  }
+
+  // Attempt 2: Free OSRM (Open Source Routing Machine) Fallback
+  try {
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=polyline`;
+    const response = await fetch(osrmUrl);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const result = {
+          duration: `${Math.round(route.duration)}s`,
+          distance: Math.round(route.distance),
+          polyline: route.geometry
+        };
+
+        if (mongoose.connection.readyState === 1) {
+          RouteCache.create({
+            originLat: origin.lat, originLng: origin.lng,
+            destLat: destination.lat, destLng: destination.lng,
+            ...result
+          }).catch(err => console.error("Route cache save error", err.message));
+        }
+        return result;
+      }
+    }
+  } catch (osrmError) {
+    console.error("OSRM Routing Error:", osrmError.message);
+  }
+
+  return null;
 };
 
 export const generateItinerary = async (tripData) => {
