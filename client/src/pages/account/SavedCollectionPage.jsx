@@ -92,3 +92,5 @@ export default function SavedCollectionPage() {
     </div>
   );
 }
+
+// added by Rishikesh
