@@ -1,14 +1,53 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Calendar, ChevronRight, CheckCircle2, Shield, Bell, MapPinOff, Users as PeopleIcon, Minus, Plus, Zap, Turtle, Compass, Loader2, AlertTriangle } from "lucide-react";
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from "@react-google-maps/api";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setTripStart, setTripSuccess, setTripFailure } from "../../store/tripSlice";
 import TopAppBar from "../../components/shared/TopAppBar";
-import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from "../../config/env";
+import { API_BASE_URL } from "../../config/env";
 
-const LIBRARIES = ['places', 'geometry'];
+const createCustomIcon = () => {
+  return L.divIcon({
+    className: "custom-leaflet-pin",
+    html: `
+      <div style="
+        width: 32px;
+        height: 32px;
+        background-color: #E8640C;
+        border: 3px solid #FFFFFF;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <div style="
+          width: 8px;
+          height: 8px;
+          background-color: #FFFFFF;
+          border-radius: 50%;
+          transform: rotate(45deg);
+        "></div>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -30]
+  });
+};
+
+function MapRecenter({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([center.lat, center.lng], zoom);
+  }, [center, zoom, map]);
+  return null;
+}
 
 const PHOTOS = {
   jaisalmer:'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=200&q=80',
@@ -33,6 +72,12 @@ const STAYS = ['Budget Hostel','Guesthouse','Mid-range Hotel','Luxury Resort'];
 const TRANSPORT = ['Train','Bus','Own Vehicle'];
 const DIETARY = ['Vegetarian','Non-Vegetarian','Vegan','Jain','No Preference'];
 
+const getDefaultDate = (offsetDays) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().split('T')[0];
+};
+
 const Label = ({children}) => <p className="font-mono-dm text-[11px] text-[#6B4F3A] uppercase tracking-[2px]">{children}</p>;
 const SubLabel = ({children}) => <p className="font-mono-dm text-[10px] text-[#B09880] mt-[6px]">{children}</p>;
 
@@ -47,53 +92,16 @@ const ChipRect = ({label, selected, onClick}) => (
 export default function NewTripStep1() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [dest, setDest] = useState(null);
-
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES
-  });
-
-  const [autocomplete, setAutocomplete] = useState(null);
-  const onAutocompleteLoad = (auto) => setAutocomplete(auto);
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
-        setDest({
-          city: place.name,
-          state: place.formatted_address,
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-          img: place.photos ? place.photos[0].getUrl() : 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
-        });
-      }
-    }
-  };
+  const [dest, setDest] = useState(DESTINATIONS[0]);
+  const [searchQuery, setSearchQuery] = useState(DESTINATIONS[0].city);
 
   const mapCenter = useMemo(() => ({
     lat: dest ? dest.lat : 20.5937,
     lng: dest ? dest.lng : 78.9629
   }), [dest]);
 
-  const mapOptions = {
-    disableDefaultUI: true,
-    styles: [
-      {
-        "featureType": "all",
-        "elementType": "geometry.fill",
-        "stylers": [{ "color": "#fef3e2" }]
-      },
-      {
-        "featureType": "all",
-        "elementType": "labels.text.fill",
-        "stylers": [{ "color": "#6b4f3a" }]
-      }
-    ]
-  };
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(getDefaultDate(1));
+  const [endDate, setEndDate] = useState(getDefaultDate(4));
   const [travelers, setTravelers] = useState(2);
   const [budget, setBudget] = useState(15000);
   const [stay, setStay] = useState('Guesthouse');
@@ -132,7 +140,7 @@ export default function NewTripStep1() {
     dispatch(setTripStart());
 
     const tripPayload = {
-      location: dest.city + ", " + dest.state,
+      location: dest.city + (dest.state ? ", " + dest.state : ""),
       startDate,
       endDate,
       duration: days,
@@ -219,27 +227,41 @@ export default function NewTripStep1() {
             <Label>Where Are You Going?</Label>
             <div className="mt-[10px] relative">
               <Search size={20} className="absolute left-[16px] top-1/2 -translate-y-1/2 text-[#B09880] z-10" />
-              {isLoaded ? (
-                <Autocomplete onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
-                  <input 
-                    className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
-                    placeholder="Search any city or place in India…" 
-                  />
-                </Autocomplete>
-              ) : (
-                <input 
-                  className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] outline-none" 
-                  placeholder="Loading search…" 
-                  disabled
-                />
-              )}
+              <input 
+                value={searchQuery}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSearchQuery(val);
+                  if (val.trim()) {
+                    const match = DESTINATIONS.find(d => d.city.toLowerCase().includes(val.toLowerCase()));
+                    if (match) {
+                      setDest(match);
+                    } else {
+                      setDest({
+                        city: val,
+                        state: 'India',
+                        lat: 20.5937,
+                        lng: 78.9629,
+                        img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
+                      });
+                    }
+                  } else {
+                    setDest(null);
+                  }
+                }}
+                className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
+                placeholder="Search any city or place in India…" 
+              />
             </div>
             <p className="font-mono-dm text-[10px] text-[#B09880] uppercase tracking-[2px] mt-[16px]">Popular Destinations</p>
             <div className="mt-[10px] grid grid-cols-2 gap-[16px]">
               {DESTINATIONS.map((d) => (
                 <button 
                   key={d.city} 
-                  onClick={() => setDest(d)} 
+                  onClick={() => {
+                    setDest(d);
+                    setSearchQuery(d.city);
+                  }} 
                   className={`bg-white border rounded-[16px] overflow-hidden h-[96px] flex text-left transition-all relative group
                     ${dest?.city === d.city 
                       ? 'border-[#E8640C] shadow-[0_8px_20px_rgba(232,100,12,0.15)] bg-ivory/50' 
@@ -362,36 +384,39 @@ export default function NewTripStep1() {
           </div>
         </div>
 
-        {/* ─── RIGHT: LIVE PREVIEW ─── */}
+        {/* ─── RIGHT: LIVE PREVIEW (LEAFLET MAP) ─── */}
         <div className="hidden lg:block flex-1 lg:ml-[96px]">
           <div className="sticky top-[72px] h-[calc(100vh-72px)] flex flex-col p-[24px]">
-            {/* Real Google Map */}
+            {/* OpenStreetMap Leaflet Map */}
             <div className={`rounded-[16px] overflow-hidden relative transition-all duration-500 border border-[#E8D5B7] ${dest ? 'h-[40%]' : 'h-[55%]'}`}>
-              {isLoaded ? (
-                <GoogleMap
-                  mapContainerStyle={{ width: '100%', height: '100%' }}
-                  center={mapCenter}
-                  zoom={dest ? 12 : 5}
-                  options={mapOptions}
-                >
-                  {dest && <Marker position={mapCenter} icon={{
-                    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-                    fillColor: "#E8640C",
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "#FFFFFF",
-                    scale: 1.5,
-                  }} />}
-                </GoogleMap>
-              ) : (
-                <div className="absolute inset-0 bg-[#FEF3E2] flex items-center justify-center animate-pulse">
-                  <Loader2 size={32} className="text-[#E8640C] animate-spin" />
-                </div>
-              )}
+              <MapContainer
+                center={[mapCenter.lat, mapCenter.lng]}
+                zoom={dest ? 11 : 5}
+                scrollWheelZoom={false}
+                style={{ width: '100%', height: '100%', borderRadius: '16px', zIndex: 1 }}
+                zoomControl={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapRecenter center={mapCenter} zoom={dest ? 11 : 5} />
+                {dest && (
+                  <Marker position={[mapCenter.lat, mapCenter.lng]} icon={createCustomIcon()}>
+                    <Popup>
+                      <div className="font-jakarta text-[13px]">
+                        <strong>{dest.city}</strong>
+                        <br />
+                        {dest.state}
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+              </MapContainer>
               
               {/* Overlay for selected destination */}
               {dest && (
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none z-20">
                   <div className="bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-[12px] p-3 shadow-lg pointer-events-auto">
                     <h4 className="font-display font-bold text-[18px] text-[#1E1410] leading-tight">{dest.city}</h4>
                     <p className="font-mono-dm text-[10px] text-[#6B4F3A] uppercase mt-0.5">{dest.state}</p>
@@ -401,7 +426,7 @@ export default function NewTripStep1() {
 
               {/* frosted strip */}
               {dest && (
-                <div className="absolute bottom-0 left-0 right-0 h-[72px] bg-[rgba(255,248,240,0.90)] backdrop-blur-[12px] border-t border-[rgba(232,213,183,0.50)] px-[20px] flex items-center gap-[24px] z-10">
+                <div className="absolute bottom-0 left-0 right-0 h-[72px] bg-[rgba(255,248,240,0.90)] backdrop-blur-[12px] border-t border-[rgba(232,213,183,0.50)] px-[20px] flex items-center gap-[24px] z-20">
                   {[['28','Guardians'],['1.2 km','Hospital'],['87','Safety Score']].map(([v,l]) => (
                     <div key={l}><p className="font-cabinet font-semibold text-[13px] text-[#1E1410]">{v}</p><p className="font-mono-dm text-[10px] text-[#6B4F3A]">{l}</p></div>
                   ))}
@@ -409,15 +434,15 @@ export default function NewTripStep1() {
               )}
             </div>
 
-            {/* summary card */}
+            {/* DYNAMIC TRIP SUMMARY & COST BREAKDOWN */}
             <div className="mt-[16px] flex-1 bg-white border border-[#E8D5B7] rounded-[16px] p-[20px] shadow-[0_4px_16px_rgba(30,20,16,0.08)] overflow-y-auto">
               <p className="font-mono-dm text-[11px] text-[#B09880] uppercase tracking-[2px]">Trip Summary</p>
               <div className="mt-[12px] flex flex-col gap-[8px]">
                 {[
-                  ['Destination', dest ? `${dest.city}, ${dest.state}` : '—'],
-                  ['Dates', startDate && endDate ? `${startDate} → ${endDate}` : '—'],
-                  ['Duration', days > 0 ? `${days} Days · ${days-1} Nights` : '—'],
-                  ['Travelers', `${travelers} People`],
+                  ['Destination', dest ? `${dest.city}${dest.state ? ', ' + dest.state : ''}` : (searchQuery.trim() || 'Select Destination')],
+                  ['Dates', startDate && endDate ? `${startDate} → ${endDate}` : 'Select Dates'],
+                  ['Duration', days > 0 ? `${days} Days · ${days-1} Nights` : '0 Days'],
+                  ['Travelers', `${travelers} ${travelers === 1 ? 'Person' : 'People'}`],
                   ['Budget', `₹${budget.toLocaleString('en-IN')}`],
                   ['Stay', stay],
                   ['Transport', transport],
@@ -432,14 +457,22 @@ export default function NewTripStep1() {
               <div className="border-t border-[#F5EDE0] my-[12px]" />
               <p className="font-mono-dm text-[10px] text-[#B09880] uppercase">Rough Cost Breakdown</p>
               <div className="mt-[8px] flex flex-col gap-[6px]">
-                {[['Accommodation','₹4,000–6,000'],['Food','₹3,000–4,500'],['Transport','₹2,500–3,500'],['Activities','₹1,500–3,000']].map(([c,a]) => (
-                  <div key={c} className="flex justify-between"><span className="font-jakarta text-[13px] text-[#6B4F3A]">{c}</span><span className="font-mono-dm text-[11px] text-[#1E1410]">{a}</span></div>
+                {[
+                  ['Accommodation', `₹${Math.round(budget * 0.35).toLocaleString('en-IN')}–₹${Math.round(budget * 0.45).toLocaleString('en-IN')}`],
+                  ['Food & Dining', `₹${Math.round(budget * 0.20).toLocaleString('en-IN')}–₹${Math.round(budget * 0.30).toLocaleString('en-IN')}`],
+                  ['Transport', `₹${Math.round(budget * 0.15).toLocaleString('en-IN')}–₹${Math.round(budget * 0.25).toLocaleString('en-IN')}`],
+                  ['Activities', `₹${Math.round(budget * 0.10).toLocaleString('en-IN')}–₹${Math.round(budget * 0.20).toLocaleString('en-IN')}`],
+                ].map(([c,a]) => (
+                  <div key={c} className="flex justify-between">
+                    <span className="font-jakarta text-[13px] text-[#6B4F3A]">{c}</span>
+                    <span className="font-mono-dm text-[11px] text-[#1E1410]">{a}</span>
+                  </div>
                 ))}
               </div>
               <div className="border-t border-[#F5EDE0] my-[12px]" />
               <div className="flex justify-between items-center">
                 <span className="font-jakarta font-semibold text-[13px] text-[#1E1410]">Total estimate</span>
-                <span className="font-display font-bold text-[18px] text-[#E8640C]">₹11,000–17,000</span>
+                <span className="font-display font-bold text-[18px] text-[#E8640C]">₹{Math.round(budget * 0.85).toLocaleString('en-IN')}–₹{budget.toLocaleString('en-IN')}</span>
               </div>
               <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Rough estimate. Final itinerary has exact costs.</p>
             </div>
@@ -455,7 +488,7 @@ export default function NewTripStep1() {
               <button disabled={!canGenerate || generating} onClick={handleGenerate} className={`w-full h-[48px] rounded-[10px] font-cabinet font-semibold text-[14px] flex items-center justify-center gap-2 transition-all ${canGenerate && !generating ? 'bg-[#E8640C] text-white shadow-[0_4px_16px_rgba(232,100,12,0.25)] hover:brightness-105' : 'bg-[#E8D5B7] text-[#B09880] cursor-not-allowed'}`}>
                 {generating ? <><Loader2 size={16} className="animate-spin" /> Building your itinerary…</> : 'Generate My Itinerary →'}
               </button>
-              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Places verified by Google Maps</p>
+              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Interactive Leaflet Maps</p>
             </div>
           </div>
         </div>

@@ -2,32 +2,51 @@ import { useState, useMemo, useEffect } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { MapPin, X, ChevronRight, Shield, Star, Navigation, Bookmark, Loader2 } from "lucide-react";
-import { GoogleMap, useJsApiLoader, Marker, Polyline } from "@react-google-maps/api";
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import TopAppBar from "../../components/shared/TopAppBar";
-import { GOOGLE_MAPS_API_KEY } from "../../config/env";
 import { fetchTripById } from "../../store/tripSlice";
 import toast, { Toaster } from "react-hot-toast";
 
-const LIBRARIES = ['places', 'geometry'];
-
-const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  mapTypeControl: false,
-  streetViewControl: false,
-  styles: [
-    {
-      "featureType": "all",
-      "elementType": "geometry.fill",
-      "stylers": [{ "color": "#fef3e2" }]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.fill",
-      "stylers": [{ "color": "#6b4f3a" }]
-    }
-  ]
+const createCustomPin = (number) => {
+  return L.divIcon({
+    className: "custom-leaflet-trip-pin",
+    html: `
+      <div style="
+        width: 30px;
+        height: 30px;
+        background-color: #E8640C;
+        border: 2px solid #FFFFFF;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <span style="
+          transform: rotate(45deg);
+          color: #FFFFFF;
+          font-weight: bold;
+          font-size: 11px;
+          font-family: sans-serif;
+        ">${number}</span>
+      </div>
+    `,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -28]
+  });
 };
+
+function MapRecenter({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([center.lat, center.lng], zoom);
+  }, [center, zoom, map]);
+  return null;
+}
 
 export default function TripMapView() {
   const dispatch = useDispatch();
@@ -46,12 +65,6 @@ export default function TripMapView() {
     }
   }, [currentTrip, id, loading, dispatch]);
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES
-  });
-
   const dayData = useMemo(() => {
     if (!currentTrip) return null;
     return currentTrip.dailyItinerary.find(d => d.day === activeDay) || currentTrip.dailyItinerary[0];
@@ -65,20 +78,12 @@ export default function TripMapView() {
     return { lat: 20.5937, lng: 78.9629 };
   }, [dayData]);
 
-  const polylines = useMemo(() => {
-    if (!dayData || !window.google) return [];
-    const lines = [];
-    dayData.activities.forEach(a => {
-      if (a.nextActivityRoute && a.nextActivityRoute.polyline) {
-        try {
-          lines.push(window.google.maps.geometry.encoding.decodePath(a.nextActivityRoute.polyline));
-        } catch (e) {
-          console.error("Polyline decode error", e);
-        }
-      }
-    });
-    return lines;
-  }, [dayData, isLoaded]);
+  const routePositions = useMemo(() => {
+    if (!dayData) return [];
+    return dayData.activities
+      .filter(a => a.lat && a.lng)
+      .map(a => [a.lat, a.lng]);
+  }, [dayData]);
 
   const toggle = (i) => setToggles(p => p.map((v, j) => j === i ? !v : v));
 
@@ -113,65 +118,54 @@ export default function TripMapView() {
 
       {/* Map Area */}
       <div className="flex-1 relative">
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            center={center}
-            zoom={13}
-            options={mapOptions}
-          >
-            {/* Activity Markers */}
-            {toggles[0] && dayData?.activities.map((a, i) => (
-              a.lat && (
-                <Marker
-                  key={i}
-                  position={{ lat: a.lat, lng: a.lng }}
-                  label={(i + 1).toString()}
-                  onClick={() => setSelectedActivity(a)}
-                  icon={{
-                    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-                    fillColor: "#E8640C",
-                    fillOpacity: 1,
-                    strokeWeight: 1,
-                    strokeColor: "#FFFFFF",
-                    scale: 1.2,
-                    labelOrigin: { x: 12, y: 10 }
-                  }}
-                />
-              )
-            ))}
+        <MapContainer
+          center={[center.lat, center.lng]}
+          zoom={13}
+          scrollWheelZoom={true}
+          style={{ width: '100%', height: '100%', zIndex: 1 }}
+          zoomControl={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <MapRecenter center={center} zoom={13} />
 
-            {/* Decoded Polylines between activities */}
-            {toggles[4] && polylines.map((path, idx) => (
-              <Polyline
-                key={idx}
-                path={path}
-                options={{
-                  strokeColor: "#E8640C",
-                  strokeOpacity: 0.8,
-                  strokeWeight: 4,
+          {/* Activity Markers */}
+          {toggles[0] && dayData?.activities.map((a, i) => (
+            a.lat && (
+              <Marker
+                key={i}
+                position={[a.lat, a.lng]}
+                icon={createCustomPin(i + 1)}
+                eventHandlers={{
+                  click: () => setSelectedActivity(a),
                 }}
-              />
-            ))}
-            
-            {/* Fallback straight line if no polylines decoded */}
-            {toggles[4] && polylines.length === 0 && dayData && (
-              <Polyline
-                path={dayData.activities.filter(a => a.lat).map(a => ({ lat: a.lat, lng: a.lng }))}
-                options={{
-                  strokeColor: "#E8640C",
-                  strokeOpacity: 0.5,
-                  strokeWeight: 2,
-                  icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4 }, offset: '0', repeat: '20px' }]
-                }}
-              />
-            )}
-          </GoogleMap>
-        ) : (
-          <div className="absolute inset-0 bg-[#FEF3E2] flex items-center justify-center">
-            <Loader2 className="animate-spin text-[#E8640C]" size={48} />
-          </div>
-        )}
+              >
+                <Popup>
+                  <div className="font-jakarta text-[13px]">
+                    <strong>Day {activeDay} · Activity {i + 1}</strong>
+                    <br />
+                    {a.activity}
+                  </div>
+                </Popup>
+              </Marker>
+            )
+          ))}
+
+          {/* Polylines between activities */}
+          {toggles[4] && routePositions.length > 1 && (
+            <Polyline
+              positions={routePositions}
+              pathOptions={{
+                color: "#E8640C",
+                weight: 4,
+                opacity: 0.8,
+                dashArray: "8, 8"
+              }}
+            />
+          )}
+        </MapContainer>
 
         {/* Map Controls — Top Right */}
         <div className="absolute top-[16px] right-[16px] bg-white border border-[#E8D5B7] rounded-[12px] p-[8px] shadow-[0_4px_16px_rgba(30,20,16,0.12)] flex flex-col gap-[6px] z-20">
@@ -232,7 +226,7 @@ export default function TripMapView() {
               <h3 className="font-cabinet font-bold text-[18px] text-[#1E1410] mt-[6px]">{selectedActivity.activity}</h3>
               <p className="font-jakarta text-[13px] text-[#6B4F3A] line-clamp-2 mt-[6px]">{selectedActivity.description}</p>
               <div className="mt-[12px] flex gap-[10px]">
-                <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedActivity.lat},${selectedActivity.lng}`, '_blank')} className="flex-1 h-[40px] rounded-[10px] border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Navigation size={14} /> Get Directions</button>
+                <button onClick={() => window.open(`https://www.openstreetmap.org/?mlat=${selectedActivity.lat}&mlon=${selectedActivity.lng}`, '_blank')} className="flex-1 h-[40px] rounded-[10px] border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Navigation size={14} /> Get Directions</button>
                 <button onClick={() => toast.success(`${selectedActivity.activity} saved to your collection!`)} className="flex-1 h-[40px] rounded-[10px] bg-[#E8640C] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Bookmark size={14} /> Add to Saved</button>
               </div>
             </div>
