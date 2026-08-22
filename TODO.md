@@ -4,7 +4,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 📋 System Architecture & Infrastructure
+##  System Architecture & Infrastructure
 
 - [x] **Backend Infrastructure Setup**
   - [x] Express.js server initialization with Mongoose ODM
@@ -20,7 +20,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🔐 Authentication & User Onboarding
+##  Authentication & User Onboarding
 
 - [x] **Account Registration & Verification**
   - [x] Multi-step signup flow (`SignupStep1`, `SignupStep2`, `SignupStep3`)
@@ -35,7 +35,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🤖 AI-Powered Trip Generation Engine
+##  AI-Powered Trip Generation Engine
 
 - [x] **Interactive Trip Creation Wizard**
   - [x] Step 1: Destination selector, travel dates, budget slider, group type
@@ -51,7 +51,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🗺️ Interactive Itinerary & Map View
+##  Interactive Itinerary & Map View
 
 - [x] **Trip Itinerary Dashboard**
   - [x] Timeline view of day-by-day activities
@@ -64,7 +64,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🚨 Traveler Safety & SOS System
+##  Traveler Safety & SOS System
 
 - [x] **One-Tap Emergency SOS Panic System**
   - [x] Real-time browser GPS location retrieval
@@ -75,7 +75,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🏥 Healthcare Facility Finder
+##  Healthcare Facility Finder
 
 - [x] **Proximity Healthcare Search**
   - [x] Interactive hospital and clinic locator map
@@ -84,7 +84,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 🌟 Local Gem Discovery & Community Spots
+##  Local Gem Discovery & Community Spots
 
 - [x] **Community Gems Exploration**
   - [x] Discover off-the-beaten-path travel spots and local experiences
@@ -93,7 +93,7 @@ A full-stack, AI-powered travel planning and traveler safety application built f
 
 ---
 
-## 👤 User Account & Preferences
+##  User Account & Preferences
 
 - [x] **Personalized Account Controls**
   - [x] Dark / Light theme toggle with persistent `localStorage` memory

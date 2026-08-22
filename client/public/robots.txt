@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /account
+Disallow: /settings
+Disallow: /dashboard
+
+Sitemap: https://myitinerary.com/sitemap.xml
