@@ -48,26 +48,57 @@ export default function NewTripStep1() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [dest, setDest] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [useOsmFallback, setUseOsmFallback] = useState(false);
 
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries: LIBRARIES
   });
+
+  const handleManualSearch = async (query) => {
+    if (!query || query.trim().length === 0) return;
+    const city = query.trim();
+    setDest({
+      city: city,
+      state: 'India',
+      lat: 20.5937,
+      lng: 78.9629,
+      img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
+    });
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setDest({
+          city: city,
+          state: data[0].display_name || 'India',
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
+        });
+      }
+    } catch (e) {
+      console.warn("Geocoding lookup error", e);
+    }
+  };
 
   const [autocomplete, setAutocomplete] = useState(null);
   const onAutocompleteLoad = (auto) => setAutocomplete(auto);
   const onPlaceChanged = () => {
     if (autocomplete !== null) {
       const place = autocomplete.getPlace();
-      if (place.geometry) {
+      if (place && place.geometry) {
         setDest({
-          city: place.name,
-          state: place.formatted_address,
+          city: place.name || searchQuery,
+          state: place.formatted_address || 'India',
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
           img: place.photos ? place.photos[0].getUrl() : 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
         });
+        if (place.name) setSearchQuery(place.name);
       }
     }
   };
@@ -219,18 +250,55 @@ export default function NewTripStep1() {
             <Label>Where Are You Going?</Label>
             <div className="mt-[10px] relative">
               <Search size={20} className="absolute left-[16px] top-1/2 -translate-y-1/2 text-[#B09880] z-10" />
-              {isLoaded ? (
+              {isLoaded && !loadError ? (
                 <Autocomplete onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
                   <input 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value.trim().length >= 2) {
+                        handleManualSearch(e.target.value);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleManualSearch(searchQuery);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (searchQuery.trim().length >= 2) {
+                        handleManualSearch(searchQuery);
+                      }
+                    }}
                     className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
                     placeholder="Search any city or place in India…" 
                   />
                 </Autocomplete>
               ) : (
                 <input 
-                  className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] outline-none" 
-                  placeholder="Loading search…" 
-                  disabled
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value.trim().length >= 2) {
+                      handleManualSearch(e.target.value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleManualSearch(searchQuery);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (searchQuery.trim().length >= 2) {
+                      handleManualSearch(searchQuery);
+                    }
+                  }}
+                  className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
+                  placeholder="Type any city (e.g. Mumbai, Goa, Jaipur)…" 
                 />
               )}
             </div>
@@ -239,7 +307,10 @@ export default function NewTripStep1() {
               {DESTINATIONS.map((d) => (
                 <button 
                   key={d.city} 
-                  onClick={() => setDest(d)} 
+                  onClick={() => {
+                    setDest(d);
+                    setSearchQuery(`${d.city}, ${d.state}`);
+                  }} 
                   className={`bg-white border rounded-[16px] overflow-hidden h-[96px] flex text-left transition-all relative group
                     ${dest?.city === d.city 
                       ? 'border-[#E8640C] shadow-[0_8px_20px_rgba(232,100,12,0.15)] bg-ivory/50' 
@@ -365,9 +436,37 @@ export default function NewTripStep1() {
         {/* ─── RIGHT: LIVE PREVIEW ─── */}
         <div className="hidden lg:block flex-1 lg:ml-[96px]">
           <div className="sticky top-[72px] h-[calc(100vh-72px)] flex flex-col p-[24px]">
-            {/* Real Google Map */}
+            {/* Real Map with Provider Toggle & OpenStreetMap Fallback */}
             <div className={`rounded-[16px] overflow-hidden relative transition-all duration-500 border border-[#E8D5B7] ${dest ? 'h-[40%]' : 'h-[55%]'}`}>
-              {isLoaded ? (
+              {/* Map Provider Selector */}
+              <div className="absolute top-3 right-3 z-30 flex items-center bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-full p-1 shadow-md">
+                <button
+                  type="button"
+                  onClick={() => setUseOsmFallback(false)}
+                  className={`px-2.5 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${!useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
+                >
+                  Google Maps
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUseOsmFallback(true)}
+                  className={`px-2.5 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
+                >
+                  OpenStreetMap
+                </button>
+              </div>
+
+              {useOsmFallback ? (
+                <iframe
+                  title="Interactive Map Preview"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.08}%2C${mapCenter.lat - 0.08}%2C${mapCenter.lng + 0.08}%2C${mapCenter.lat + 0.08}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
+                  className="w-full h-full"
+                />
+              ) : isLoaded && !loadError ? (
                 <GoogleMap
                   mapContainerStyle={{ width: '100%', height: '100%' }}
                   center={mapCenter}
@@ -384,14 +483,20 @@ export default function NewTripStep1() {
                   }} />}
                 </GoogleMap>
               ) : (
-                <div className="absolute inset-0 bg-[#FEF3E2] flex items-center justify-center animate-pulse">
-                  <Loader2 size={32} className="text-[#E8640C] animate-spin" />
-                </div>
+                <iframe
+                  title="Interactive Map Preview"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.08}%2C${mapCenter.lat - 0.08}%2C${mapCenter.lng + 0.08}%2C${mapCenter.lat + 0.08}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
+                  className="w-full h-full"
+                />
               )}
               
               {/* Overlay for selected destination */}
               {dest && (
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                <div className="absolute top-4 left-4 flex justify-between items-start pointer-events-none z-20">
                   <div className="bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-[12px] p-3 shadow-lg pointer-events-auto">
                     <h4 className="font-display font-bold text-[18px] text-[#1E1410] leading-tight">{dest.city}</h4>
                     <p className="font-mono-dm text-[10px] text-[#6B4F3A] uppercase mt-0.5">{dest.state}</p>

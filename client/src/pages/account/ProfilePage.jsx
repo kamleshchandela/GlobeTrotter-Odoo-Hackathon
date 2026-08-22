@@ -232,5 +232,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-// added by Rishikesh

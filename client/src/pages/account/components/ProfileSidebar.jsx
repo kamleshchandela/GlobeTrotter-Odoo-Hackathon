@@ -121,5 +121,3 @@ export default function ProfileSidebar({ user, onOpenPhotoModal, onDeleteClick, 
     </aside>
   );
 }
-
-// added by Rishikesh

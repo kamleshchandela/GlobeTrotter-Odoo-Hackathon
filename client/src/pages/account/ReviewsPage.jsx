@@ -164,5 +164,3 @@ export default function ReviewsPage() {
     </div>
   );
 }
-
-// added by Rishikesh

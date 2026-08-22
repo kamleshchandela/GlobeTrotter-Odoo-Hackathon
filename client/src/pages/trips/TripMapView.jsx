@@ -38,6 +38,7 @@ export default function TripMapView() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showGuardian, setShowGuardian] = useState(false);
   const [toggles, setToggles] = useState([true, true, true, false, true]);
+  const [useOsmFallback, setUseOsmFallback] = useState(false);
 
   // If currentTrip is not in Redux (e.g. page refresh), try fetching from DB
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function TripMapView() {
     }
   }, [currentTrip, id, loading, dispatch]);
 
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries: LIBRARIES
@@ -113,7 +114,35 @@ export default function TripMapView() {
 
       {/* Map Area */}
       <div className="flex-1 relative">
-        {isLoaded ? (
+        {/* Map Provider Selector */}
+        <div className="absolute top-4 left-[360px] z-30 flex items-center bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-full p-1 shadow-md">
+          <button
+            type="button"
+            onClick={() => setUseOsmFallback(false)}
+            className={`px-3 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${!useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
+          >
+            Google Maps
+          </button>
+          <button
+            type="button"
+            onClick={() => setUseOsmFallback(true)}
+            className={`px-3 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
+          >
+            OpenStreetMap (Free)
+          </button>
+        </div>
+
+        {useOsmFallback ? (
+          <iframe
+            title="Interactive Map View"
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            scrolling="no"
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
+            className="w-full h-full"
+          />
+        ) : isLoaded && !loadError ? (
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%' }}
             center={center}
@@ -168,9 +197,15 @@ export default function TripMapView() {
             )}
           </GoogleMap>
         ) : (
-          <div className="absolute inset-0 bg-[#FEF3E2] flex items-center justify-center">
-            <Loader2 className="animate-spin text-[#E8640C]" size={48} />
-          </div>
+          <iframe
+            title="Interactive Map View"
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            scrolling="no"
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
+            className="w-full h-full"
+          />
         )}
 
         {/* Map Controls — Top Right */}

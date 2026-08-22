@@ -8,7 +8,11 @@
 
 | Resource | Link |
 |---|---|
+| 🌐 **Live Deployed Project** | [https://my-itinerary-mu.vercel.app](https://my-itinerary-mu.vercel.app) |
+| ⚙️ **Backend Deployed Link** | [https://my-itinerary-backend.onrender.com](https://my-itinerary-backend.onrender.com) |
 | 🎨 **Figma Design Link** | [View Figma Design](https://www.figma.com/design/Cwx3aXDvJ9tM0QU760L0iw/work?node-id=544-1907&t=TbFlAKX2Bwqk5ct9-1) |
+| 📬 **Postman Documentation** | [View API Documentation](https://demu07-9443935.postman.co/workspace/7bcff791-3c4b-4205-8d3c-3cae430539cb/documentation/50841059-2968335d-159f-497a-bc14-5384b3b4707f) |
+| 🎥 **YouTube Demo Video** | [Watch Demo Video](https://youtu.be/FdB2_mW40Uw?si=1DQ77syh3FKUQrIM) |
 
 ---
 
@@ -199,23 +203,33 @@ myItnary/
 
 ### Landing Page
 <!-- Replace with actual screenshot -->
-<img width="1880" height="915" alt="Screenshot 2026-05-06 173654" src="https://github.com/user-attachments/assets/a7210671-26b4-4534-9594-207d66fe678e" />
-
+![Landing Page](./screenshots/landing-page.png)
 
 ### User Dashboard
 <!-- Replace with actual screenshot -->
-<img width="1883" height="911" alt="Screenshot 2026-05-06 173730" src="https://github.com/user-attachments/assets/c47b6282-d9d9-4fac-8955-2f4a147f3d8d" />
-
+![Dashboard](./screenshots/dashboard.png)
 
 ### AI Trip Generation
 <!-- Replace with actual screenshot -->
-<img width="1885" height="908" alt="Screenshot 2026-05-06 173803" src="https://github.com/user-attachments/assets/e017b21c-2170-41e9-b0be-3a12150ddcfa" />
-
+![Trip Generation](./screenshots/trip-generation.png)
 
 ### Generated Itinerary
 <!-- Replace with actual screenshot -->
-<img width="1878" height="918" alt="Screenshot 2026-05-02 125941" src="https://github.com/user-attachments/assets/63e98f05-c882-4fbc-99dd-ece2d9f1af46" />
+![Itinerary](./screenshots/itinerary.png)
 
+### SOS Safety Feature
+<!-- Replace with actual screenshot -->
+![SOS Feature](./screenshots/sos-feature.png)
+
+### Healthcare Facility Finder
+<!-- Replace with actual screenshot -->
+![Healthcare](./screenshots/healthcare.png)
+
+### Mobile Responsive View
+<!-- Replace with actual screenshot -->
+![Mobile View](./screenshots/mobile-view.png)
+
+> 📌 **Screenshots will be added to the `screenshots/` folder.**
 
 ---
 
@@ -457,16 +471,12 @@ The application will be available at `http://localhost:5173`.
 | Backend | Render | [https://my-itinerary-backend.onrender.com](https://my-itinerary-backend.onrender.com) |
 | Database | MongoDB Atlas | Cloud-hosted |
 
-## 👥 Development Team & Roles
+---
 
-* **Kamlesh Chandela** (Project Lead, AI Services & Travel Planner)
-  * GitHub: [@kamleshchandela](https://github.com/kamleshchandela)
-* **Himmat Mundhe** (UI/UX Architect, Layouts & Themes)
-  * GitHub: [@himmatmundhe07](https://github.com/himmatmundhe07)
-* **Rishikesh Singh** (Backend & Security Coordinator)
-  * GitHub: [@RishikeshSingh-dev](https://github.com/RishikeshSingh-dev) *(Verify GitHub profile)*
-* **Souvik Biswas** (Safety Systems, SOS & Maps Specialist)
-  * GitHub: [@SouvikBiswas-dev](https://github.com/SouvikBiswas-dev) *(Verify GitHub profile)*
+## 👤 Author
+
+**Himmat Mundhe**
+- GitHub: [@himmatmundhe07](https://github.com/himmatmundhe07)
 
 ---
 
