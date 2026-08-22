@@ -45,6 +45,20 @@ export const saveTrip = createAsyncThunk('trip/saveTrip', async (tripData, { rej
   }
 });
 
+export const deleteTrip = createAsyncThunk('trip/deleteTrip', async (id, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/trips/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Failed to delete trip');
+    return id;
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
 const tripSlice = createSlice({
   name: 'trip',
   initialState: {
@@ -101,6 +115,12 @@ const tripSlice = createSlice({
       .addCase(saveTrip.fulfilled, (state, action) => {
         state.trips.unshift(action.payload);
         state.currentTrip = action.payload;
+      })
+      .addCase(deleteTrip.fulfilled, (state, action) => {
+        state.trips = state.trips.filter(t => t._id !== action.payload);
+        if (state.currentTrip?._id === action.payload) {
+          state.currentTrip = null;
+        }
       });
   }
 });

@@ -97,76 +97,16 @@ export default function TripMapView() {
 
       {/* Map Area */}
       <div className="flex-1 relative">
-        {/* Map Header Indicator */}
-        <div className="absolute top-4 left-[360px] z-30 flex items-center bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-full px-4 py-1.5 shadow-md">
-          <span className="font-cabinet font-semibold text-[12px] text-[#E8640C] flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse" />
-            OpenStreetMap Interactive Engine
-          </span>
-        </div>
-
-        <MapContainer
-          key="leaflet-map"
-          center={[center.lat, center.lng]}
-          zoom={14}
-          style={{ width: '100%', height: '100%', zIndex: 0 }}
-          zoomControl={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          />
-          <MapUpdater center={[center.lat, center.lng]} />
-
-          {/* Activities (index 0) */}
-          {toggles[0] && dayData?.activities.map((a, i) => (
-            a.lat && a.lng ? (
-              <Marker key={`activity-${i}`} position={[a.lat, a.lng]} icon={activityIcon}>
-                <Popup className="custom-popup">
-                  <div className="font-cabinet font-semibold text-[#1E1410]">{a.activity}</div>
-                  <div className="font-mono-dm text-[10px] text-[#6B4F3A] mt-1">{a.time}</div>
-                </Popup>
-              </Marker>
-            ) : null
-          ))}
-
-          {/* Route (index 4) */}
-          {toggles[4] && dayData?.activities.map((a, i) => {
-            if (dayData.activities[i+1] && a.lat && a.lng && dayData.activities[i+1].lat && dayData.activities[i+1].lng) {
-              return (
-                <Polyline 
-                  key={`route-${i}`} 
-                  positions={[[a.lat, a.lng], [dayData.activities[i+1].lat, dayData.activities[i+1].lng]]} 
-                  color="#E8640C" 
-                  weight={4} 
-                  dashArray="8, 8" 
-                />
-              );
-            }
-            return null;
-          })}
-
-          {/* Mock Hospitals (index 1) */}
-          {toggles[1] && (
-            <Marker position={[center.lat + 0.005, center.lng - 0.005]} icon={hospitalIcon}>
-              <Popup><div className="font-cabinet font-semibold text-[#1E1410]">City Hospital (Mock)</div></Popup>
-            </Marker>
-          )}
-
-          {/* Mock Guardians (index 2) */}
-          {toggles[2] && (
-            <Marker position={[center.lat - 0.003, center.lng + 0.004]} icon={guardianIcon}>
-              <Popup><div className="font-cabinet font-semibold text-[#1E1410]">Verified Guardian (Mock)</div></Popup>
-            </Marker>
-          )}
-
-          {/* Mock Hidden Gems (index 3) */}
-          {toggles[3] && (
-            <Marker position={[center.lat + 0.008, center.lng + 0.006]} icon={gemIcon}>
-              <Popup><div className="font-cabinet font-semibold text-[#1E1410]">Local Cafe (Hidden Gem)</div></Popup>
-            </Marker>
-          )}
-        </MapContainer>
+        {/* OpenStreetMap Only */}
+        <iframe
+          title="Interactive Map View"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          scrolling="no"
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
+          className="w-full h-full"
+        />
 
         {/* Map Layer Controls — Top Right */}
         <div className="absolute top-[16px] right-[16px] bg-white border border-[#E8D5B7] rounded-[12px] p-[8px] shadow-[0_4px_16px_rgba(30,20,16,0.12)] flex flex-col gap-[6px] z-20">

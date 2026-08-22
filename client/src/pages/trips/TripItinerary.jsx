@@ -146,7 +146,7 @@ export default function TripItinerary() {
         day.activities.forEach((a, i) => {
           checkPage(30);
           addLine(`${a.time}  •  ${a.activity}`, 11, 'bold', [30, 20, 16]);
-          if (a.location) addLine(`📍 ${a.location}`, 9, 'normal', [232, 100, 12]);
+          if (a.location) addLine(`Location: ${a.location}`, 9, 'normal', [232, 100, 12]);
           if (a.description) addLine(a.description, 9, 'normal', [80, 70, 60]);
           y += 3;
         });
@@ -154,7 +154,7 @@ export default function TripItinerary() {
         // Safety Notes
         if (day.safetyNotes) {
           checkPage(16);
-          addLine('⚠️ Safety Notes', 10, 'bold', [192, 57, 43]);
+          addLine('Safety Notes', 10, 'bold', [192, 57, 43]);
           addLine(day.safetyNotes, 9, 'normal', [80, 70, 60]);
           y += 3;
         }
@@ -162,7 +162,7 @@ export default function TripItinerary() {
         // Food Suggestions
         if (day.foodSuggestions?.length) {
           checkPage(14);
-          addLine('🍽️ Food Suggestions', 10, 'bold', [45, 106, 79]);
+          addLine('Food Suggestions', 10, 'bold', [45, 106, 79]);
           day.foodSuggestions.forEach(f => addLine(`  • ${f}`, 9, 'normal', [80, 70, 60]));
           y += 4;
         }
@@ -246,21 +246,34 @@ export default function TripItinerary() {
       </div>
 
       {/* ZONE 1 — Hero */}
-      <div className="w-full h-[340px] relative">
+      <div className="w-full h-[400px] relative">
         <img src={heroPhoto} alt={currentTrip.tripTitle} className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{background:'linear-gradient(180deg, transparent 30%, rgba(20,14,10,0.75) 100%)'}} />
-        <div className="absolute top-[20px] left-[20px] h-[24px] px-[14px] flex items-center rounded-[100px] bg-white/[0.18] border border-white/30">
-          <span className="font-mono-dm text-[10px] text-white uppercase tracking-wider">Active Trip</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(20,12,8,0.92)] via-[rgba(20,12,8,0.45)] to-transparent" />
+        
+        <div className="absolute top-[24px] left-[24px] z-30">
+          <span className="h-[24px] px-[14px] flex items-center rounded-full bg-white/20 border border-white/20 font-mono-dm text-[10px] text-white uppercase tracking-wider backdrop-blur-md">
+            Active Trip Plan
+          </span>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <div className="max-w-[1200px] mx-auto px-[48px] pb-[40px] flex items-end justify-between">
-            <div>
-              <p className="font-mono-dm text-[12px] text-white/60 uppercase tracking-[2px]">Day {activeDay} of {currentTrip.dailyItinerary.length}</p>
-              <h1 className="font-display font-extrabold text-[44px] text-white leading-none mt-[4px]">{currentTrip.tripTitle}</h1>
-              <p className="font-mono-dm text-[12px] text-white/60 mt-[8px]">{currentTrip.overview}</p>
+
+        <div className="absolute inset-x-0 bottom-0 z-20">
+          <div className="max-w-[1200px] mx-auto px-[24px] md:px-[40px] pb-[48px] flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+            <div className="max-w-[750px]">
+              <span className="font-mono-dm text-[12px] text-[#F0A500] uppercase tracking-[3px] font-bold">
+                Day {activeDay} of {currentTrip.dailyItinerary.length}
+              </span>
+              <h1 className="font-display font-bold text-[36px] md:text-[46px] text-white leading-tight mt-1 drop-shadow-sm">
+                {currentTrip.tripTitle}
+              </h1>
+              <p className="font-jakarta text-[14px] text-white/85 mt-2 leading-relaxed drop-shadow-sm">
+                {currentTrip.overview}
+              </p>
             </div>
-            <div className="bg-white/[0.15] backdrop-blur-[8px] border border-white/25 rounded-[100px] px-[16px] py-[8px]">
-              <span className="font-cabinet font-bold text-[14px] text-white">Day {activeDay} / {currentTrip.dailyItinerary.length}</span>
+            
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-2.5 shrink-0 shadow-sm">
+              <span className="font-cabinet font-bold text-[14px] text-white">
+                Progress: {activeDay} / {currentTrip.dailyItinerary.length} Days
+              </span>
             </div>
           </div>
         </div>
@@ -268,11 +281,11 @@ export default function TripItinerary() {
 
       {/* ZONE 2 — Stats Bar */}
       <div className="max-w-[1200px] mx-auto px-[24px]">
-        <div className="bg-white border border-[#E8D5B7] rounded-[14px] min-h-[64px] py-[12px] px-[24px] flex items-center -mt-[24px] relative z-10 shadow-[0_4px_16px_rgba(30,20,16,0.10)]">
-          {[{val:currentTrip.dailyItinerary.length,label:'Days'},{val:currentTrip.estimatedCosts.total,label:'Est. Budget'},{val:currentTrip.essentialPacking.length,label:'Packing Items'},{val:'87',label:'Safety Score',green:true}].map((s,i,arr) => (
-            <div key={s.label} className={`flex-1 flex flex-col items-center justify-center ${i < arr.length-1 ? 'border-r border-[#F5EDE0]' : ''}`}>
-              <span className={`font-display font-bold text-[18px] lg:text-[22px] leading-none ${s.green ? 'text-[#2D6A4F]' : 'text-[#1E1410]'}`}>{s.val}</span>
-              <span className="font-mono-dm text-[10px] text-[#B09880] uppercase mt-[2px]">{s.label}</span>
+        <div className="bg-white border border-[#E8D5B7]/40 rounded-[20px] py-[16px] px-[24px] flex flex-wrap md:flex-nowrap items-center -mt-[32px] relative z-30 shadow-[0_12px_32px_rgba(30,20,16,0.06)] gap-y-4">
+          {[{val:currentTrip.dailyItinerary.length,label:'Days Count'},{val:currentTrip.estimatedCosts.total,label:'Est. Budget'},{val:currentTrip.essentialPacking.length,label:'Items to Pack'},{val:'87',label:'Safety Index',green:true}].map((s,i,arr) => (
+            <div key={s.label} className={`flex-1 min-w-[120px] flex flex-col items-center justify-center ${i < arr.length-1 ? 'border-r border-[#F5EDE0]' : ''}`}>
+              <span className={`font-display font-bold text-[20px] lg:text-[24px] leading-none ${s.green ? 'text-[#2D6A4F]' : 'text-[#1E1410]'}`}>{s.val}</span>
+              <span className="font-mono-dm text-[9px] text-[#B09880] uppercase tracking-wider mt-[4px]">{s.label}</span>
             </div>
           ))}
         </div>
@@ -281,7 +294,7 @@ export default function TripItinerary() {
       {/* ZONE 3 — Day Tabs + Weather + Content */}
       <div className="max-w-[1200px] mx-auto px-[24px] mt-[28px] pb-[80px]">
         {/* Day Tabs */}
-        <div className="flex gap-[8px] overflow-x-auto scrollbar-none">
+        <div className="flex gap-[8px] overflow-x-auto pb-2 scroll-smooth">
           {currentTrip.dailyItinerary.map(d => (
             <button key={d.day} onClick={() => setActiveDay(d.day)} className={`h-[38px] px-[20px] rounded-[100px] font-cabinet font-medium text-[13px] transition-colors shrink-0 ${activeDay === d.day ? 'bg-[#E8640C] text-white' : d.day < activeDay ? 'bg-[#2D6A4F] text-white' : 'bg-white border border-[#E8D5B7] text-[#6B4F3A]'}`}>
               {d.day < activeDay && <CheckCircle2 size={12} className="inline mr-1" />}Day {d.day}
@@ -310,22 +323,39 @@ export default function TripItinerary() {
                 const isDone = checked[`${activeDay}-${i}`];
                 return (
                   <div key={i} className="relative pl-[40px] mb-[16px] group">
-                    {/* Node */}
-                    <div className={`absolute left-0 top-[18px] z-10 flex items-center justify-center w-[12px] h-[12px]`}>
+                    {/* Centered Node */}
+                    <div className="absolute left-[6px] top-[24px] z-10 flex items-center justify-center w-[12px] h-[12px]">
                       {isDone ? (
                         <div className="w-[12px] h-[12px] rounded-full bg-[#2D6A4F] flex items-center justify-center"><CheckCircle2 size={8} className="text-white" /></div>
                       ) : (
-                        <div className="w-[12px] h-[12px] rounded-full bg-white border-[2px] border-[#E8D5B7]" />
+                        <div className="w-[12px] h-[12px] rounded-full bg-white border-[2px] border-[#E8D5B7] shadow-sm" />
                       )}
                     </div>
                     {/* Card */}
-                    <div className={`bg-white border border-[#E8D5B7] rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(30,20,16,0.06)] flex flex-col md:flex-row ${isDone ? 'opacity-60' : ''}`}>
-                      {a.photoUrl && (
-                        <div className="w-full md:w-[140px] h-[100px] shrink-0">
-                          <img src={a.photoUrl} alt={a.activity} className="w-full h-full object-cover" />
+                    <div className={`bg-white border border-[#E8D5B7]/40 rounded-[16px] overflow-hidden shadow-[0_4px_16px_rgba(30,20,16,0.03)] flex flex-col md:flex-row ${isDone ? 'opacity-65' : ''} transition-all duration-300 hover:shadow-[0_8px_24px_rgba(30,20,16,0.06)]`}>
+                      {a.photoUrl && !a.photoUrl.includes("undefined") ? (
+                        <div className="w-full md:w-[150px] h-[120px] md:h-auto shrink-0 relative bg-[#FFF8F0]">
+                          <img 
+                            src={a.photoUrl} 
+                            alt={a.activity} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 bg-[#FFF8F0] flex-col items-center justify-center text-center p-3 border-r border-[#E8D5B7]/30">
+                            <MapPin size={20} className="text-[#E8640C] mb-1" />
+                            <span className="font-mono-dm text-[8px] text-[#B09880]">Spot View</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-full md:w-[100px] shrink-0 bg-[#FFF8F0] border-r border-[#E8D5B7]/30 flex flex-col items-center justify-center text-center p-3">
+                          <MapPin size={20} className="text-[#B09880]" />
                         </div>
                       )}
-                      <div className="p-[16px] flex-1">
+                      
+                      <div className="p-[20px] flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                            <span className="font-mono-dm text-[11px] text-[#B09880]">{a.time}</span>
                            <button onClick={() => toggleCheck(`${activeDay}-${i}`)} className={`w-[20px] h-[20px] rounded-[4px] border-[1.5px] flex items-center justify-center transition-colors ${isDone ? 'bg-[#2D6A4F] border-[#2D6A4F]' : 'border-[#E8D5B7] hover:border-[#E8640C]'}`}>
@@ -370,16 +400,16 @@ export default function TripItinerary() {
             {/* Budget */}
             <div className="bg-white border border-[#E8D5B7] rounded-[12px] p-[16px]">
               <p className="font-mono-dm text-[10px] text-[#B09880] uppercase tracking-[2px]">Estimated Budget</p>
-              <div className="mt-[10px] flex flex-col">
+              <div className="mt-[10px] flex flex-col gap-2">
                 {Object.entries(currentTrip.estimatedCosts.breakdown).map(([cat, amt]) => (
-                  <div key={cat} className="flex justify-between py-[6px]">
-                    <span className="font-jakarta text-[13px] text-[#6B4F3A] capitalize">{cat}</span>
-                    <span className="font-mono-dm text-[11px] text-[#1E1410]">{amt}</span>
+                  <div key={cat} className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center py-[4px] border-b border-[#FFF8F0] last:border-0">
+                    <span className="font-jakarta text-[13px] font-semibold text-[#6B4F3A] capitalize">{cat}</span>
+                    <span className="font-jakarta text-[12px] text-[#1E1410] text-left sm:text-right mt-1 sm:mt-0 max-w-full sm:max-w-[180px] break-words">{amt}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-[#F5EDE0] mt-[6px] pt-[10px] flex justify-between items-center">
-                <span className="font-cabinet font-semibold text-[14px] text-[#1E1410]">Est. Total</span>
+              <div className="border-t border-[#F5EDE0] mt-[10px] pt-[12px] flex justify-between items-center">
+                <span className="font-cabinet font-bold text-[14px] text-[#1E1410]">Est. Total</span>
                 <span className="font-display font-bold text-[18px] text-[#E8640C]">{currentTrip.estimatedCosts.total}</span>
               </div>
             </div>
@@ -388,7 +418,6 @@ export default function TripItinerary() {
               {!currentTrip._id && (
                 <button onClick={handleSaveTrip} className="w-full h-[42px] rounded-[10px] bg-[#E8640C] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Save size={14} /> Save Trip</button>
               )}
-              <Link to={location.pathname.replace('itinerary', 'map')} className="w-full h-[42px] rounded-[10px] bg-white border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><MapIcon size={14} /> View on Map</Link>
               <button onClick={downloadPDF} className="w-full h-[42px] rounded-[10px] bg-white border border-[#E8D5B7] text-[#6B4F3A] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Download size={14} /> Download PDF</button>
               <Link to="/safety/sos" className="w-full h-[42px] rounded-[10px] bg-[#C0392B] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Shield size={14} /> SOS</Link>
             </div>
