@@ -1,14 +1,11 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Calendar, ChevronRight, CheckCircle2, Shield, Bell, MapPinOff, Users as PeopleIcon, Minus, Plus, Zap, Turtle, Compass, Loader2, AlertTriangle } from "lucide-react";
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from "@react-google-maps/api";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setTripStart, setTripSuccess, setTripFailure } from "../../store/tripSlice";
 import TopAppBar from "../../components/shared/TopAppBar";
-import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from "../../config/env";
-
-const LIBRARIES = ['places', 'geometry'];
+import { API_BASE_URL } from "../../config/env";
 
 const PHOTOS = {
   jaisalmer:'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=200&q=80',
@@ -82,24 +79,6 @@ export default function NewTripStep1() {
       }
     } catch (e) {
       console.warn("Geocoding lookup error", e);
-    }
-  };
-
-  const [autocomplete, setAutocomplete] = useState(null);
-  const onAutocompleteLoad = (auto) => setAutocomplete(auto);
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      if (place && place.geometry) {
-        setDest({
-          city: place.name || searchQuery,
-          state: place.formatted_address || 'India',
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-          img: place.photos ? place.photos[0].getUrl() : 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
-        });
-        if (place.name) setSearchQuery(place.name);
-      }
     }
   };
 
@@ -250,57 +229,29 @@ export default function NewTripStep1() {
             <Label>Where Are You Going?</Label>
             <div className="mt-[10px] relative">
               <Search size={20} className="absolute left-[16px] top-1/2 -translate-y-1/2 text-[#B09880] z-10" />
-              {isLoaded && !loadError ? (
-                <Autocomplete onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
-                  <input 
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (e.target.value.trim().length >= 2) {
-                        handleManualSearch(e.target.value);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleManualSearch(searchQuery);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (searchQuery.trim().length >= 2) {
-                        handleManualSearch(searchQuery);
-                      }
-                    }}
-                    className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
-                    placeholder="Search any city or place in India…" 
-                  />
-                </Autocomplete>
-              ) : (
-                <input 
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (e.target.value.trim().length >= 2) {
-                      handleManualSearch(e.target.value);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleManualSearch(searchQuery);
-                    }
-                  }}
-                  onBlur={() => {
-                    if (searchQuery.trim().length >= 2) {
-                      handleManualSearch(searchQuery);
-                    }
-                  }}
-                  className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
-                  placeholder="Type any city (e.g. Mumbai, Goa, Jaipur)…" 
-                />
-              )}
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim().length >= 2) {
+                    handleManualSearch(e.target.value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleManualSearch(searchQuery);
+                  }
+                }}
+                onBlur={() => {
+                  if (searchQuery.trim().length >= 2) {
+                    handleManualSearch(searchQuery);
+                  }
+                }}
+                className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
+                placeholder="Search any city or place in India (e.g. Jaipur, Goa, Manali)…" 
+              />
             </div>
             <p className="font-mono-dm text-[10px] text-[#B09880] uppercase tracking-[2px] mt-[16px]">Popular Destinations</p>
             <div className="mt-[10px] grid grid-cols-2 gap-[16px]">
@@ -529,7 +480,7 @@ export default function NewTripStep1() {
               <button disabled={!canGenerate || generating} onClick={handleGenerate} className={`w-full h-[48px] rounded-[10px] font-cabinet font-semibold text-[14px] flex items-center justify-center gap-2 transition-all ${canGenerate && !generating ? 'bg-[#E8640C] text-white shadow-[0_4px_16px_rgba(232,100,12,0.25)] hover:brightness-105' : 'bg-[#E8D5B7] text-[#B09880] cursor-not-allowed'}`}>
                 {generating ? <><Loader2 size={16} className="animate-spin" /> Building your itinerary…</> : 'Generate My Itinerary →'}
               </button>
-              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Places verified by Google Maps</p>
+              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Places verified by OpenStreetMap</p>
             </div>
           </div>
         </div>

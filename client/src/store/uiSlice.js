@@ -4,6 +4,7 @@ const initialState = {
   theme: localStorage.getItem('theme') || 'light',
   isSidebarOpen: false,
   globalLoading: false,
+  isCalendarOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -20,8 +21,11 @@ const uiSlice = createSlice({
     setGlobalLoading: (state, action) => {
       state.globalLoading = action.payload;
     },
+    setCalendarOpen: (state, action) => {
+      state.isCalendarOpen = action.payload;
+    },
   },
 });
 
-export const { toggleTheme, setSidebarOpen, setGlobalLoading } = uiSlice.actions;
+export const { toggleTheme, setSidebarOpen, setGlobalLoading, setCalendarOpen } = uiSlice.actions;
 export default uiSlice.reducer;

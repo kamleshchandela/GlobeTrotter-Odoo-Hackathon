@@ -1,33 +1,35 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { MapPin, X, ChevronRight, Shield, Star, Navigation, Bookmark, Loader2 } from "lucide-react";
-import { GoogleMap, useJsApiLoader, Marker, Polyline } from "@react-google-maps/api";
+import { MapPin, X, ChevronRight, Shield, Star, Navigation, Bookmark, Loader2, PlusSquare, Sparkles, Route } from "lucide-react";
 import TopAppBar from "../../components/shared/TopAppBar";
-import { GOOGLE_MAPS_API_KEY } from "../../config/env";
 import { fetchTripById } from "../../store/tripSlice";
 import toast, { Toaster } from "react-hot-toast";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-const LIBRARIES = ['places', 'geometry'];
-
-const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  mapTypeControl: false,
-  streetViewControl: false,
-  styles: [
-    {
-      "featureType": "all",
-      "elementType": "geometry.fill",
-      "stylers": [{ "color": "#fef3e2" }]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.fill",
-      "stylers": [{ "color": "#6b4f3a" }]
-    }
-  ]
+// Custom Leaflet Icons
+const createCustomIcon = (color) => {
+  return L.divIcon({
+    className: 'custom-leaflet-icon',
+    html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
 };
+const activityIcon = createCustomIcon('#E8640C');
+const hospitalIcon = createCustomIcon('#C0392B');
+const guardianIcon = createCustomIcon('#2D6A4F');
+const gemIcon = createCustomIcon('#F0A500');
+
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, 14, { duration: 1.5 });
+  }, [center, map]);
+  return null;
+}
 
 export default function TripMapView() {
   const dispatch = useDispatch();
@@ -38,7 +40,6 @@ export default function TripMapView() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showGuardian, setShowGuardian] = useState(false);
   const [toggles, setToggles] = useState([true, true, true, false, true]);
-  const [useOsmFallback, setUseOsmFallback] = useState(false);
 
   // If currentTrip is not in Redux (e.g. page refresh), try fetching from DB
   useEffect(() => {
@@ -47,39 +48,21 @@ export default function TripMapView() {
     }
   }, [currentTrip, id, loading, dispatch]);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES
-  });
-
   const dayData = useMemo(() => {
     if (!currentTrip) return null;
     return currentTrip.dailyItinerary.find(d => d.day === activeDay) || currentTrip.dailyItinerary[0];
   }, [currentTrip, activeDay]);
 
   const center = useMemo(() => {
+    if (selectedActivity && selectedActivity.lat && selectedActivity.lng) {
+      return { lat: selectedActivity.lat, lng: selectedActivity.lng };
+    }
     if (dayData && dayData.activities.length > 0) {
-      const first = dayData.activities.find(a => a.lat);
+      const first = dayData.activities.find(a => a.lat && a.lng);
       if (first) return { lat: first.lat, lng: first.lng };
     }
     return { lat: 20.5937, lng: 78.9629 };
-  }, [dayData]);
-
-  const polylines = useMemo(() => {
-    if (!dayData || !window.google) return [];
-    const lines = [];
-    dayData.activities.forEach(a => {
-      if (a.nextActivityRoute && a.nextActivityRoute.polyline) {
-        try {
-          lines.push(window.google.maps.geometry.encoding.decodePath(a.nextActivityRoute.polyline));
-        } catch (e) {
-          console.error("Polyline decode error", e);
-        }
-      }
-    });
-    return lines;
-  }, [dayData, isLoaded]);
+  }, [dayData, selectedActivity]);
 
   const toggle = (i) => setToggles(p => p.map((v, j) => j === i ? !v : v));
 
@@ -125,19 +108,22 @@ export default function TripMapView() {
           className="w-full h-full"
         />
 
-        {/* Map Controls — Top Right */}
+        {/* Map Layer Controls — Top Right */}
         <div className="absolute top-[16px] right-[16px] bg-white border border-[#E8D5B7] rounded-[12px] p-[8px] shadow-[0_4px_16px_rgba(30,20,16,0.12)] flex flex-col gap-[6px] z-20">
           {[
-            { label: 'Activities', color: '#E8640C' },
-            { label: 'Hospitals', color: '#C0392B' },
-            { label: 'Guardians', color: '#2D6A4F' },
-            { label: 'Hidden Gems', color: '#F0A500' },
-            { label: 'Route', color: '#E8640C' },
-          ].map((t, i) => (
-            <button key={t.label} onClick={() => toggle(i)} title={t.label} className={`w-[36px] h-[36px] rounded-[8px] flex items-center justify-center transition-colors ${toggles[i] ? '' : 'border border-[#E8D5B7]'}`} style={toggles[i] ? { background: `${t.color}22` } : {}}>
-              <div className="w-[10px] h-[10px] rounded-full" style={{ background: t.color }} />
-            </button>
-          ))}
+            { label: 'Activities', color: '#E8640C', icon: MapPin },
+            { label: 'Hospitals', color: '#C0392B', icon: PlusSquare },
+            { label: 'Guardians', color: '#2D6A4F', icon: Shield },
+            { label: 'Hidden Gems', color: '#F0A500', icon: Sparkles },
+            { label: 'Route', color: '#E8640C', icon: Route },
+          ].map((t, i) => {
+            const Icon = t.icon;
+            return (
+              <button key={t.label} onClick={() => toggle(i)} title={t.label} className={`w-[44px] h-[44px] rounded-[10px] flex items-center justify-center transition-all duration-300 ${toggles[i] ? 'shadow-inner' : 'border border-[#E8D5B7] bg-white hover:bg-[#F5EDE0]'}`} style={toggles[i] ? { background: `${t.color}22` } : {}}>
+                <Icon size={20} color={toggles[i] ? t.color : '#B09880'} />
+              </button>
+            );
+          })}
         </div>
 
         {/* Left Panel — Activity List */}
@@ -184,7 +170,7 @@ export default function TripMapView() {
               <h3 className="font-cabinet font-bold text-[18px] text-[#1E1410] mt-[6px]">{selectedActivity.activity}</h3>
               <p className="font-jakarta text-[13px] text-[#6B4F3A] line-clamp-2 mt-[6px]">{selectedActivity.description}</p>
               <div className="mt-[12px] flex gap-[10px]">
-                <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedActivity.lat},${selectedActivity.lng}`, '_blank')} className="flex-1 h-[40px] rounded-[10px] border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Navigation size={14} /> Get Directions</button>
+                <button onClick={() => window.open(`https://www.openstreetmap.org/?mlat=${selectedActivity.lat || center.lat}&mlon=${selectedActivity.lng || center.lng}#map=16/${selectedActivity.lat || center.lat}/${selectedActivity.lng || center.lng}`, '_blank')} className="flex-1 h-[40px] rounded-[10px] border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Navigation size={14} /> Open in OSM</button>
                 <button onClick={() => toast.success(`${selectedActivity.activity} saved to your collection!`)} className="flex-1 h-[40px] rounded-[10px] bg-[#E8640C] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Bookmark size={14} /> Add to Saved</button>
               </div>
             </div>
