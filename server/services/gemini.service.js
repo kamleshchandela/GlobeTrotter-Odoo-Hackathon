@@ -7,13 +7,21 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+import mongoose from "mongoose";
+
 const getGoogleMapsPlaceInfo = async (placeName, location) => {
   try {
     const query = `${placeName} in ${location}`;
     
-    // Check Cache first
-    const cached = await PlaceCache.findOne({ query });
-    if (cached) return cached;
+    // Check Cache first if database connection is active
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const cached = await PlaceCache.findOne({ query });
+        if (cached) return cached;
+      } catch (e) {
+        console.warn("PlaceCache read error:", e.message);
+      }
+    }
 
     const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
@@ -45,8 +53,10 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
         photoUrl
       };
 
-      // Save to cache
-      await PlaceCache.create({ query, ...result });
+      // Save to cache if connected
+      if (mongoose.connection.readyState === 1) {
+        PlaceCache.create({ query, ...result }).catch(err => console.error("Place cache save error", err.message));
+      }
 
       return result;
     }
@@ -60,11 +70,17 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
 const getGoogleMapsRouteInfo = async (origin, destination) => {
   try {
     // Check Cache first to avoid Google Maps API costs
-    const cached = await RouteCache.findOne({
-      originLat: origin.lat, originLng: origin.lng,
-      destLat: destination.lat, destLng: destination.lng
-    });
-    if (cached) return cached;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const cached = await RouteCache.findOne({
+          originLat: origin.lat, originLng: origin.lng,
+          destLat: destination.lat, destLng: destination.lng
+        });
+        if (cached) return cached;
+      } catch (e) {
+        console.warn("RouteCache read error:", e.message);
+      }
+    }
 
     const response = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
       method: "POST",
@@ -92,12 +108,14 @@ const getGoogleMapsRouteInfo = async (origin, destination) => {
         polyline: route.polyline.encodedPolyline
       };
       
-      // Save to cache asynchronously
-      RouteCache.create({
-        originLat: origin.lat, originLng: origin.lng,
-        destLat: destination.lat, destLng: destination.lng,
-        ...result
-      }).catch(err => console.error("Route cache save error", err));
+      // Save to cache asynchronously if connected
+      if (mongoose.connection.readyState === 1) {
+        RouteCache.create({
+          originLat: origin.lat, originLng: origin.lng,
+          destLat: destination.lat, destLng: destination.lng,
+          ...result
+        }).catch(err => console.error("Route cache save error", err.message));
+      }
 
       return result;
     }
@@ -161,18 +179,36 @@ export const generateItinerary = async (tripData) => {
       Strictly return ONLY the JSON object. Do not wrap in markdown or backticks.
     `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
-    });
+    const modelsToTry = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-flash-latest"];
+    let response = null;
+    let lastError = null;
 
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error("GEMINI_API_ERROR_BODY:", JSON.stringify(errData, null, 2));
-      throw new Error(errData.error?.message || "Gemini API request failed");
+    for (const model of modelsToTry) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (res.ok) {
+          response = res;
+          break;
+        } else {
+          const errData = await res.json();
+          console.warn(`Model ${model} failed:`, errData.error?.message);
+          lastError = errData.error?.message;
+        }
+      } catch (err) {
+        console.warn(`Model ${model} fetch exception:`, err.message);
+        lastError = err.message;
+      }
+    }
+
+    if (!response) {
+      throw new Error(lastError || "Gemini API request failed across all candidate models.");
     }
 
     const result = await response.json();
@@ -185,32 +221,44 @@ export const generateItinerary = async (tripData) => {
     const parsedItinerary = JSON.parse(cleanJson);
     console.log("GEMINI_GENERATION_SUCCESS: Starting grounding...");
 
-    // Grounding Layer 1: Validate locations with Google Maps Places
+    // Grounding Layer 1: Validate locations with Google Maps Places in parallel
+    const placePromises = [];
     for (const day of parsedItinerary.dailyItinerary) {
       for (const activity of day.activities) {
         if (activity.location) {
-          const groundedData = await getGoogleMapsPlaceInfo(activity.location, tripData.location);
-          if (groundedData) {
-            activity.placeId = groundedData.placeId;
-            activity.lat = groundedData.lat;
-            activity.lng = groundedData.lng;
-            activity.photoUrl = groundedData.photoUrl;
-          }
+          placePromises.push(
+            getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
+              if (groundedData) {
+                activity.placeId = groundedData.placeId;
+                activity.lat = groundedData.lat;
+                activity.lng = groundedData.lng;
+                activity.photoUrl = groundedData.photoUrl;
+              }
+            })
+          );
         }
       }
+    }
+    await Promise.all(placePromises);
 
-      // Grounding Layer 2: Validate Routes between activities for each day
+    // Grounding Layer 2: Validate Routes between activities in parallel
+    const routePromises = [];
+    for (const day of parsedItinerary.dailyItinerary) {
       for (let i = 0; i < day.activities.length - 1; i++) {
         const start = day.activities[i];
         const end = day.activities[i+1];
         if (start.lat && end.lat) {
-          const routeData = await getGoogleMapsRouteInfo(start, end);
-          if (routeData) {
-            start.nextActivityRoute = routeData;
-          }
+          routePromises.push(
+            getGoogleMapsRouteInfo(start, end).then(routeData => {
+              if (routeData) {
+                start.nextActivityRoute = routeData;
+              }
+            })
+          );
         }
       }
     }
+    await Promise.all(routePromises);
 
     return parsedItinerary;
   } catch (error) {

@@ -125,5 +125,3 @@ export default function TravelHistoryPage() {
     </div>
   );
 }
-
-// added by Rishikesh
