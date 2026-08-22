@@ -79,4 +79,14 @@ router.put('/:id', protect, async (req, res) => {
   }
 });
 
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const result = await Trip.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!result) return res.status(404).json({ message: 'Trip not found' });
+    res.json({ message: 'Trip deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

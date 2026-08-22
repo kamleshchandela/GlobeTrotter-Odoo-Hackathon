@@ -30,7 +30,10 @@ export default function TravelCalendar() {
   // Calendar Workspace states
   const [selectedTripId, setSelectedTripId] = useState("all");
   const [currentView, setCurrentView] = useState("month"); // month, week, timeline, day
-  const [viewDate, setViewDate] = useState(new Date(2026, 7, 1)); // Default to August 2026 for demo
+  const [viewDate, setViewDate] = useState(() => {
+    // Return current date by default
+    return new Date();
+  });
   const [activeDayIndex, setActiveDayIndex] = useState(1);
   
   // Dialog/Editor states
@@ -169,7 +172,7 @@ export default function TravelCalendar() {
   };
 
   const handleJumpToToday = () => {
-    setViewDate(new Date(2026, 7, 22)); 
+    setViewDate(new Date()); 
     toast.success("Navigated to Today!");
   };
 
@@ -542,22 +545,22 @@ export default function TravelCalendar() {
         <section className="flex-1 flex flex-col min-w-0 bg-transparent">
           
           {/* Top calendar header controls row */}
-          <div className="bg-white/80 backdrop-blur-md border-b border-sand px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 shadow-md relative z-10">
-            <div className="flex flex-row items-center gap-3">
+          <div className="bg-white/90 backdrop-blur-md border-b border-sand px-4 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-sm relative z-10">
+            <div className="flex items-center gap-2 flex-wrap">
               <button 
                 onClick={() => dispatch(setCalendarOpen(false))}
-                className="p-2 hover:bg-sand/35 rounded-full text-taupe hover:text-charcoal hover:scale-105 transition-all shrink-0 border border-sand shadow-sm"
+                className="p-1.5 hover:bg-sand/35 rounded-full text-taupe hover:text-charcoal hover:scale-105 transition-all shrink-0 border border-sand shadow-sm"
                 title="Close Calendar"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
-              <h2 className="font-display font-extrabold text-[18px] text-charcoal leading-none">Travel Calendar</h2>
+              <h2 className="font-display font-extrabold text-[15px] md:text-[18px] text-charcoal leading-none">Travel Calendar</h2>
               
               {/* Trip selector dropdown */}
               <select 
                 value={selectedTripId}
                 onChange={e => setSelectedTripId(e.target.value)}
-                className="h-[36px] px-3.5 rounded-xl border border-sand/80 bg-white text-charcoal font-cabinet font-bold text-[12.5px] outline-none focus:border-saffron focus:ring-1 focus:ring-saffron"
+                className="h-[32px] px-2.5 rounded-xl border border-sand/80 bg-white text-charcoal font-cabinet font-bold text-[11.5px] outline-none focus:border-saffron focus:ring-1 focus:ring-saffron"
               >
                 <option value="all">All Trips</option>
                 {trips.map(t => <option key={t._id} value={t._id}>{t.tripTitle || t.location}</option>)}
@@ -565,31 +568,31 @@ export default function TravelCalendar() {
             </div>
 
             {/* Middle Nav Range Controls */}
-            <div className="flex items-center gap-1.5">
-              <button onClick={handlePrevDate} className="p-2 hover:bg-sand/35 rounded-xl border border-sand bg-white hover:scale-105 transition-all shadow-sm">
-                <ChevronLeft size={15} />
+            <div className="flex items-center gap-1">
+              <button onClick={handlePrevDate} className="p-1.5 hover:bg-sand/35 rounded-xl border border-sand bg-white hover:scale-105 transition-all shadow-sm">
+                <ChevronLeft size={14} />
               </button>
               
-              <span className="font-cabinet font-extrabold text-[14px] text-charcoal px-3">
+              <span className="font-cabinet font-extrabold text-[12px] md:text-[14px] text-charcoal px-2 whitespace-nowrap">
                 {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </span>
 
-              <button onClick={handleNextDate} className="p-2 hover:bg-sand/35 rounded-xl border border-sand bg-white hover:scale-105 transition-all shadow-sm">
-                <ChevronRight size={15} />
+              <button onClick={handleNextDate} className="p-1.5 hover:bg-sand/35 rounded-xl border border-sand bg-white hover:scale-105 transition-all shadow-sm">
+                <ChevronRight size={14} />
               </button>
 
-              <button onClick={handleJumpToToday} className="h-[34px] px-4 rounded-xl border border-sand bg-white hover:bg-ivory hover:border-saffron text-taupe font-cabinet font-extrabold text-[12px] ml-2 transition-all shadow-sm">
+              <button onClick={handleJumpToToday} className="h-[30px] px-3 rounded-xl border border-sand bg-white hover:bg-ivory hover:border-saffron text-taupe font-cabinet font-extrabold text-[11px] ml-1.5 transition-all shadow-sm">
                 Today
               </button>
             </div>
 
             {/* View Switchers */}
-            <div className="flex bg-[#FAF5EE] p-1 border border-sand/80 rounded-xl shrink-0 shadow-inner">
+            <div className="flex bg-[#FAF5EE] p-0.5 border border-sand/80 rounded-xl shrink-0 shadow-inner">
               {["month", "week", "timeline", "day"].map(view => (
                 <button
                   key={view}
                   onClick={() => setCurrentView(view)}
-                  className={`h-[30px] px-4 rounded-lg font-cabinet font-bold text-[11px] capitalize transition-all ${
+                  className={`h-[28px] px-3.5 rounded-lg font-cabinet font-bold text-[10px] capitalize transition-all ${
                     currentView === view 
                       ? "bg-gradient-to-r from-saffron to-amber-500 text-white shadow-md" 
                       : "text-taupe hover:text-charcoal"
@@ -706,7 +709,8 @@ export default function TravelCalendar() {
                       {/* 7 Days of the week columns */}
                       {[0, 1, 2, 3, 4, 5, 6].map(offset => {
                         const dayDate = new Date(viewDate);
-                        dayDate.setDate(viewDate.getDate() + offset - viewDate.getDay()); 
+                        const currentDayOfWeek = viewDate.getDay();
+                        dayDate.setDate(viewDate.getDate() + offset - currentDayOfWeek);
                         const dayEvents = calendarEvents.filter(e => e.date.toDateString() === dayDate.toDateString());
 
                         return (

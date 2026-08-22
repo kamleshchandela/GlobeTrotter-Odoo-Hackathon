@@ -22,7 +22,7 @@ const PHOTOS = {
 };
 
 const SectionLabel = ({ children }) => (
-  <p className="font-mono-dm text-[10px] uppercase tracking-[2px] text-[#B09880] mb-[2px]">{children}</p>
+  <p className="font-mono-dm text-[10px] uppercase tracking-[2px] text-[#627D98] font-bold mb-[2px]">{children}</p>
 );
 
 import { useDispatch } from 'react-redux';
@@ -39,7 +39,7 @@ const Home = () => {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0] relative font-jakarta">
+    <div className="min-h-screen bg-[#F7FAFC] relative font-jakarta">
       <Helmet>
         <title>Dashboard | My Itinerary - AI Travel & Healthcare</title>
         <meta
@@ -49,29 +49,28 @@ const Home = () => {
         <link rel="canonical" href="https://myitinerary.com/" />
       </Helmet>
 
-      <div className="fixed inset-0 pointer-events-none opacity-[0.04] mix-blend-multiply z-50" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} />
       <TopAppBar variant="logo" />
       
       <div className="mx-auto max-w-[1200px] px-[16px] md:px-[24px] pt-[12px] pb-[60px] flex flex-col gap-[28px]">
         {/* Banner Image - Slideshow Hero Component */}
-        <C1_WelcomeHero />
-
-
+        <div className="animate-fade-up">
+          <C1_WelcomeHero />
+        </div>
 
         {/* Top Regional Selections */}
-        <div>
+        <div className="animate-fade-up-d1">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#1E1410] tracking-tight">Top Regional Selections</h3>
-            <span className="font-mono-dm text-[11px] text-[#B09880]">Popular Spots</span>
+            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#102A43] tracking-tight">Top Regional Selections</h3>
+            <span className="font-mono-dm text-[11px] text-[#627D98]">Popular Spots</span>
           </div>
           <C5_Trending />
         </div>
 
         {/* Previous Trips Section */}
-        <div>
+        <div className="animate-fade-up-d2">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#1E1410] tracking-tight">Previous Trips</h3>
-            <span className="font-mono-dm text-[11px] text-[#B09880]">History Log</span>
+            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#102A43] tracking-tight">Previous Trips</h3>
+            <span className="font-mono-dm text-[11px] text-[#627D98]">History Log</span>
           </div>
           
           {/* Main Dashboard Layout showing Safety snapshot alongside history */}
@@ -80,15 +79,15 @@ const Home = () => {
               {/* Dynamic list of previous trips */}
               <div className="flex flex-col gap-4">
                 {loading ? (
-                  <div className="flex items-center justify-center p-8 bg-white border border-[#E8D5B7]/40 rounded-[24px]">
-                    <Loader2 className="animate-spin text-[#E8640C]" size={24} />
+                  <div className="flex items-center justify-center p-8 bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px]">
+                    <Loader2 className="animate-spin text-[#2A9D8F]" size={24} />
                   </div>
                 ) : trips && trips.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {trips.map((trip) => (
                       <div 
                         key={trip._id}
-                        className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-5 shadow-[0_4px_20px_rgba(30,20,16,0.03)] hover:shadow-[0_8px_30px_rgba(30,20,16,0.08)] hover:border-[#E8640C]/25 transition-all flex flex-col justify-between h-[160px] relative group"
+                        className="bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-5 shadow-[0_8px_30px_rgb(240,244,248,0.5)] hover:shadow-[0_12px_36px_rgba(42,157,143,0.08)] hover:border-[#2A9D8F]/25 transition-all duration-300 flex flex-col justify-between h-[160px] relative group"
                       >
                         <Link to={`/trips/${trip._id}`} className="absolute inset-0 z-0 rounded-[24px]" />
                         <button 
@@ -102,33 +101,33 @@ const Home = () => {
                                 .catch((err) => toast.error(err || "Failed to delete trip"));
                             }
                           }}
-                          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white border border-[#E8D5B7]/60 flex items-center justify-center text-[#B09880] hover:text-[#C0392B] hover:border-[#C0392B]/50 transition-colors shadow-sm"
+                          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-[#627D98] hover:text-[#C0392B] hover:border-[#C0392B]/50 transition-colors shadow-sm"
                           title="Delete Trip"
                         >
                           <Trash2 size={14} />
                         </button>
                         <div className="z-0 relative pointer-events-none">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FFF8F0] border border-[#E8D5B7]/30 font-mono-dm text-[8px] text-[#E8640C] uppercase tracking-wider mb-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FFE1D2] border border-[#F4A261]/20 font-mono-dm text-[8px] text-[#E8640C] uppercase tracking-wider mb-2">
                             {trip.duration} Days
                           </span>
-                          <h4 className="font-cabinet font-bold text-[16px] text-[#1E1410] truncate group-hover:text-[#E8640C] transition-colors">
+                          <h4 className="font-cabinet font-bold text-[16px] text-[#102A43] truncate group-hover:text-[#2A9D8F] transition-colors">
                             {trip.tripTitle || trip.location}
                           </h4>
-                          <p className="font-jakarta text-[12px] text-[#6B4F3A] mt-1 truncate flex items-center gap-1">
-                            <MapPin size={12} className="text-[#E8640C]" />
+                          <p className="font-jakarta text-[12px] text-[#627D98] mt-1 truncate flex items-center gap-1">
+                            <MapPin size={12} className="text-[#2A9D8F]" />
                             <span>{trip.location} · {trip.budget}</span>
                           </p>
                         </div>
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#FFF8F0] z-0 relative pointer-events-none">
-                          <span className="font-mono-dm text-[10px] text-[#B09880]">Saved Details</span>
-                          <ChevronRight size={14} className="text-[#B09880] group-hover:translate-x-1 transition-transform" />
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 z-0 relative pointer-events-none">
+                          <span className="font-mono-dm text-[10px] text-[#627D98]">Saved Details</span>
+                          <ChevronRight size={14} className="text-[#627D98] group-hover:translate-x-1 group-hover:text-[#2A9D8F] transition-all" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-8 text-center shadow-[0_4px_24px_rgba(30,20,16,0.03)]">
-                    <p className="font-jakarta text-[13px] text-[#6B4F3A]">No previous trips found. Plan your first adventure!</p>
+                  <div className="bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-8 text-center shadow-[0_8px_30px_rgb(240,244,248,0.5)]">
+                    <p className="font-jakarta text-[13px] text-[#627D98]">No previous trips found. Plan your first adventure!</p>
                   </div>
                 )}
               </div>
@@ -146,10 +145,10 @@ const Home = () => {
         </div>
         
         {/* Floating Action Button to plan trip */}
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-24 right-6 z-40">
           <Link
             to="/trips/new"
-            className="flex items-center gap-2 bg-[#E8640C] text-white px-6 py-4 rounded-full font-cabinet font-bold text-[15px] shadow-[0_10px_30px_rgba(232,100,12,0.4)] hover:scale-105 transition-transform"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#2A9D8F] to-[#72D6C4] text-white px-6 py-4 rounded-full font-cabinet font-bold text-[15px] shadow-[0_10px_30px_rgba(42,157,143,0.35)] hover:shadow-[0_14px_40px_rgba(42,157,143,0.45)] hover:scale-105 transition-all duration-300"
           >
             <span>+ Plan a trip</span>
           </Link>
@@ -231,21 +230,21 @@ const L1_Greeting = ({ user }) => {
 
   return (
     <div className="pt-[16px] pb-[24px]">
-      <p className="font-jakarta text-[14px] text-[#6B4F3A]">{getGreeting()}</p>
-      <h1 className="font-display font-bold text-[32px] text-[#1E1410] leading-none mt-1">{firstName}</h1>
+      <p className="font-jakarta text-[14px] text-[#627D98]">{getGreeting()}</p>
+      <h1 className="font-display font-bold text-[32px] text-[#102A43] leading-none mt-1">{firstName}</h1>
       <div className="mt-[12px] flex items-center gap-2">
-        <span className="flex items-center gap-1.5 font-mono-dm text-[11px] text-[#6B4F3A]">
-          <MapPin size={13} className={loading ? "animate-pulse text-[#B09880]" : "text-[#E8640C]"} /> 
+        <span className="flex items-center gap-1.5 font-mono-dm text-[11px] text-[#243B53]">
+          <MapPin size={13} className={loading ? "animate-pulse text-[#627D98]" : "text-[#2A9D8F]"} /> 
           {loading ? "Detecting location..." : `${userLocation.city}, ${userLocation.region}`}
         </span>
-        <span className="w-px h-[10px] bg-[#E8D5B7]" />
-        <span className="flex items-center gap-1.5 font-mono-dm text-[11px] text-[#B09880]">
+        <span className="w-px h-[10px] bg-slate-200" />
+        <span className="flex items-center gap-1.5 font-mono-dm text-[11px] text-[#627D98]">
           <Calendar size={13} /> {formattedDate}
         </span>
       </div>
       <div className="mt-[16px] flex items-center gap-1.5">
-        <Sun size={18} className={loading ? "animate-spin text-[#E8D5B7]" : "text-[#F0A500]"} fill="currentColor" />
-        <span className="font-cabinet font-medium text-[14px] text-[#6B4F3A]">
+        <Sun size={18} className={loading ? "animate-spin text-slate-300" : "text-[#F4A261]"} fill="currentColor" />
+        <span className="font-cabinet font-medium text-[14px] text-[#243B53]">
           {loading ? "--°C" : `${weather.temp}°C · ${weather.condition}`}
         </span>
       </div>
@@ -254,53 +253,53 @@ const L1_Greeting = ({ user }) => {
 };
 
 const L2_SafetyCard = () => (
-  <div className="w-full bg-[#FFFFFF] rounded-[20px] p-[20px] border-[1.5px] border-[#E8640C]/35 shadow-[0_4px_16px_rgba(232,100,12,0.10)] border-l-[4px] border-l-[#E8640C] relative">
+  <div className="w-full bg-white/70 backdrop-blur-md rounded-[20px] p-[20px] border-[1.5px] border-[#2A9D8F]/25 shadow-[0_8px_30px_rgb(240,244,248,0.5)] border-l-[4px] border-l-[#2A9D8F] relative">
     <div className="flex justify-between items-center">
-      <p className="font-mono-dm text-[10px] text-[#B09880] uppercase tracking-[2px]">Your Safety Status</p>
-      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#E8640C]" /><span className="font-cabinet font-semibold text-[11px] text-[#E8640C]">Setup Needed</span></div>
+      <p className="font-mono-dm text-[10px] text-[#627D98] uppercase tracking-[2px]">Your Safety Status</p>
+      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F4A261]" /><span className="font-cabinet font-semibold text-[11px] text-[#F4A261]">Setup Needed</span></div>
     </div>
     <div className="mt-[16px] flex items-center gap-3">
-      <Shield size={32} className="text-[#E8640C] shrink-0" strokeWidth={1.5} />
-      <div><h3 className="font-display font-bold text-[18px] text-[#1E1410] leading-tight">Safety Incomplete</h3><p className="font-jakarta text-[12px] text-[#6B4F3A] mt-0.5">Complete setup to activate protection</p></div>
+      <Shield size={32} className="text-[#2A9D8F] shrink-0" strokeWidth={1.5} />
+      <div><h3 className="font-display font-bold text-[18px] text-[#102A43] leading-tight">Safety Incomplete</h3><p className="font-jakarta text-[12px] text-[#627D98] mt-0.5">Complete setup to activate protection</p></div>
     </div>
-    <div className="mt-[14px] w-full h-px bg-[#E8D5B7]" />
+    <div className="mt-[14px] w-full h-px bg-slate-100" />
     <div className="mt-[14px] flex flex-col gap-3">
       {[{done:true,text:'Location access enabled'},{done:true,text:'Emergency contact saved'},{done:false,text:'Request your first guardian'}].map((r,i)=>(
         <div key={i} className="flex items-center justify-between">
-          <div className="flex items-center gap-2">{r.done ? <CheckCircle2 size={16} className="text-[#2D6A4F]" fill="#2D6A4F" color="white"/> : <Circle size={16} className="text-[#E8D5B7]"/>}<span className={`font-jakarta text-[13px] ${r.done?'text-[#1E1410]':'text-[#6B4F3A]'}`}>{r.text}</span></div>
-          <span className={`font-mono-dm text-[10px] ${r.done?'text-[#2D6A4F]':'text-[#B09880]'}`}>{r.done?'Done':'Pending'}</span>
+          <div className="flex items-center gap-2">{r.done ? <CheckCircle2 size={16} className="text-[#52B788]" fill="#52B788" color="white"/> : <Circle size={16} className="text-slate-300"/>}<span className={`font-jakarta text-[13px] ${r.done?'text-[#102A43]':'text-[#627D98]'}`}>{r.text}</span></div>
+          <span className={`font-mono-dm text-[10px] ${r.done?'text-[#52B788]':'text-[#627D98]'}`}>{r.done?'Done':'Pending'}</span>
         </div>))}
     </div>
-    <Link to="/safety" className="mt-[14px] w-full h-[40px] rounded-[10px] bg-[#E8640C] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(232,100,12,0.25)] hover:bg-[#D5570A] transition-colors"><Shield size={14} fill="white" /> Activate Full Safety</Link>
-    <p className="mt-[8px] font-jakarta text-[11px] text-[#B09880] text-center">Takes less than 2 minutes.</p>
+    <Link to="/safety" className="mt-[14px] w-full h-[40px] rounded-[10px] bg-gradient-to-r from-[#2A9D8F] to-[#72D6C4] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(42,157,143,0.25)] hover:shadow-[0_6px_20px_rgba(42,157,143,0.35)] transition-shadow"><Shield size={14} fill="white" /> Activate Full Safety</Link>
+    <p className="mt-[8px] font-jakarta text-[11px] text-[#627D98] text-center">Takes less than 2 minutes.</p>
   </div>
 );
 
 const L3_GuardianNetwork = () => (
-  <div className="mt-[20px] bg-[#FFFFFF] border border-[#E8D5B7] rounded-[16px] p-[16px] shadow-[0_2px_8px_rgba(30,20,16,0.07)]">
+  <div className="mt-[20px] bg-white/70 backdrop-blur-md border border-slate-100 rounded-[16px] p-[16px] shadow-[0_8px_30px_rgb(240,244,248,0.5)]">
     <SectionLabel>Guardian Network</SectionLabel>
     <div className="mt-[16px] flex flex-col items-center text-center">
-      <Users size={32} className="text-[#E8D5B7]" />
-      <h3 className="mt-[10px] font-cabinet font-semibold text-[13px] text-[#6B4F3A]">No guardians assigned yet</h3>
-      <p className="mt-[6px] font-jakarta text-[12px] text-[#B09880] leading-relaxed max-w-[220px]">Guardians are local verified residents who assist you when you need help.</p>
+      <Users size={32} className="text-slate-300" />
+      <h3 className="mt-[10px] font-cabinet font-semibold text-[13px] text-[#243B53]">No guardians assigned yet</h3>
+      <p className="mt-[6px] font-jakarta text-[12px] text-[#627D98] leading-relaxed max-w-[220px]">Guardians are local verified residents who assist you when you need help.</p>
     </div>
     <div className="mt-[12px] flex flex-col items-center gap-2 w-full">
       <div className="flex justify-center gap-2 flex-wrap w-full">
-        <div className="h-[28px] bg-[#FEF3E2] border border-[#E8D5B7] rounded-[100px] px-[10px] flex items-center gap-1.5 whitespace-nowrap"><Clock size={12} className="text-[#2D6A4F] shrink-0" /><span className="font-jakarta text-[11px] text-[#6B4F3A]">Avg. 4 min response</span></div>
-        <div className="h-[28px] bg-[#FEF3E2] border border-[#E8D5B7] rounded-[100px] px-[10px] flex items-center gap-1.5 whitespace-nowrap"><Users size={12} className="text-[#C0392B] shrink-0" /><span className="font-jakarta text-[11px] text-[#6B4F3A]">14 women guardians</span></div>
+        <div className="h-[28px] bg-[#72D6C4]/10 border border-[#72D6C4]/20 rounded-[100px] px-[10px] flex items-center gap-1.5 whitespace-nowrap"><Clock size={12} className="text-[#52B788] shrink-0" /><span className="font-jakarta text-[11px] text-[#243B53]">Avg. 4 min response</span></div>
+        <div className="h-[28px] bg-[#FFE1D2]/40 border border-[#F4A261]/20 rounded-[100px] px-[10px] flex items-center gap-1.5 whitespace-nowrap"><Users size={12} className="text-[#C0392B] shrink-0" /><span className="font-jakarta text-[11px] text-[#243B53]">14 women guardians</span></div>
       </div>
     </div>
-    <Link to="/safety/guardians" className="mt-[16px] w-full h-[40px] rounded-[10px] bg-white border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] hover:bg-[#E8640C] hover:text-white transition-colors flex items-center justify-center">Find a Guardian</Link>
+    <Link to="/safety/guardians" className="mt-[16px] w-full h-[40px] rounded-[10px] bg-white border-[1.5px] border-[#2A9D8F] text-[#2A9D8F] font-cabinet font-semibold text-[13px] hover:bg-[#2A9D8F] hover:text-white transition-colors flex items-center justify-center">Find a Guardian</Link>
   </div>
 );
 
 const L4_RecentAlerts = () => (
-  <div className="mt-[20px] bg-[#FEF3E2] border border-[#E8D5B7] rounded-[12px] p-[14px]">
+  <div className="mt-[20px] bg-[#72D6C4]/5 border border-[#72D6C4]/15 rounded-[12px] p-[14px]">
     <SectionLabel>Recent Alerts</SectionLabel>
     <div className="mt-[10px] flex flex-col items-center text-center py-2">
-      <Bell size={20} className="text-[#E8D5B7]" />
-      <h3 className="mt-[8px] font-cabinet font-medium text-[13px] text-[#6B4F3A]">No alerts yet</h3>
-      <p className="mt-[4px] font-jakarta text-[12px] text-[#B09880]">Safety alerts for your location will appear here.</p>
+      <Bell size={20} className="text-slate-300" />
+      <h3 className="mt-[8px] font-cabinet font-medium text-[13px] text-[#243B53]">No alerts yet</h3>
+      <p className="mt-[4px] font-jakarta text-[12px] text-[#627D98]">Safety alerts for your location will appear here.</p>
     </div>
   </div>
 );
@@ -308,11 +307,11 @@ const L4_RecentAlerts = () => (
 /* ── CENTER COLUMN ── */
 const C1_WelcomeHero = () => {
   const slideshowImages = [
-    { url: PHOTOS.jaisalmer, title: "Jaisalmer Fort, Rajasthan", vibe: "Desert Romance" },
-    { url: PHOTOS.varanasi, title: "Ganga Ghats, Varanasi", vibe: "Spiritual Awakening" },
-    { url: PHOTOS.meghalaya, title: "Double Decker Bridge, Meghalaya", vibe: "Nature Trails" },
-    { url: PHOTOS.ladakh, title: "Pangong Lake, Ladakh", vibe: "Adventure Peak" },
-    { url: PHOTOS.kerala, title: "Munnar Tea Estates, Kerala", vibe: "Serene Backwaters" }
+    { url: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1600&q=80", title: "Taj Mahal, Agra", vibe: "Heritage Wonder" },
+    { url: "https://images.unsplash.com/photo-1593693397690-362cb9666c6b?auto=format&fit=crop&w=1600&q=80", title: "Alleppey Backwaters, Kerala", vibe: "Tropical Serenity" },
+    { url: "https://images.unsplash.com/photo-1477587458883-47135fb640e5?auto=format&fit=crop&w=1600&q=80", title: "Amer Fort, Jaipur", vibe: "Royal Majesty" },
+    { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80", title: "Himalayas, Ladakh", vibe: "Mountain Adventure" },
+    { url: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1600&q=80", title: "Ganga Aarti, Varanasi", vibe: "Spiritual Light" }
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -325,75 +324,78 @@ const C1_WelcomeHero = () => {
   }, []);
 
   return (
-    <div className="w-full h-[420px] rounded-[28px] overflow-hidden relative shadow-[0_20px_50px_rgba(30,20,16,0.18)] group bg-[#140C08]">
-      {/* Dynamic Background Slideshow with Cross-Fade Effect */}
-      {slideshowImages.map((slide, idx) => (
-        <div
-          key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            idx === activeIndex ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-        >
-          <img
-            src={slide.url}
-            alt={slide.title}
-            className={`absolute inset-0 w-full h-full object-cover transform transition-transform duration-[4500ms] ease-out ${
-              idx === activeIndex ? "scale-105" : "scale-100"
-            }`}
-          />
-          {/* Subtle overlay helper for readability */}
-          <div className="absolute top-[24px] left-[24px] bg-black/30 backdrop-blur-md rounded-full px-[14px] py-[6px] border border-white/10 shadow-sm z-25 flex items-center gap-1.5">
-            <MapPin size={12} className="text-[#F0A500]" />
-            <span className="font-mono-dm text-[10px] font-bold text-[#FEF3E2] uppercase tracking-wider">
-              {slide.title}
-            </span>
+    <div className="w-full h-[320px] sm:h-[360px] rounded-[24px] overflow-hidden relative shadow-[0_16px_36px_rgba(16,42,67,0.12)] group bg-[#102A43]">
+      {/* JioHotstar-style horizontal sliding layout */}
+      <div 
+        className="absolute inset-0 flex transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ transform: `translateX(-${activeIndex * 100}%)`, width: `${slideshowImages.length * 100}%` }}
+      >
+        {slideshowImages.map((slide, idx) => (
+          <div key={idx} className="relative w-full h-full shrink-0">
+            <img
+              src={slide.url}
+              alt={slide.title}
+              className="absolute inset-0 w-full h-full object-cover transform scale-100 group-hover:scale-[1.01] transition-transform duration-[6000ms] ease-out"
+            />
+            {/* Subtle destination badge */}
+            <div className="absolute top-[20px] left-[20px] bg-black/45 backdrop-blur-md rounded-full px-[12px] py-[5px] border border-white/15 shadow-md z-25 flex items-center gap-2">
+              <MapPin size={11} className="text-[#72D6C4]" />
+              <span className="font-mono-dm text-[9.5px] font-bold text-white uppercase tracking-wider">
+                {slide.title}
+              </span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      {/* Premium Cinematic Ambient Bright-Contrast Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(20,12,8,0.75)] via-[rgba(20,12,8,0.25)] to-transparent" />
+      {/* Modern gradient overlay shading for content contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(16,42,67,0.88)] via-[rgba(16,42,67,0.3)] to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[rgba(16,42,67,0.35)] via-transparent to-transparent pointer-events-none z-10" />
 
-      {/* Hero Content */}
-      <div className="absolute inset-x-0 bottom-0 p-[32px] md:p-[40px] flex flex-col justify-end h-full z-20">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-2 h-2 rounded-full bg-[#E8640C] animate-ping" />
-          <p className="font-mono-dm text-[11px] text-[#F0A500] uppercase tracking-[3px] font-bold">
-            Start Your Journey
+      {/* Hero Content (Overlaid above the slider track) */}
+      <div className="absolute inset-x-4 bottom-4 md:inset-x-6 md:bottom-6 z-20 pointer-events-none">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-[20px] p-5 md:p-6 pointer-events-auto max-w-[680px] shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#72D6C4] animate-pulse" />
+            <p className="font-mono-dm text-[9.5px] text-white/95 uppercase tracking-[3px] font-extrabold">
+              Discover. Plan. Travel.
+            </p>
+          </div>
+          <h2 className="font-display font-extrabold text-[24px] md:text-[34px] text-white leading-[1.15] drop-shadow-md">
+            Where in India are <span className="text-[#72D6C4]">you</span> going?
+          </h2>
+          <p className="font-jakarta text-[12px] md:text-[13px] text-white/85 mt-2 max-w-[560px] leading-relaxed drop-shadow-sm font-light">
+            Plan personalized, safe, and memorable journeys across India. Fully customized AI-powered day itineraries enriched with verified safety scores and local helper networks.
           </p>
-        </div>
-        <h2 className="font-display font-bold text-[32px] md:text-[42px] text-white leading-tight max-w-[650px] drop-shadow-md">
-          Where in India are you going?
-        </h2>
-        <p className="font-jakarta text-[14px] text-white/85 mt-2 max-w-[550px] leading-relaxed drop-shadow-md">
-          Plan your first safe trip across India. Fully customized AI-powered day itineraries enriched with verified safety scores and local helper networks.
-        </p>
-        
-        <div className="mt-[28px] flex items-center gap-[20px] flex-wrap">
-          <Link
-            to="/trips/new"
-            className="h-[52px] rounded-full bg-[#E8640C] hover:bg-[#F0731E] text-white px-[32px] font-cabinet font-bold text-[15px] flex items-center gap-2.5 shadow-[0_8px_30px_rgba(232,100,12,0.45)] hover:scale-105 transition-all duration-300"
-          >
-            Plan My First AI Trip <ArrowRight size={16} />
-          </Link>
           
-          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
-            <Shield size={16} className="text-[#4ADE80]" />
-            <span className="font-mono-dm text-[11px] text-white/90">
-              Emergency SOS & Guardians Active
-            </span>
+          <div className="mt-[20px] flex items-center gap-[16px] flex-wrap">
+            <Link
+              to="/trips/new"
+              className="h-[44px] rounded-full bg-gradient-to-r from-[#2A9D8F] to-[#72D6C4] hover:from-[#227C70] hover:to-[#5CC4B0] text-white px-[24px] font-cabinet font-bold text-[13.5px] flex items-center gap-2 shadow-[0_8px_24px_rgba(42,157,143,0.4)] hover:scale-105 transition-all duration-300 pointer-events-auto"
+            >
+              Plan My Trip <ArrowRight size={15} />
+            </Link>
+            
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 rounded-full px-4 py-2">
+              <Shield size={14} className="text-[#52B788]" />
+              <span className="font-mono-dm text-[10px] text-white font-medium">
+                Emergency SOS & Guardians Active
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Slideshow Indicators */}
-      <div className="absolute bottom-[32px] right-[40px] flex items-center gap-2 z-20">
+      {/* JioHotstar-style indicator indicators on bottom-right */}
+      <div className="absolute bottom-[24px] right-[32px] flex items-center gap-2 z-20">
         {slideshowImages.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setActiveIndex(idx)}
-            className={`h-[6px] rounded-full transition-all duration-300 ${
-              idx === activeIndex ? "w-[32px] bg-[#E8640C]" : "w-[8px] bg-white/40 hover:bg-white/85"
+            className={`h-[5px] rounded-full transition-all duration-500 ${
+              idx === activeIndex 
+                ? "w-[30px] bg-[#72D6C4] shadow-[0_0_8px_rgba(114,214,196,0.6)]" 
+                : "w-[8px] bg-white/30 hover:bg-white/70"
             }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
@@ -407,19 +409,19 @@ const C2_HowItWorks = () => (
   <div className="mt-[32px]">
     <div className="flex items-center justify-between mb-4">
       <SectionLabel>Your Travel Journey</SectionLabel>
-      <span className="text-[11px] font-mono-dm text-[#B09880]">Guided Steps</span>
+      <span className="text-[11px] font-mono-dm text-[#627D98]">Guided Steps</span>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
       {[
-        { num:'01', title:'Custom AI Itinerary', desc:'Provide destination and interests. Our system crafts details powered by Gemini.', icon:MapPin, color:'#E8640C', bg:'#FFF3EB' },
-        { num:'02', title:'Verified Safety Net', desc:'Instant access to verified local guardians and automatic SOS alerting features.', icon:Shield, color:'#2D6A4F', bg:'#EBF5EE' },
-        { num:'03', title:'Explore Safely', desc:'Access verified medical care, explore offbeat gems, and navigate with confidence.', icon:Compass, color:'#F0A500', bg:'#FFFBEB' }
+        { num:'01', title:'Custom AI Itinerary', desc:'Provide destination and interests. Our system crafts details powered by Gemini.', icon:MapPin, color:'#2A9D8F', bg:'#72D6C4' },
+        { num:'02', title:'Verified Safety Net', desc:'Instant access to verified local guardians and automatic SOS alerting features.', icon:Shield, color:'#52B788', bg:'#52B788' },
+        { num:'03', title:'Explore Safely', desc:'Access verified medical care, explore offbeat gems, and navigate with confidence.', icon:Compass, color:'#F4A261', bg:'#F4A261' }
       ].map((step, i) => (
-        <div key={i} className="bg-white border border-[#E8D5B7]/40 rounded-[20px] p-[24px] shadow-[0_4px_20px_rgba(30,20,16,0.03)] relative transition-all duration-300 hover:shadow-[0_8px_30px_rgba(30,20,16,0.06)] hover:border-[#E8640C]/20 group">
-          <span className="absolute top-[20px] right-[24px] font-display font-bold text-[28px] text-[#E8D5B7]/40 leading-none group-hover:text-[#E8640C]/20 transition-colors">{step.num}</span>
-          <div className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: step.bg }}><step.icon size={22} color={step.color} /></div>
-          <h4 className="mt-[16px] font-cabinet font-bold text-[16px] text-[#1E1410]">{step.title}</h4>
-          <p className="mt-[8px] font-jakarta text-[13px] text-[#6B4F3A] leading-relaxed">{step.desc}</p>
+        <div key={i} className="bg-white/70 backdrop-blur-md border border-slate-100 rounded-[20px] p-[24px] shadow-[0_8px_30px_rgb(240,244,248,0.5)] relative transition-all duration-300 hover:shadow-[0_12px_36px_rgba(42,157,143,0.08)] hover:border-[#2A9D8F]/20 group">
+          <span className="absolute top-[20px] right-[24px] font-display font-bold text-[28px] text-slate-200/50 leading-none group-hover:text-[#2A9D8F]/15 transition-colors">{step.num}</span>
+          <div className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: `${step.bg}15` }}><step.icon size={22} color={step.color} /></div>
+          <h4 className="mt-[16px] font-cabinet font-bold text-[16px] text-[#102A43]">{step.title}</h4>
+          <p className="mt-[8px] font-jakarta text-[13px] text-[#627D98] leading-relaxed">{step.desc}</p>
         </div>
       ))}
     </div>
@@ -427,51 +429,51 @@ const C2_HowItWorks = () => (
 );
 
 const C3_SafetySnapshot = () => (
-  <div className="mt-[32px] w-full bg-[#FFFFFF] border border-[#E8D5B7]/40 rounded-[24px] p-[28px] flex shadow-[0_4px_24px_rgba(30,20,16,0.03)] flex-col sm:flex-row gap-8">
+  <div className="mt-[32px] w-full bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-[28px] flex shadow-[0_8px_30px_rgb(240,244,248,0.5)] flex-col sm:flex-row gap-8">
     <div className="w-full sm:w-[55%] flex flex-col justify-between">
       <div>
         <SectionLabel>Live Location Security</SectionLabel>
-        <h3 className="font-cabinet font-bold text-[22px] text-[#1E1410] mt-1">Udaipur, Rajasthan</h3>
+        <h3 className="font-cabinet font-bold text-[22px] text-[#102A43] mt-1">Udaipur, Rajasthan</h3>
         
         <div className="mt-[16px] flex items-baseline gap-2">
-          <span className="font-display font-bold text-[36px] text-[#2D6A4F] leading-none">87</span>
-          <span className="font-mono-dm text-[14px] text-[#B09880]">/ 100 Safety Score</span>
+          <span className="font-display font-bold text-[36px] text-[#52B788] leading-none">87</span>
+          <span className="font-mono-dm text-[14px] text-[#627D98]">/ 100 Safety Score</span>
         </div>
-        <div className="mt-[12px] w-full h-[6px] bg-[#E8D5B7]/30 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-[#4ADE80] to-[#2D6A4F] rounded-full w-[87%]" />
+        <div className="mt-[12px] w-full h-[6px] bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[#52B788] to-[#2A9D8F] rounded-full w-[87%]" />
         </div>
 
         <div className="mt-[20px] flex flex-col gap-[12px]">
           {[
-            {color:"#2D6A4F",name:"Tourist Safety Rating",stat:"High (Safe)"},
-            {color:"#2D6A4F",name:"Healthcare Facilities",stat:"Hospital 1.2 km"},
-            {color:"#F0A500",name:"Peak Hour Crowds",stat:"Moderate"}
+            {color:"#52B788",name:"Tourist Safety Rating",stat:"High (Safe)"},
+            {color:"#2A9D8F",name:"Healthcare Facilities",stat:"Hospital 1.2 km"},
+            {color:"#F4A261",name:"Peak Hour Crowds",stat:"Moderate"}
           ].map((c,i)=>(
             <div key={i} className="flex items-center justify-between text-[13px]">
               <div className="flex items-center gap-2">
                 <span className="w-[8px] h-[8px] rounded-full" style={{backgroundColor:c.color}}/>
-                <span className="font-cabinet font-medium text-[#1E1410]">{c.name}</span>
+                <span className="font-cabinet font-medium text-[#102A43]">{c.name}</span>
               </div>
-              <span className="font-jakarta text-[#6B4F3A] font-medium">{c.stat}</span>
+              <span className="font-jakarta text-[#627D98] font-medium">{c.stat}</span>
             </div>
           ))}
         </div>
       </div>
       
-      <div className="mt-[24px] pt-4 border-t border-[#E8D5B7]/30">
-        <Link to="/safety" className="flex items-center gap-1 group text-[#E8640C] font-cabinet font-bold text-[13px]">
+      <div className="mt-[24px] pt-4 border-t border-slate-100">
+        <Link to="/safety" className="flex items-center gap-1 group text-[#2A9D8F] font-cabinet font-bold text-[13px]">
           <span>View Safety Analytics & Reports</span>
           <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform"/>
         </Link>
       </div>
     </div>
     
-    <div className="w-full sm:w-[45%] h-[200px] sm:h-auto relative rounded-[20px] overflow-hidden border border-[#E8D5B7]/40 shadow-inner group">
+    <div className="w-full sm:w-[45%] h-[200px] sm:h-auto relative rounded-[20px] overflow-hidden border border-slate-100 shadow-inner group">
       <img src={PHOTOS.mapThumb} alt="Interactive safety map showing Udaipur landmarks" loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-      <div className="absolute inset-0 bg-[#E8640C]/5" />
+      <div className="absolute inset-0 bg-[#2A9D8F]/5" />
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-[50px] h-[50px] rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-          <MapPin size={22} className="text-[#E8640C]" fill="currentColor" />
+          <MapPin size={22} className="text-[#2A9D8F]" fill="currentColor" />
         </div>
       </div>
     </div>
@@ -482,10 +484,10 @@ const C3_SafetySnapshot = () => (
 
 const C5_Trending = () => {
   const trending = [
+    { img: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=80", title: "Manali Hills", loc: "Himachal Pradesh", tags: ["Peaks", "Valleys"] },
     { img: PHOTOS.meghalaya, title: "Meghalaya Valley", loc: "Northeast India", tags: ["Forests", "Bridges"] },
     { img: PHOTOS.ladakh, title: "Leh-Ladakh Heights", loc: "Himalayan Range", tags: ["Peaks", "Cold Desert"] },
     { img: PHOTOS.kerala, title: "Alleppey Backwaters", loc: "Kerala Coast", tags: ["Houseboats", "Lakes"] },
-    { img: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80", title: "Junagadh Girnar", loc: "Gujarat Hills", tags: ["Temples", "Forest"] },
     { img: PHOTOS.jaisalmer, title: "Jaisalmer Fort", loc: "Rajasthan Desert", tags: ["Dunes", "Culture"] },
     { img: PHOTOS.varanasi, title: "Varanasi Ghats", loc: "Uttar Pradesh", tags: ["Spiritual", "Ganga"] },
     { img: PHOTOS.ranakpur, title: "Ranakpur Temples", loc: "Rajasthan Forest", tags: ["Carvings", "Peace"] },
@@ -516,7 +518,7 @@ const C5_Trending = () => {
     <div className="mt-[32px]">
       <div className="flex justify-between items-center mb-4">
         <SectionLabel>Top 10 Indian Journeys</SectionLabel>
-        <Link to="/explore" className="flex items-center gap-1 group text-[#E8640C] font-cabinet font-bold text-[13px]">
+        <Link to="/explore" className="flex items-center gap-1 group text-[#2A9D8F] font-cabinet font-bold text-[13px]">
           <span>Explore All</span>
           <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform"/>
         </Link>
@@ -537,7 +539,7 @@ const C5_Trending = () => {
             <span 
               className="absolute left-[-42px] bottom-[-15px] font-cabinet font-extrabold text-[120px] leading-none select-none pointer-events-none text-transparent z-10 transition-all duration-300 group-hover:scale-105"
               style={{
-                WebkitTextStroke: '2px rgba(232, 100, 12, 0.45)',
+                WebkitTextStroke: '2px rgba(42, 157, 143, 0.35)',
                 fontFamily: 'Cabinet Grotesk, sans-serif'
               }}
             >
@@ -545,9 +547,9 @@ const C5_Trending = () => {
             </span>
 
             {/* Travel Card */}
-            <div className="w-[280px] sm:w-[310px] h-[210px] rounded-[24px] overflow-hidden relative shadow-[0_8px_24px_rgba(30,20,16,0.06)] group cursor-pointer transition-all duration-300 hover:shadow-[0_16px_36px_rgba(30,20,16,0.12)] border border-[#E8D5B7]/25 z-20">
+            <div className="w-[280px] sm:w-[310px] h-[210px] rounded-[24px] overflow-hidden relative shadow-[0_8px_24px_rgba(16,42,67,0.06)] group cursor-pointer transition-all duration-300 hover:shadow-[0_16px_36px_rgba(42,157,143,0.12)] border border-slate-100 z-20">
               <img src={t.img || t.url} alt={t.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#102A43]/85 via-[#102A43]/25 to-transparent" />
 
               <div className="absolute bottom-[20px] left-[20px] right-[20px]">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/20 border border-white/10 backdrop-blur-md font-mono-dm text-[8px] text-white uppercase tracking-wider mb-1">Ranked #{i+1}</span>
@@ -569,30 +571,30 @@ const C5_Trending = () => {
 
 /* ── RIGHT SIDEBAR ── */
 const R1_Doctors = () => (
-  <div className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[20px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+  <div className="bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-[20px] shadow-[0_8px_30px_rgb(240,244,248,0.5)] w-full">
     <div className="flex justify-between items-center mb-4">
       <SectionLabel>Verified Medical Care</SectionLabel>
-      <Link to="/healthcare" className="font-cabinet font-bold text-[11px] text-[#E8640C] hover:underline">View Map</Link>
+      <Link to="/healthcare" className="font-cabinet font-bold text-[11px] text-[#2A9D8F] hover:underline">View Map</Link>
     </div>
     <div className="flex flex-col gap-[16px]">
       {[
         {img:PHOTOS.doc1,name:'Dr. Kavita Sharma',spec:'General Physician',dist:'0.8 km'},
         {img:PHOTOS.doc2,name:'Dr. Arjun Reddy',spec:'Emergency Response',dist:'1.4 km'}
       ].map((d,i)=>(
-        <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-[16px] hover:bg-[#FFF8F0] transition-colors duration-300">
+        <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-[16px] hover:bg-[#72D6C4]/5 transition-colors duration-300">
           <div className="flex items-center gap-3">
-            <img src={d.img} className="w-[48px] h-[48px] rounded-full object-cover border border-[#E8D5B7] shrink-0 shadow-sm" alt={d.name} />
+            <img src={d.img} className="w-[48px] h-[48px] rounded-full object-cover border border-slate-200 shrink-0 shadow-sm" alt={d.name} />
             <div className="min-w-0">
-              <h4 className="font-cabinet font-bold text-[13px] text-[#1E1410] leading-tight truncate">{d.name}</h4>
-              <p className="font-jakarta text-[12px] text-[#6B4F3A] mt-0.5 truncate">{d.spec}</p>
-              <span className="inline-flex items-center gap-1 text-[#2D6A4F] font-cabinet text-[10px] font-bold mt-1 bg-[#2D6A4F]/10 px-2 py-0.5 rounded-full">
-                <CheckCircle2 size={10} className="text-[#2D6A4F]" /> Verified
+              <h4 className="font-cabinet font-bold text-[13px] text-[#102A43] leading-tight truncate">{d.name}</h4>
+              <p className="font-jakarta text-[12px] text-[#627D98] mt-0.5 truncate">{d.spec}</p>
+              <span className="inline-flex items-center gap-1 text-[#52B788] font-cabinet text-[10px] font-bold mt-1 bg-[#52B788]/10 px-2 py-0.5 rounded-full">
+                <CheckCircle2 size={10} className="text-[#52B788]" /> Verified
               </span>
             </div>
           </div>
           <div className="text-right flex flex-col items-end gap-1">
-            <span className="font-mono-dm text-[10px] text-[#B09880]">{d.dist}</span>
-            <Link to="/healthcare" className="px-3 py-1 bg-[#E8640C] text-white font-cabinet font-bold text-[10px] rounded-full hover:bg-[#F0731E] transition-colors shadow-sm">Book</Link>
+            <span className="font-mono-dm text-[10px] text-[#627D98]">{d.dist}</span>
+            <Link to="/healthcare" className="px-3 py-1 bg-gradient-to-r from-[#2A9D8F] to-[#72D6C4] text-white font-cabinet font-bold text-[10px] rounded-full hover:shadow-md transition-shadow">Book</Link>
           </div>
         </div>
       ))}
@@ -601,18 +603,18 @@ const R1_Doctors = () => (
 );
 
 const R2_TravelProfile = ({ user }) => (
-  <div className="mt-[20px] bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[24px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+  <div className="mt-[20px] bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-[24px] shadow-[0_8px_30px_rgb(240,244,248,0.5)] w-full">
     <div className="flex items-center gap-3">
-      <div className="w-[60px] h-[60px] rounded-full bg-[#FFF8F0] border-2 border-[#E8D5B7] shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
-        <span className="font-display font-bold text-[26px] text-[#E8640C]">{(user?.fullName || user?.name || 'T')[0]}</span>
+      <div className="w-[60px] h-[60px] rounded-full bg-[#72D6C4]/10 border-2 border-[#72D6C4]/30 shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
+        <span className="font-display font-bold text-[26px] text-[#2A9D8F]">{(user?.fullName || user?.name || 'T')[0]}</span>
       </div>
       <div className="min-w-0">
-        <h3 className="font-cabinet font-bold text-[16px] text-[#1E1410] truncate">{user?.fullName || user?.name || 'Traveler'}</h3>
-        <p className="font-mono-dm text-[11px] text-[#6B4F3A] mt-0.5">Verified Solo Traveler</p>
-        <p className="font-jakarta text-[11px] text-[#B09880] mt-0.5 truncate">{user?.email}</p>
+        <h3 className="font-cabinet font-bold text-[16px] text-[#102A43] truncate">{user?.fullName || user?.name || 'Traveler'}</h3>
+        <p className="font-mono-dm text-[11px] text-[#627D98] mt-0.5">Verified Solo Traveler</p>
+        <p className="font-jakarta text-[11px] text-[#627D98] mt-0.5 truncate">{user?.email}</p>
       </div>
     </div>
-    <div className="w-full h-px bg-[#E8D5B7]/30 my-[20px]" />
+    <div className="w-full h-px bg-slate-100 my-[20px]" />
     <div className="grid grid-cols-2 gap-[12px]">
       {[
         {val:"0",label:"Trips Started"},
@@ -620,9 +622,9 @@ const R2_TravelProfile = ({ user }) => (
         {val:"0",label:"Guardians"},
         {val:"0",label:"Total Reviews"}
       ].map((s,i) => (
-        <div key={i} className="bg-[#FFF8F0] rounded-[16px] p-[12px] text-center border border-[#E8D5B7]/20">
-          <p className="font-display font-bold text-[22px] text-[#E8640C] leading-none">{s.val}</p>
-          <p className="font-mono-dm text-[9px] text-[#B09880] uppercase mt-1 tracking-wider">{s.label}</p>
+        <div key={i} className="bg-[#72D6C4]/5 rounded-[16px] p-[12px] text-center border border-[#72D6C4]/10">
+          <p className="font-display font-bold text-[22px] text-[#2A9D8F] leading-none">{s.val}</p>
+          <p className="font-mono-dm text-[9px] text-[#627D98] uppercase mt-1 tracking-wider">{s.label}</p>
         </div>
       ))}
     </div>
@@ -630,14 +632,14 @@ const R2_TravelProfile = ({ user }) => (
 );
 
 const R3_Notifications = () => (
-  <div className="mt-[20px] bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[20px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+  <div className="mt-[20px] bg-white/70 backdrop-blur-md border border-slate-100 rounded-[24px] p-[20px] shadow-[0_8px_30px_rgb(240,244,248,0.5)] w-full">
     <SectionLabel>Live Alert Center</SectionLabel>
     <div className="mt-[16px] flex flex-col items-center text-center py-4">
-      <div className="w-[44px] h-[44px] rounded-full bg-[#FFF8F0] flex items-center justify-center mb-3">
-        <Bell size={20} className="text-[#B09880]" />
+      <div className="w-[44px] h-[44px] rounded-full bg-[#72D6C4]/10 flex items-center justify-center mb-3">
+        <Bell size={20} className="text-[#627D98]" />
       </div>
-      <h3 className="font-cabinet font-bold text-[13px] text-[#1E1410]">All Quiet for Now</h3>
-      <p className="mt-[6px] font-jakarta text-[12px] text-[#B09880] max-w-[200px]">Real-time safety signals and chat messages will populate here.</p>
+      <h3 className="font-cabinet font-bold text-[13px] text-[#102A43]">All Quiet for Now</h3>
+      <p className="mt-[6px] font-jakarta text-[12px] text-[#627D98] max-w-[200px]">Real-time safety signals and chat messages will populate here.</p>
     </div>
   </div>
 );

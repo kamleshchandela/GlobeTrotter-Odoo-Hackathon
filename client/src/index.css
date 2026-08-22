@@ -8,54 +8,54 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* My Itinerary — warm earthy India palette (HSL) */
-    --background: 35 100% 97%;          /* Warm Cream #FFF8F0 */
-    --foreground: 18 20% 9%;            /* Charcoal Brown #1E1410 */
+    /* My Itinerary — Premium Teal, Coral, and Navy palette (HSL) */
+    --background: 204 45% 98%;          /* Soft White #F7FAFC */
+    --foreground: 211 40% 23%;          /* Dark Text #243B53 */
 
     --card: 0 0% 100%;
-    --card-foreground: 18 20% 9%;
+    --card-foreground: 211 40% 23%;
 
-    --popover: 35 100% 97%;
-    --popover-foreground: 18 20% 9%;
+    --popover: 204 45% 98%;
+    --popover-foreground: 211 40% 23%;
 
-    --primary: 22 88% 48%;              /* Saffron Orange #E8640C */
-    --primary-foreground: 35 100% 97%;
+    --primary: 172 54% 39%;              /* Primary Teal #2A9D8F */
+    --primary-foreground: 204 45% 98%;
 
-    --secondary: 36 92% 94%;            /* Soft Ivory #FEF3E2 */
-    --secondary-foreground: 18 20% 9%;
+    --secondary: 19 100% 91%;            /* Soft Peach #FFE1D2 */
+    --secondary-foreground: 209 61% 16%;
 
-    --muted: 36 92% 94%;
-    --muted-foreground: 25 31% 32%;     /* Warm Taupe #6B4F3A */
+    --muted: 210 24% 49%;
+    --muted-foreground: 210 24% 49%;     /* Slate #627D98 */
 
-    --accent: 41 100% 47%;              /* Turmeric Gold #F0A500 */
-    --accent-foreground: 18 20% 9%;
+    --accent: 27 87% 67%;              /* Coral Accent #F4A261 */
+    --accent-foreground: 209 61% 16%;
 
-    --destructive: 6 64% 46%;           /* Sindoor Red #C0392B */
-    --destructive-foreground: 35 100% 97%;
+    --destructive: 6 64% 46%;
+    --destructive-foreground: 204 45% 98%;
 
-    --border: 33 56% 81%;               /* Pale Sand #E8D5B7 */
-    --input: 33 56% 81%;
-    --ring: 22 88% 48%;
+    --border: 210 20% 88%;               /* Soft Slate border */
+    --input: 210 20% 88%;
+    --ring: 172 54% 39%;
 
     --radius: 1rem;
 
-    /* Brand-specific tokens */
-    --cream: 35 100% 97%;
-    --ivory: 36 92% 94%;
-    --saffron: 22 88% 48%;
-    --turmeric: 41 100% 47%;
-    --charcoal: 18 20% 9%;
-    --taupe: 25 31% 32%;
-    --banyan: 152 41% 30%;              /* Banyan Green #2D6A4F */
-    --sindoor: 6 64% 46%;               /* Sindoor Red #C0392B */
-    --sand: 33 56% 81%;
-    --haldi: 45 100% 70%;               /* Haldi Yellow #FFD166 */
+    /* Brand-specific tokens (Mapped to user palette to update whole application theme) */
+    --cream: 204 45% 98%;               /* Soft White */
+    --ivory: 204 45% 98%;
+    --saffron: 172 54% 39%;             /* Mapped to Primary Teal */
+    --turmeric: 27 87% 67%;             /* Mapped to Coral Accent */
+    --charcoal: 209 61% 16%;            /* Mapped to Dark Navy */
+    --taupe: 210 24% 49%;               /* Mapped to Slate */
+    --banyan: 152 43% 52%;              /* Mapped to Success Green */
+    --sindoor: 6 64% 46%;
+    --sand: 210 20% 88%;                /* Soft Slate */
+    --haldi: 41 100% 76%;
 
-    --shadow-saffron: 0 20px 60px -20px hsl(22 88% 48% / 0.35);
-    --shadow-warm: 0 12px 40px -16px hsl(22 88% 48% / 0.18);
-    --shadow-soft: 0 6px 24px -10px hsl(25 31% 32% / 0.18);
-    --gradient-saffron: linear-gradient(135deg, hsl(22 88% 48%), hsl(41 100% 47%));
-    --gradient-warm-blob: radial-gradient(circle at 30% 30%, hsl(45 100% 70% / 0.5), transparent 60%);
+    --shadow-saffron: 0 20px 60px -20px hsl(172 54% 39% / 0.25);
+    --shadow-warm: 0 12px 40px -16px hsl(172 54% 39% / 0.15);
+    --shadow-soft: 0 6px 24px -10px hsl(210 24% 49% / 0.15);
+    --gradient-saffron: linear-gradient(135deg, hsl(172 54% 39%), hsl(169 53% 64%));
+    --gradient-warm-blob: radial-gradient(circle at 30% 30%, hsl(203 81% 76% / 0.3), transparent 60%);
 
     --sidebar-background: 0 0% 98%;
 
@@ -119,22 +119,22 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    @apply bg-background text-foreground pb-[120px];
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Clash Display', 'Playfair Display', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
-  .font-display { font-family: 'Clash Display', 'Playfair Display', Georgia, serif; }
-  .font-cabinet { font-family: 'Cabinet Grotesk', 'Plus Jakarta Sans', sans-serif; }
-  .font-jakarta { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+  .font-display { font-family: 'Playfair Display', Georgia, serif; }
+  .font-cabinet { font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif; }
+  .font-jakarta { font-family: 'Outfit', system-ui, sans-serif; }
   .font-mono-dm { font-family: 'DM Mono', ui-monospace, monospace; }
   .font-serif-display { font-family: 'Playfair Display', Georgia, serif; }
   .font-devanagari { font-family: 'Noto Serif Devanagari', serif; }
@@ -196,6 +196,40 @@ All colors MUST be HSL.
     0% { offset-distance: 0%; }
     100% { offset-distance: 100%; }
   }
+
+  /* Aurora drift — physically moves blobs in a figure-8 path */
+  @keyframes aurora-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -10px) scale(1.15); }
+    50% { transform: translate(-10px, 12px) scale(0.95); }
+    75% { transform: translate(-25px, -8px) scale(1.1); }
+  }
+  @keyframes aurora-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1.05); }
+    33% { transform: translate(-20px, 14px) scale(0.9); }
+    66% { transform: translate(22px, -6px) scale(1.15); }
+  }
+  @keyframes aurora-drift-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    20% { transform: translate(18px, 10px) scale(1.1); }
+    50% { transform: translate(-15px, -12px) scale(0.92); }
+    80% { transform: translate(10px, 6px) scale(1.08); }
+  }
+  .animate-aurora-1 { animation: aurora-drift-1 6s ease-in-out infinite; }
+  .animate-aurora-2 { animation: aurora-drift-2 8s ease-in-out infinite; }
+  .animate-aurora-3 { animation: aurora-drift-3 10s ease-in-out infinite; }
+
+  /* Smooth fade-up entrance for cards */
+  @keyframes fade-up-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up { animation: fade-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-fade-up-d1 { animation: fade-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
+  .animate-fade-up-d2 { animation: fade-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
+  .animate-fade-up-d3 { animation: fade-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
+  .animate-fade-up-d4 { animation: fade-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both; }
+
   .animate-pulse-ring { animation: pulse-ring 2s infinite; }
   .animate-pulse-ring-red { animation: pulse-ring-red 1.8s infinite; }
   .animate-float { animation: float-y 6s ease-in-out infinite; }
