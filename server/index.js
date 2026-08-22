@@ -57,11 +57,8 @@ app.use((err, req, res, next) => {
 
 async function seedCommunityPosts() {
   try {
-    const postCount = await CommunityPost.countDocuments();
-    if (postCount > 0) {
-      console.log('Community posts already exist, skipping seeding.');
-      return;
-    }
+    // Delete existing community posts to ensure clean, emoji-free database re-seeding
+    await CommunityPost.deleteMany({});
 
     console.log('Seeding initial community posts...');
 
@@ -81,7 +78,7 @@ async function seedCommunityPosts() {
         type: 'trip',
         author: authorUser._id,
         authorName: authorUser.fullName,
-        title: 'Japan in 10 Days 🇯🇵',
+        title: 'Japan in 10 Days',
         description: 'A perfect mix of food, culture, and adventure. Visited Tokyo, Kyoto, and Osaka. Highlights include sushi tasting in Tsukiji, bamboo forest in Arashiyama, and street food in Dotonbori.',
         coverImage: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
         tags: ['Japan', 'BudgetTravel', 'Food', 'Culture', 'Trips'],
@@ -104,7 +101,7 @@ async function seedCommunityPosts() {
         type: 'experience',
         author: authorUser._id,
         authorName: 'Priya Sharma',
-        title: 'The perfect evening in Kyoto 🇯🇵',
+        title: 'The perfect evening in Kyoto',
         description: 'If you are visiting Kyoto, don\'t miss the sunset near Yasaka Pagoda in Gion. Walk through the traditional wooden streets and keep an eye out for Geishas heading to dinners. The lighting is magical around 6 PM.',
         coverImage: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
         tags: ['Kyoto', 'Japan', 'Photography', 'Experiences'],
@@ -118,7 +115,7 @@ async function seedCommunityPosts() {
         type: 'activity',
         author: authorUser._id,
         authorName: 'Karan Malhotra',
-        title: 'Paragliding in Manali 🪂',
+        title: 'Paragliding in Manali',
         description: 'Soaring above the Solang Valley was the highlight of my Himachal trip. The view of the snow-capped Himalayan peaks is absolutely breathtaking. Book through verified operators only!',
         coverImage: 'https://images.unsplash.com/photo-1626621331169-5f34be280ed9?auto=format&fit=crop&w=800&q=80',
         tags: ['Adventure', 'Manali', 'Himachal', 'Activities'],
@@ -141,7 +138,7 @@ async function seedCommunityPosts() {
         type: 'destination',
         author: authorUser._id,
         authorName: 'Aisha Rao',
-        title: 'Goa: Beyond the Beaches 🌴',
+        title: 'Goa: Beyond the Beaches',
         description: 'Goa is famous for its beaches, but the real gems are the old Portuguese quarters in Fontainhas, the spice plantations in Ponda, and the local Goan fish curry at small beach shacks.',
         coverImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
         tags: ['Goa', 'India', 'Beach', 'Destinations'],
