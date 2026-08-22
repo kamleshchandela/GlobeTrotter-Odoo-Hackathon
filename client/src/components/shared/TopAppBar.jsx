@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { ArrowLeft, X, Bell, Shield, Search, Menu } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { ArrowLeft, X, Bell, Shield, Search, Menu, Calendar } from "lucide-react";
 import { useState } from "react";
+import { setCalendarOpen } from "../../store/uiSlice";
 
 export default function TopAppBar({
   variant = "logo",
@@ -15,6 +16,7 @@ export default function TopAppBar({
   const { user: authUser } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const handleBack = onBack || (() => navigate(-1));
 
@@ -79,6 +81,14 @@ export default function TopAppBar({
                     <span className="absolute top-2 right-2 w-[8px] h-[8px] rounded-full bg-sindoor border-2 border-cream" />
                   )}
                 </button>
+                {/* Calendar Button next to profile */}
+                <button 
+                  onClick={() => dispatch(setCalendarOpen(true))}
+                  className="relative flex items-center justify-center w-10 h-10 hover:bg-sand/30 rounded-full transition-colors"
+                  title="Open Travel Calendar"
+                >
+                  <Calendar size={18} className="text-charcoal" strokeWidth={1.8} />
+                </button>
                 <Link to="/account" className="hidden sm:flex w-9 h-9 rounded-full bg-ivory border-[2px] border-sand items-center justify-center overflow-hidden hover:border-saffron transition-colors">
                   <span className="font-cabinet font-bold text-[14px] text-taupe uppercase">
                     {(authUser?.fullName || authUser?.name || 'T')[0]}
@@ -104,17 +114,29 @@ export default function TopAppBar({
               { label: 'Community', path: '/community' },
               { label: 'Healthcare', path: '/healthcare' },
               { label: 'Trips', path: '/trips/new' },
+              { label: 'Calendar', action: () => { setIsMobileMenuOpen(false); dispatch(setCalendarOpen(true)); } },
               { label: 'Account', path: '/account' },
-            ].map(({ label, path }) => {
-              const isActive = location.pathname.startsWith(path);
+            ].map((link) => {
+              const isActive = link.path ? location.pathname.startsWith(link.path) : false;
+              if (link.action) {
+                return (
+                  <button
+                    key={link.label}
+                    onClick={link.action}
+                    className="px-6 py-4 border-t border-sand/50 font-cabinet font-medium text-[16px] text-taupe hover:bg-sand/20 text-left w-full"
+                  >
+                    {link.label}
+                  </button>
+                );
+              }
               return (
                 <Link
-                  key={label}
-                  to={path}
+                  key={link.label}
+                  to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`px-6 py-4 border-t border-sand/50 font-cabinet font-medium text-[16px] ${isActive ? 'text-saffron bg-sand/20' : 'text-taupe hover:bg-sand/20'}`}
                 >
-                  {label}
+                  {link.label}
                 </Link>
               );
             })}
