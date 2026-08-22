@@ -282,3 +282,5 @@ export default function LoginPage() {
     </AuthLayout>
   );
 }
+
+// added by Rishikesh

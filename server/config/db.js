@@ -18,3 +18,5 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+
+// added by Rishikesh

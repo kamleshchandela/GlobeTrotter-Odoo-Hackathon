@@ -28,3 +28,5 @@ export const useLocalStorage = (key, initialValue) => {
 
   return [storedValue, setValue];
 };
+
+// added by Rishikesh

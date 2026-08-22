@@ -134,3 +134,5 @@ export default function ForgotPassword() {
     </AuthLayout>
   );
 }
+
+// added by Rishikesh
