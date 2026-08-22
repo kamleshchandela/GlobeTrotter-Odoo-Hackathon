@@ -20,8 +20,12 @@ export const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-10 h-16">
-        <a href="#" className="flex items-center gap-2">
-          <ShieldIcon size={20} className="text-banyan" strokeWidth={2} />
+        <a href="#" className="flex items-center gap-2 group">
+          <img 
+            src="/logo.png" 
+            alt="GlobeTrotter Logo" 
+            className="w-7 h-7 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform" 
+          />
           <span className="font-display font-bold text-[22px] text-charcoal tracking-tight">
             My Itinerary
           </span>

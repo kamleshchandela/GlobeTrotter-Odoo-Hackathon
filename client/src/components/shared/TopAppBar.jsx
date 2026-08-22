@@ -27,8 +27,12 @@ export default function TopAppBar({
         <header className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-[0_1px_3px_rgba(16,42,67,0.04)] transition-all duration-300">
           <div className="flex items-center justify-between h-16 px-8 lg:px-12 max-w-[1440px] mx-auto">
             {/* Logo Section */}
-            <Link to="/home" className="flex items-center gap-2.5 shrink-0">
-              <Shield size={22} className="text-[#E8640C]" strokeWidth={2} />
+            <Link to="/home" className="flex items-center gap-2.5 shrink-0 group">
+              <img 
+                src="/logo.png" 
+                alt="GlobeTrotter Logo" 
+                className="w-8 h-8 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform" 
+              />
               <span className="font-display font-extrabold text-[22px] text-charcoal tracking-tight">
                 My Itinerary
               </span>

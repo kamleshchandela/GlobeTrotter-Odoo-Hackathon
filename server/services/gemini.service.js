@@ -107,73 +107,84 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
   return null;
 };
 
+// Attempt to repair truncated JSON by closing any open structures
+const repairJSON = (str) => {
+  // Remove trailing incomplete key-value pairs and whitespace
+  let s = str.trimEnd();
+  // Close open strings
+  const quoteCount = (s.match(/(?<!\\)"/g) || []).length;
+  if (quoteCount % 2 !== 0) s += '"';
+  // Count open brackets/braces and close them
+  let openBraces = 0, openBrackets = 0;
+  let inString = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === '"' && (i === 0 || s[i - 1] !== '\\')) inString = !inString;
+    if (!inString) {
+      if (ch === '{') openBraces++;
+      else if (ch === '}') openBraces--;
+      else if (ch === '[') openBrackets++;
+      else if (ch === ']') openBrackets--;
+    }
+  }
+  // Remove trailing comma before closing
+  s = s.replace(/,\s*$/, '');
+  while (openBrackets > 0) { s += ']'; openBrackets--; }
+  while (openBraces > 0) { s += '}'; openBraces--; }
+  return s;
+};
+
 export const generateItinerary = async (tripData) => {
   try {
-    const prompt = `
-      Generate a highly detailed, realistic, and rich travel itinerary for India with parameters:
-      - Destination: ${tripData.location}
-      - Duration: ${tripData.duration} days
-      - Budget/Stay Preference: ${tripData.stay}
-      - Transport Mode: ${tripData.transport}
-      - Dietary Preference: ${tripData.dietary}
-      - Interests: ${tripData.interests.join(", ")}
-      - Travel Vibe: ${tripData.vibe}
+    const prompt = `Generate a detailed travel itinerary for India.
+Parameters:
+- Destination: ${tripData.location}
+- Duration: ${tripData.duration} days
+- Budget/Stay: ${tripData.stay}
+- Transport: ${tripData.transport}
+- Dietary: ${tripData.dietary}
+- Interests: ${tripData.interests.join(", ")}
+- Vibe: ${tripData.vibe}
 
-      IMPORTANT REQUIREMENTS FOR MAXIMUM DETAIL:
-      1. Provide 4 to 5 distinct activities for each day.
-      2. For each activity, write an engaging 3-sentence description highlighting history, key discoveries, and insider tips.
-      3. For each day, provide specific food suggestions with famous local restaurant names and signature dishes.
-      4. For each day, include location-specific safety notes.
-      5. Provide an estimated cost breakdown (in ₹) for accommodation, food, transport, and activities, plus total range.
+Rules:
+1. 3 to 4 activities per day (keep descriptions to 1-2 sentences).
+2. Include food suggestions and safety notes per day.
+3. Include estimated cost breakdown in INR.
 
-      Return ONLY a raw JSON object with keys "tripTitle", "overview", "safetyMetrics", "dailyItinerary", "estimatedCosts", "essentialPacking". No markdown, no prose wrapper.
-      JSON structure:
-      {
-        "tripTitle": "Catchy, evocative title",
-        "overview": "Rich 3-sentence summary of the trip atmosphere, highlights, and expectations",
-        "safetyMetrics": {
-          "guardiansCount": 24,
-          "hospitalDistanceKm": 1.4,
-          "safetyScore": 89
-        },
-        "dailyItinerary": [
-          {
-            "day": 1,
-            "theme": "Evocative theme for the day",
-            "activities": [
-              {
-                "time": "09:00 AM",
-                "activity": "Detailed activity title",
-                "description": "Engaging description detailing history and insider tips.",
-                "location": "Specific existing place name (e.g. City Palace, Udaipur)"
-              }
-            ],
-            "foodSuggestions": ["Famous Restaurant 1 (Known for Signature Dish)", "Local Eatery 2"],
-            "safetyNotes": "Detailed location-specific safety tips and neighborhood advice."
-          }
-        ],
-        "estimatedCosts": {
-          "total": "Range in ₹",
-          "breakdown": {
-            "accommodation": "Range in ₹",
-            "food": "Range in ₹",
-            "transport": "Range in ₹",
-            "activities": "Range in ₹"
-          }
-        },
-        "essentialPacking": ["Item 1", "Item 2", "Item 3", "Item 4"]
-      }
-    `;
+Return ONLY a valid, complete JSON object. No markdown. No extra text. No trailing commas.
+JSON structure:
+{
+  "tripTitle": "string",
+  "overview": "string",
+  "safetyMetrics": { "guardiansCount": 24, "hospitalDistanceKm": 1.4, "safetyScore": 89 },
+  "dailyItinerary": [
+    {
+      "day": 1,
+      "theme": "string",
+      "activities": [
+        { "time": "09:00 AM", "activity": "string", "description": "string", "location": "Specific place name" }
+      ],
+      "foodSuggestions": ["Restaurant (Dish)"],
+      "safetyNotes": "string"
+    }
+  ],
+  "estimatedCosts": {
+    "total": "string",
+    "breakdown": { "accommodation": "string", "food": "string", "transport": "string", "activities": "string" }
+  },
+  "essentialPacking": ["Item 1", "Item 2", "Item 3"]
+}`;
 
     let text = null;
 
-    // 1. PRIMARY: USE GOOGLE GEMINI API FOR HIGH-QUALITY RICH PLACE INFORMATION
+    // 1. PRIMARY: GOOGLE GEMINI API
+    // Try secondary key first since primary is reported as leaked
     const apiKeys = [
-      process.env.GEMINI_API_KEY,
-      process.env.GEMINI_API_KEY_SECONDARY
+      process.env.GEMINI_API_KEY_SECONDARY,
+      process.env.GEMINI_API_KEY
     ].filter((key, idx, self) => key && self.indexOf(key) === idx);
 
-    const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-2.5-pro"];
 
     keyLoop:
     for (const apiKey of apiKeys) {
@@ -186,7 +197,8 @@ export const generateItinerary = async (tripData) => {
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
                 responseMimeType: "application/json",
-                temperature: 0.7
+                temperature: 0.7,
+                maxOutputTokens: 4096
               }
             })
           });
@@ -213,7 +225,7 @@ export const generateItinerary = async (tripData) => {
       console.log("[LLM FALLBACK] Gemini unavailable, falling back to Groq...");
       const groqKey = process.env.GROQ_API_KEY;
       if (groqKey) {
-        const groqModels = ["openai/gpt-oss-120b", "groq/compound", "qwen/qwen3.6-27b"];
+        const groqModels = ["llama-3.3-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768"];
         for (const gModel of groqModels) {
           try {
             const gRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -225,7 +237,8 @@ export const generateItinerary = async (tripData) => {
               body: JSON.stringify({
                 model: gModel,
                 messages: [{ role: "user", content: prompt }],
-                response_format: { type: "json_object" }
+                response_format: { type: "json_object" },
+                max_tokens: 4096
               })
             });
 
@@ -236,9 +249,12 @@ export const generateItinerary = async (tripData) => {
                 console.log(`[GROQ-FALLBACK] Generated via Groq model (${gModel}) successfully!`);
                 break;
               }
+            } else {
+              const gErrData = await gRes.json();
+              console.warn(`Groq model ${gModel} failed:`, gErrData.error?.message);
             }
           } catch (gErr) {
-            console.warn(`Groq model ${gModel} failed:`, gErr.message);
+            console.warn(`Groq model ${gModel} fetch exception:`, gErr.message);
           }
         }
       }
@@ -250,12 +266,25 @@ export const generateItinerary = async (tripData) => {
 
     // Sanitize control characters and extract JSON payload
     const sanitizedText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
-    const jsonMatch = sanitizedText.match(/\{[\s\S]*\}/);
+    const jsonMatch = sanitizedText.match(/\{[\s\S]*/);
     if (!jsonMatch) {
       throw new Error("Could not extract valid JSON from AI output.");
     }
 
-    const parsedItinerary = JSON.parse(jsonMatch[0]);
+    let parsedItinerary;
+    try {
+      parsedItinerary = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.warn("[JSON-REPAIR] Initial parse failed, attempting repair...", parseErr.message);
+      try {
+        const repaired = repairJSON(jsonMatch[0]);
+        parsedItinerary = JSON.parse(repaired);
+        console.log("[JSON-REPAIR] Successfully repaired truncated JSON response.");
+      } catch (repairErr) {
+        console.error("[JSON-REPAIR] Repair also failed:", repairErr.message);
+        throw new Error("Could not parse AI response JSON even after repair.");
+      }
+    }
 
     // Thorough Place Grounding with 4.5s max timeout cap to fetch full photo URLs & coordinates
     const placePromises = [];

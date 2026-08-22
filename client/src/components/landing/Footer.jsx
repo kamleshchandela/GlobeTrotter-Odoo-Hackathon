@@ -14,7 +14,7 @@ export const Footer = () => {
       </div>
       <div className="relative max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <ShieldIcon size={20} className="text-banyan" strokeWidth={2.2} />
+          <img src="/logo.png" alt="GlobeTrotter Logo" className="w-7 h-7 object-contain rounded-lg" />
           <span className="font-display font-bold text-cream text-[20px]">My Itinerary</span>
         </div>
         <p className="mt-2 text-taupe font-jakarta text-[14px]">Travel Freely. Stay Safe.</p>
