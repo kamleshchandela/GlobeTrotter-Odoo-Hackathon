@@ -22,18 +22,20 @@ const fetchNominatim = async (queryStr) => {
 };
 
 const getGoogleMapsPlaceInfo = async (placeName, location) => {
-  try {
-    const query = `${placeName} in ${location}`;
-    
-    if (mongoose.connection.readyState === 1) {
-      try {
-        const cached = await PlaceCache.findOne({ query }).lean();
-        if (cached) return cached;
-      } catch (e) {
-        console.warn("PlaceCache read error:", e.message);
-      }
-    }
+  const query = `${placeName} in ${location}`;
 
+  // Check Cache first if database connection is active
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const cached = await PlaceCache.findOne({ query }).lean();
+      if (cached) return cached;
+    } catch (e) {
+      console.warn("PlaceCache read error:", e.message);
+    }
+  }
+
+  // Attempt 1: Google Places API
+  if (process.env.GOOGLE_MAPS_API_KEY) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -50,7 +52,8 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
           maxResultCount: 1
         }),
         signal: controller.signal
-      }).finally(() => clearTimeout(timeoutId));
+      });
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -60,23 +63,25 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
           if (place.photos && place.photos.length > 0) {
             photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_MAPS_API_KEY}`;
           }
-          
           const result = {
             placeId: place.id,
             lat: place.location.latitude,
             lng: place.location.longitude,
             photoUrl
           };
-
           if (mongoose.connection.readyState === 1) {
             PlaceCache.create({ query, ...result }).catch(() => {});
           }
-
           return result;
         }
       }
-    } catch (gErr) {}
+    } catch (err) {
+      console.warn("Google Places API failed, trying Nominatim fallback:", err.message);
+    }
+  }
 
+  // Attempt 2: OpenStreetMap Nominatim API Fallback
+  try {
     let place = await fetchNominatim(query);
     if (!place) {
       place = await fetchNominatim(location);
@@ -95,11 +100,11 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
       }
       return result;
     }
-
-    return null;
   } catch (error) {
-    return null;
+    console.error("Nominatim geocoding error:", error.message);
   }
+
+  return null;
 };
 
 export const generateItinerary = async (tripData) => {
