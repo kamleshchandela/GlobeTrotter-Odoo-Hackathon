@@ -151,4 +151,6 @@ const seedData = async () => {
   }
 };
 
-seedData();
+if (process.argv[1] && process.argv[1].includes('seedHealthcare')) {
+  seedData();
+}

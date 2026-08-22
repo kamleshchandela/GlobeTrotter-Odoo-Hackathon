@@ -19,6 +19,7 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
         console.warn("PlaceCache read error:", e.message);
       }
     }
+  }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -46,25 +47,39 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
       if (place.photos && place.photos.length > 0) {
         photoUrl = `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_MAPS_API_KEY}`;
       }
-      
+    }
+    return null;
+  };
+
+  // OpenStreetMap Nominatim API
+  try {
+    let place = await fetchNominatim(query);
+    
+    // Fallback: If exact place not found, just use the location (city) coordinates
+    if (!place) {
+      console.warn(`Place not found: ${query}. Falling back to location: ${location}`);
+      place = await fetchNominatim(location);
+    }
+
+    if (place) {
       const result = {
-        placeId: place.id,
-        lat: place.location.latitude,
-        lng: place.location.longitude,
-        photoUrl
+        placeId: `osm-${place.place_id}`,
+        lat: parseFloat(place.lat),
+        lng: parseFloat(place.lon),
+        photoUrl: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80`
       };
 
       // Save to cache asynchronously if connected
       if (mongoose.connection.readyState === 1) {
         PlaceCache.create({ query, ...result }).catch(() => {});
       }
-
-      return result;
     }
     return null;
   } catch (error) {
     return null;
   }
+
+  return null;
 };
 
 export const generateItinerary = async (tripData) => {
