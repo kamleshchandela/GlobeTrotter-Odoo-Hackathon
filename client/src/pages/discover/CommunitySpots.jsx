@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -6,18 +6,13 @@ import {
   Info, Loader2, Trash2, Search, MessageSquare, Share2, 
   Sparkles, Star, Plus, Calendar, Clock, DollarSign, ArrowRight,
   Filter, Check, SlidersHorizontal, RefreshCw, Send, Paperclip, Smile,
-  Hash, Users, HelpCircle, Heart, Flame, ShieldAlert, Award, Compass, MessageCircle, AlertCircle
+  Hash, Users, HelpCircle, Heart, Flame, ShieldAlert, Award, Compass, MessageCircle, AlertCircle,
+  Briefcase, Landmark, BookOpen, SendHorizontal, Image, FileText, CheckCircle2
 } from "lucide-react";
 import TopAppBar from "../../components/shared/TopAppBar";
 import toast, { Toaster } from "react-hot-toast";
 import { communityService } from "../../services/communityService";
 import { fetchTrips, saveTrip } from "../../store/tripSlice";
-
-/* ================================================================
-   GlobeTrotter Premium Community Page (Judge Wireframe Redesign)
-   Aligns with the judge's screen wireframe layout, elevated with
-   modern SaaS layout, shimmers, and full interactive capabilities.
-   ================================================================ */
 
 const TRAVEL_STYLES = ["Adventure", "Luxury", "Budget", "Family", "Solo", "Couple", "Backpacking", "Food", "Culture", "Nature"];
 
@@ -70,11 +65,10 @@ export default function CommunitySpots() {
   const [commentInput, setCommentInput] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  // AI Assistant Widget States
-  const [aiWidgetOpen, setAiWidgetOpen] = useState(false);
+  // Embedded AI Assistant Chat Panel States
   const [aiInput, setAiInput] = useState("");
   const [aiLog, setAiLog] = useState([
-    { sender: "ai", text: "Hello! I am your Gemini AI Travel Assistant. Ask me to recommend itineraries, estimate travel budgets, or review safety scores!" }
+    { sender: "ai", text: "Hello! I am your Gemini AI Travel Assistant. Ask me to recommend itineraries, estimate budgets, or review safety scores!" }
   ]);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -126,7 +120,7 @@ export default function CommunitySpots() {
   const handleLike = async (postId, e) => {
     e.stopPropagation();
     if (!isAuthenticated) {
-      toast.error("Please login to like posts.");
+      toast.error("Please login to react to posts.");
       navigate("/auth/login");
       return;
     }
@@ -137,6 +131,7 @@ export default function CommunitySpots() {
           ? { ...post, likes: response.likes } 
           : post
       ));
+      toast.success("Reacted to post!");
     } catch (err) {
       toast.error("Failed to update like");
     }
@@ -240,8 +235,8 @@ export default function CommunitySpots() {
     toast.promise(
       dispatch(saveTrip(duplicatedTrip)).unwrap(),
       {
-        loading: 'Duplicating itinerary...',
-        success: (newTrip) => {
+        loading: 'Importing itinerary...',
+        success: () => {
           navigate(`/explore`);
           return 'Itinerary imported into your plan builder!';
         },
@@ -290,14 +285,13 @@ export default function CommunitySpots() {
     setIsAiTyping(true);
 
     try {
-      // Simulate Gemini API response with delay
       setTimeout(() => {
         setIsAiTyping(false);
         let response = "I couldn't process that query. Ask me about Jaipur, Tokyo, Goa, or Manali travel tips!";
         const query = prompt.toLowerCase();
         
         if (query.includes("jaipur")) {
-          response = "Jaipur (Pink City) is highly safe (91/100). Essential Tips:\n- 🏰 Visit Amber Fort early at 8 AM.\n- 🛍️ Shop block-print textiles at Johri Bazar.\n- 🍽️ Dine at Chokhi Dhani for authentic Rajasthani food.";
+          response = "Jaipur (Pink City) is highly safe (91/100). Tips:\n- 🏰 Visit Amber Fort early at 8 AM.\n- 🛍️ Shop block-print textiles at Johri Bazar.\n- 🍽️ Dine at Chokhi Dhani for authentic Rajasthani food.";
         } else if (query.includes("tokyo") || query.includes("japan")) {
           response = "Tokyo offers incredible urban transit. Tips:\n- 🚉 Use Suica/Pasmo card on the Metro.\n- 🍣 Try Tsukiji outer market for fresh sushi.\n- 🎌 Plan a side day-trip to Mt. Fuji (Kawaguchiko).";
         } else if (query.includes("goa")) {
@@ -307,13 +301,12 @@ export default function CommunitySpots() {
         }
 
         setAiLog(prev => [...prev, { sender: "ai", text: response }]);
-      }, 1200);
+      }, 1000);
     } catch (err) {
       setIsAiTyping(false);
     }
   };
 
-  // Clear Filters
   const handleClearFilters = () => {
     setSearch("");
     setSelectedStyle("");
@@ -362,34 +355,38 @@ export default function CommunitySpots() {
   }, [posts, groupBy]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#FFF8F0] font-jakarta overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#FAF5EE] font-jakarta overflow-hidden">
       <TopAppBar variant="logo" />
       <Toaster position="top-right" />
 
       {/* ---- HEADER STICKY CONTROLS BAR (Matches wireframe layout) ---- */}
-      <div className="bg-white border-b border-sand shrink-0 shadow-sm relative z-20 mt-0">
-        <div className="max-w-[900px] mx-auto px-6 py-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="bg-white/80 backdrop-blur-md border-b border-sand shrink-0 shadow-sm relative z-20">
+        <div className="max-w-[1280px] mx-auto px-6 py-4 flex flex-col md:flex-row gap-4 items-center justify-between">
           
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <Compass className="text-saffron animate-spin-slow" size={24} />
+            <h1 className="font-display font-extrabold text-[20px] text-charcoal tracking-tight leading-none">Traveler Community</h1>
+          </div>
+
           {/* Search bar input */}
-          <div className="w-full sm:flex-1 h-[42px] bg-[#FFF8F0] border border-sand rounded-xl flex items-center px-4 gap-3 focus-within:border-saffron focus-within:ring-1 focus-within:ring-saffron transition-all">
-            <Search size={16} className="text-taupe" />
+          <div className="w-full md:flex-1 max-w-[500px] h-[40px] bg-[#FAF5EE] border border-sand rounded-xl flex items-center px-4 gap-3 focus-within:border-saffron focus-within:ring-1 focus-within:ring-saffron transition-all">
+            <Search size={15} className="text-taupe" />
             <input 
               type="text" 
               placeholder="Search destinations, experiences, itineraries..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-transparent outline-none w-full font-cabinet font-semibold text-[13px] text-charcoal placeholder:text-taupe/40"
+              className="bg-transparent outline-none w-full font-cabinet font-bold text-[12.5px] text-charcoal placeholder:text-taupe/40"
             />
             {search && <X size={14} className="text-taupe cursor-pointer" onClick={() => setSearch("")} />}
           </div>
 
           {/* Group By, Filter, Sort By Actions row */}
-          <div className="flex gap-2 w-full sm:w-auto shrink-0 justify-end">
-            {/* Group By selector */}
+          <div className="flex gap-2 w-full md:w-auto shrink-0 justify-end">
             <select 
               value={groupBy}
               onChange={e => setGroupBy(e.target.value)}
-              className="h-[40px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-bold text-[12px] focus:border-saffron outline-none"
+              className="h-[38px] px-3 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11.5px] focus:border-saffron outline-none shadow-sm cursor-pointer"
             >
               <option value="none">Group By: None</option>
               <option value="destination">Destination</option>
@@ -398,13 +395,12 @@ export default function CommunitySpots() {
               <option value="duration">Duration</option>
             </select>
 
-            {/* Sort By selector */}
             <select 
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-[40px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-bold text-[12px] focus:border-saffron outline-none"
+              className="h-[38px] px-3 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11.5px] focus:border-saffron outline-none shadow-sm cursor-pointer"
             >
-              <option value="recommended">Sort By: Recommended</option>
+              <option value="recommended">Sort: Recommended</option>
               <option value="recent">Most Recent</option>
               <option value="popular">Popularity</option>
               <option value="rating">Rating</option>
@@ -412,226 +408,331 @@ export default function CommunitySpots() {
               <option value="budget_high">Budget: High-Low</option>
             </select>
 
-            {/* Filter Toggle Button */}
             <button 
               onClick={() => setMobileFilterOpen(true)}
-              className="h-[40px] px-4 rounded-xl border border-sand bg-white hover:bg-ivory text-taupe font-cabinet font-bold text-[12px] flex items-center gap-1.5"
+              className="h-[38px] px-4 rounded-xl border border-sand bg-white hover:bg-ivory text-taupe font-cabinet font-extrabold text-[11.5px] flex items-center gap-1.5 shadow-sm"
             >
-              <Filter size={14} /> Filter
+              <Filter size={13} /> Filter
             </button>
           </div>
         </div>
       </div>
 
-      {/* ---- SCROLLABLE MAIN LAYOUT FEED ---- */}
+      {/* ---- THREE-COLUMN RESPONSIVE LAYOUT (LinkedIn Style) ---- */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[900px] mx-auto px-6 py-8 space-y-6">
+        <div className="max-w-[1280px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Section Header */}
-          <div className="text-center pb-4 relative">
-            <span className="font-mono-dm text-[11px] text-saffron uppercase tracking-widest font-bold">GlobeTrotter Space</span>
-            <h1 className="font-display font-extrabold text-[32px] sm:text-[40px] text-charcoal mt-1">Community Feed</h1>
-            <p className="font-cabinet text-taupe/70 text-[13px] max-w-[480px] mx-auto mt-2 leading-relaxed">
-              Real safety ratings, cost estimations, and verified itineraries shared by travelers around the globe.
-            </p>
-
-            {/* Floating Share button */}
-            <div className="mt-5 flex justify-center gap-3">
-              <button 
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    toast.error("Please login to share a story.");
-                    navigate("/auth/login");
-                  } else {
-                    setShareModalOpen(true);
-                  }
-                }}
-                className="h-[38px] px-5 rounded-full bg-saffron text-white font-cabinet font-bold text-[12px] hover:shadow-saffron hover:scale-[1.02] transition-all flex items-center gap-1.5"
-              >
-                <Plus size={14} /> Share Experience
-              </button>
-              {hasActiveFilters && (
-                <button 
-                  onClick={handleClearFilters}
-                  className="font-mono-dm text-[11px] text-saffron hover:underline flex items-center gap-1"
-                >
-                  <RefreshCw size={11} /> Clear filters
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Filter content category navigation row */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-sand/50">
-            {["All", "trip", "experience", "activity", "destination"].map(type => (
-              <button 
-                key={type}
-                onClick={() => setSelectedType(type === 'All' ? 'All' : type)}
-                className={`h-[32px] px-4 rounded-full font-cabinet font-bold text-[11px] transition-all shrink-0 capitalize ${
-                  (selectedType === type) 
-                    ? "bg-saffron text-white shadow-sm" 
-                    : "bg-white border border-sand text-taupe hover:bg-ivory"
-                }`}
-              >
-                {type === 'trip' ? 'Itineraries' : type === 'experience' ? 'Travel Logs' : type === 'activity' ? 'Activities' : type === 'destination' ? 'Destinations' : 'All Stories'}
-              </button>
-            ))}
-          </div>
-
-          {/* STREAM LOG */}
-          {loading ? (
-            <div className="space-y-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex gap-4 items-start animate-pulse">
-                  <div className="w-12 h-12 rounded-full bg-sand/30 shrink-0" />
-                  <div className="flex-1 bg-white border border-sand rounded-2xl p-5 h-44" />
+          {/* LEFT SIDEBAR: PROFILE & STATS (LinkedIn Style) */}
+          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-0">
+            <div className="bg-white border border-sand rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              {/* Card Banner Background */}
+              <div className="h-20 bg-gradient-to-r from-saffron to-amber-500" />
+              
+              {/* Profile info block */}
+              <div className="p-5 text-center -mt-10 border-b border-sand">
+                <div className="w-16 h-16 rounded-full bg-white border-2 border-white shadow-md mx-auto flex items-center justify-center font-cabinet font-extrabold text-[22px] text-charcoal">
+                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "👤"}
                 </div>
+                <h3 className="font-display font-extrabold text-[15.5px] text-charcoal mt-3">
+                  {isAuthenticated ? authUser?.name : "Guest Traveler"}
+                </h3>
+                <span className="font-mono-dm text-[9.5px] text-saffron bg-[#FEF3E2] border border-[#FEF3E2] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider mt-1.5 inline-block">
+                  Level 3 Contributor
+                </span>
+              </div>
+
+              {/* Sidebar stats link */}
+              <div className="p-4 space-y-3.5 text-[12.5px] font-cabinet font-semibold text-taupe bg-[#FAF5EE]/30">
+                <div className="flex justify-between items-center">
+                  <span>Itineraries Shared</span>
+                  <span className="text-saffron font-bold">12</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Total Views</span>
+                  <span className="text-charcoal font-bold">1.4k</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-sand/50 pt-2.5">
+                  <span>Safety Contributions</span>
+                  <span className="text-[#2D6A4F] font-bold">98% Verified</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links Card */}
+            <div className="bg-white border border-sand rounded-3xl p-5 space-y-3.5 shadow-sm">
+              <h4 className="font-cabinet font-extrabold text-[12.5px] text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                <BookOpen size={14} className="text-saffron" /> Quick Access
+              </h4>
+              <div className="space-y-2.5 text-[12.5px] font-cabinet font-bold text-taupe">
+                <Link to="/explore" className="flex items-center gap-2 hover:text-saffron transition-colors">
+                  🧭 Discover Dashboard
+                </Link>
+                <Link to="/history" className="flex items-center gap-2 hover:text-saffron transition-colors">
+                  📅 Your Saved Collection
+                </Link>
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please login to share an experience.");
+                      navigate("/auth/login");
+                    } else {
+                      setShareModalOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 hover:text-saffron transition-colors w-full text-left"
+                >
+                  📝 Publish New Travel Card
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* CENTER PANEL: FEED STREAM */}
+          <main className="lg:col-span-6 space-y-6">
+            
+            {/* Start a Post / Experience Card (LinkedIn style) */}
+            <div className="bg-white border border-sand rounded-3xl p-4.5 shadow-sm space-y-4">
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-full bg-[#FEF3E2] border border-sand flex items-center justify-center font-cabinet font-extrabold text-[15px] text-charcoal shrink-0">
+                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "G"}
+                </div>
+                
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please login to share a story.");
+                      navigate("/auth/login");
+                    } else {
+                      setShareModalOpen(true);
+                    }
+                  }}
+                  className="flex-1 h-[40px] bg-[#FAF5EE] border border-sand rounded-full text-left px-5 font-cabinet font-semibold text-[12.5px] text-taupe/50 hover:bg-ivory transition-colors cursor-pointer"
+                >
+                  Share a travel log, activity pass, or itinerary...
+                </button>
+              </div>
+
+              <div className="flex justify-between items-center border-t border-sand/40 pt-3">
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please login to share.");
+                      navigate("/auth/login");
+                    } else {
+                      setPostType("experience");
+                      setShareModalOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                >
+                  <Image size={15} className="text-[#3A86C8]" />
+                  <span>Photo / Log</span>
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please login to share.");
+                      navigate("/auth/login");
+                    } else {
+                      setPostType("trip");
+                      setShareModalOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                >
+                  <FileText size={15} className="text-[#10B981]" />
+                  <span>Itinerary file</span>
+                </button>
+
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please login to share.");
+                      navigate("/auth/login");
+                    } else {
+                      setPostType("activity");
+                      setShareModalOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                >
+                  <Landmark size={15} className="text-amber-500" />
+                  <span>Activity Pass</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Content filter category navigation pills */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-sand/45">
+              {["All", "trip", "experience", "activity", "destination"].map(type => (
+                <button 
+                  key={type}
+                  onClick={() => setSelectedType(type === 'All' ? 'All' : type)}
+                  className={`h-[30px] px-4.5 rounded-full font-cabinet font-extrabold text-[11px] transition-all shrink-0 capitalize ${
+                    (selectedType === type) 
+                      ? "bg-[#1B4332] text-white shadow-sm" 
+                      : "bg-white border border-sand text-taupe hover:bg-ivory"
+                  }`}
+                >
+                  {type === 'trip' ? '🎫 Itineraries' : type === 'experience' ? '📸 Stories' : type === 'activity' ? '🪂 Activities' : type === 'destination' ? '📍 Destinations' : 'All Feeds'}
+                </button>
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center py-12 bg-white border border-sand rounded-2xl p-8">
-              <p className="font-cabinet text-[13.5px] text-taupe font-semibold">Could not fetch logs. Please try again.</p>
-              <button onClick={fetchPostsData} className="mt-4 px-5 py-2 rounded-full bg-saffron text-white font-cabinet font-semibold text-[12px]">
-                Retry connection
-              </button>
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="text-center py-16 bg-white border border-sand rounded-2xl p-8">
-              <HelpCircle size={44} className="text-saffron/40 mx-auto mb-3 animate-bounce" />
-              <h3 className="font-display font-bold text-lg text-charcoal">No logs in this view</h3>
-              <p className="font-jakarta text-[12px] text-taupe mt-1">Adjust your filter options or search queries.</p>
-            </div>
-          ) : (
-            <div className="space-y-10">
-              {processedPosts.map(group => {
-                if (group.list.length === 0) return null;
-                return (
-                  <div key={group.key} className="space-y-6">
-                    {groupBy !== "none" && (
-                      <div className="flex items-center gap-3">
-                        <span className="font-cabinet font-bold text-[11px] text-saffron uppercase tracking-widest bg-[#FEF3E2] px-3 py-0.5 rounded border border-sand shadow-sm">
-                          {group.key}
-                        </span>
-                        <div className="h-[1px] bg-sand flex-1" />
-                        <span className="font-mono-dm text-[10px] text-taupe/65">{group.list.length} items</span>
+
+            {/* FEED LOADING / EMPTY / LIST */}
+            {loading ? (
+              <div className="space-y-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white border border-sand rounded-3xl p-5 space-y-4 animate-pulse">
+                    <div className="flex gap-3 items-center">
+                      <div className="w-10 h-10 rounded-full bg-sand/30 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-3.5 bg-sand/30 rounded w-1/4" />
+                        <div className="h-2.5 bg-sand/20 rounded w-1/6" />
                       </div>
-                    )}
+                    </div>
+                    <div className="h-44 bg-sand/20 rounded-2xl" />
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12 bg-white border border-sand rounded-3xl p-8">
+                <AlertCircle className="text-red-500 mx-auto mb-3" size={36} />
+                <p className="font-cabinet text-[13.5px] text-taupe font-semibold">Could not fetch logs. Please try again.</p>
+                <button onClick={fetchPostsData} className="mt-4 px-5 py-2 rounded-xl bg-saffron text-white font-cabinet font-semibold text-[12px]">
+                  Retry connection
+                </button>
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-16 bg-white border border-sand rounded-3xl p-8 shadow-sm">
+                <HelpCircle size={44} className="text-saffron/40 mx-auto mb-3 animate-bounce" />
+                <h3 className="font-display font-extrabold text-[16px] text-charcoal">No travel cards found</h3>
+                <p className="font-jakarta text-[12px] text-taupe mt-1">Try adjusting your filters or keyword query.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {processedPosts.map(group => {
+                  if (group.list.length === 0) return null;
+                  return (
+                    <div key={group.key} className="space-y-6">
+                      {groupBy !== "none" && (
+                        <div className="flex items-center gap-3">
+                          <span className="font-cabinet font-bold text-[10px] text-saffron uppercase tracking-widest bg-[#FEF3E2] px-3 py-0.5 rounded border border-sand shadow-sm">
+                            {group.key}
+                          </span>
+                          <div className="h-[1px] bg-sand flex-1" />
+                          <span className="font-mono-dm text-[9.5px] text-taupe/65">{group.list.length} items</span>
+                        </div>
+                      )}
 
-                    {/* Chat-Like Wireframe Layout (Avatar Left, Card Right) */}
-                    <div className="space-y-6">
-                      {group.list.map(post => {
-                        const isLiked = post.likes?.includes(authUser?._id || "current-user");
-                        const isSaved = post.saves?.includes(authUser?._id || "current-user");
-                        const isCommentsExpanded = expandedCommentsPostId === (post._id || post.id);
+                      <div className="space-y-5">
+                        {group.list.map(post => {
+                          const isLiked = post.likes?.includes(authUser?._id || "current-user");
+                          const isSaved = post.saves?.includes(authUser?._id || "current-user");
+                          const isCommentsExpanded = expandedCommentsPostId === (post._id || post.id);
 
-                        return (
-                          <div 
-                            key={post._id || post.id} 
-                            className="flex gap-4 items-start group"
-                          >
-                            {/* Left Side Avatar Column */}
-                            <div className="flex flex-col items-center gap-1.5 shrink-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[15px] border-2 shadow-sm ${
-                                post.authorName === 'Gemini-AI-Guide'
-                                  ? 'bg-gradient-to-tr from-saffron to-violet-500 text-white border-violet-400'
-                                  : 'bg-[#FEF3E2] border-sand text-charcoal'
-                              }`}>
-                                {post.authorName === 'Gemini-AI-Guide' ? '🤖' : post.authorName[0]}
-                              </div>
-                              <span className="font-mono-dm text-[9px] text-taupe/60 text-center w-12 truncate block">
-                                {post.authorName.split(" ")[0]}
-                              </span>
-                            </div>
-
-                            {/* Right Side Card Content Bubble */}
-                            <div 
-                              onClick={() => {
-                                if (post.type === 'trip') {
-                                  setDetailModalPost(post);
-                                }
-                              }}
-                              className={`flex-1 border rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_24px_rgba(30,20,16,0.06)] hover:scale-[1.005] transition-all cursor-pointer flex flex-col ${
-                                post.authorName === 'Gemini-AI-Guide'
-                                  ? 'bg-gradient-to-br from-[#FFF8F0] via-white to-[#FEF3E2] border-violet-400/70 shadow-md relative overflow-hidden before:absolute before:top-0 before:left-0 before:w-1.5 before:h-full before:bg-gradient-to-b before:from-saffron before:to-violet-400'
-                                  : 'bg-white border-sand'
-                              }`}
+                          return (
+                            <article 
+                              key={post._id || post.id} 
+                              className={`bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col`}
                             >
-                              {/* Card image/split preview */}
+                              {/* Post Header */}
+                              <div className="p-5 flex justify-between items-start">
+                                <div className="flex gap-3 items-center">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[14px] border border-sand shrink-0 bg-[#FEF3E2] text-charcoal`}>
+                                    {post.authorName === 'Gemini-AI-Guide' ? '🤖' : post.authorName[0]}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <h4 className="font-cabinet font-extrabold text-[13.5px] text-charcoal leading-none">
+                                        {post.authorName}
+                                      </h4>
+                                      {post.authorName === 'Gemini-AI-Guide' && (
+                                        <span className="bg-violet-100 text-violet-700 text-[8px] font-mono-dm uppercase font-extrabold px-1.5 py-0.5 rounded border border-violet-200">AI Partner</span>
+                                      )}
+                                    </div>
+                                    <span className="font-mono-dm text-[9.5px] text-taupe/50 block mt-1">
+                                      {new Date(post.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · verified traveler
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <Bookmark 
+                                  size={16} 
+                                  className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0 cursor-pointer`}
+                                  onClick={(e) => handleSave(post._id || post.id, e)}
+                                />
+                              </div>
+
+                              {/* Post Image Banner */}
                               {post.coverImage && (
-                                <div className="w-full h-[160px] relative overflow-hidden shrink-0">
+                                <div className="w-full h-[220px] relative overflow-hidden shrink-0 bg-sand/30 border-y border-sand/40">
                                   <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
                                   
-                                  {/* Safety Badge or Rating overlay */}
+                                  {/* Safety Stamp */}
                                   {post.rating && (
-                                    <div className="absolute top-4 right-4 h-[24px] px-2.5 rounded-full bg-white/95 backdrop-blur shadow flex items-center gap-1">
+                                    <div className="absolute top-4 right-4 h-[24px] px-2.5 rounded-full bg-white/95 border border-sand shadow-sm flex items-center gap-1">
                                       <Star size={11} className="text-accent fill-accent" />
                                       <span className="font-cabinet font-bold text-[11px] text-charcoal">{post.rating}</span>
                                     </div>
                                   )}
-                                  
-                                  <div className="absolute bottom-4 left-4 h-[22px] px-2.5 rounded-full bg-charcoal/60 backdrop-blur border border-white/20 flex items-center">
-                                    <span className="font-mono-dm text-[9px] text-white uppercase tracking-wider font-semibold">
+
+                                  <div className="absolute bottom-4 left-4 h-[22px] px-2.5 rounded-full bg-charcoal/70 backdrop-blur border border-white/20 flex items-center">
+                                    <span className="font-mono-dm text-[8.5px] text-white uppercase tracking-wider font-extrabold">
                                       {post.type}
                                     </span>
                                   </div>
                                 </div>
                               )}
 
-                              {/* Card Body */}
+                              {/* Card Content Body */}
                               <div className="p-5 flex-1 flex flex-col justify-between">
                                 <div>
-                                  <div className="flex items-center justify-between gap-4">
-                                    <h3 className="font-display font-extrabold text-[16px] text-charcoal leading-snug">
-                                      {post.title}
-                                    </h3>
-                                    <Bookmark 
-                                      size={15} 
-                                      className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0`}
-                                      onClick={(e) => handleSave(post._id || post.id, e)}
-                                    />
-                                  </div>
+                                  <h3 className="font-display font-extrabold text-[17px] text-charcoal leading-snug">
+                                    {post.title}
+                                  </h3>
 
                                   {post.destinationName && (
                                     <div className="flex items-center gap-1 mt-1 text-taupe/65">
-                                      <MapPin size={11} className="text-saffron" />
-                                      <span className="font-cabinet font-semibold text-[11px]">{post.destinationName}</span>
+                                      <MapPin size={11.5} className="text-saffron" />
+                                      <span className="font-cabinet font-semibold text-[11.5px]">{post.destinationName}</span>
                                     </div>
                                   )}
 
-                                  <p className="font-jakarta text-[12.5px] text-taupe mt-2.5 leading-relaxed whitespace-pre-wrap">
+                                  <p className="font-jakarta text-[13px] text-taupe mt-3 leading-relaxed whitespace-pre-wrap">
                                     {post.description}
                                   </p>
 
-                                  {/* Action Card Attachments */}
+                                  {/* Dynamic visual attachments for Travel Posts */}
                                   {post.type === 'trip' && (
-                                    <div className="mt-4 border-2 border-dashed border-sand bg-[#FFF8F0]/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-[520px] relative overflow-hidden before:absolute before:-left-3 before:top-1/2 before:-translate-y-1/2 before:w-6 before:h-6 before:rounded-full before:bg-[#FFF8F0] before:border-r before:border-sand after:absolute after:-right-3 after:top-1/2 after:-translate-y-1/2 after:w-6 after:h-6 after:rounded-full after:bg-[#FFF8F0] after:border-l after:border-sand">
-                                      <div className="pl-2">
+                                    <div className="mt-4 border border-sand bg-emerald-50/20 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-full relative overflow-hidden border-l-4 border-l-[#1B4332]">
+                                      <div>
                                         <div className="flex items-center gap-1.5">
-                                          <span className="font-mono-dm text-[9px] text-taupe/60 uppercase tracking-wide">Itinerary Ticket</span>
-                                          <Compass size={10} className="text-saffron animate-spin-slow" />
+                                          <span className="font-mono-dm text-[8.5px] text-taupe/60 uppercase tracking-widest font-extrabold">Itinerary Ticket Stub</span>
+                                          <CheckCircle2 size={10} className="text-emerald-600" />
                                         </div>
-                                        <h5 className="font-cabinet font-bold text-[14px] text-charcoal mt-1 flex items-center gap-1.5">
-                                          {post.duration} Days <ArrowRight size={12} className="text-saffron" /> {post.destinationName}
+                                        <h5 className="font-cabinet font-extrabold text-[14.5px] text-charcoal mt-1 flex items-center gap-1.5">
+                                          {post.duration} Days Plan <ArrowRight size={12} className="text-saffron" /> {post.destinationName}
                                         </h5>
-                                        <div className="flex gap-3 mt-2">
-                                          <span className="font-mono-dm text-[10px] text-saffron font-bold">Est: ₹{(post.budget || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-charcoal/60">·</span>
-                                          <span className="font-mono-dm text-[10px] text-[#2D6A4F] font-bold">🛡️ 91/100 Safe</span>
+                                        <div className="flex gap-3 mt-2.5">
+                                          <span className="font-mono-dm text-[10px] text-emerald-800 font-bold bg-emerald-100/50 px-2 py-0.5 rounded">Est: ₹{(post.budget || 0).toLocaleString()}</span>
+                                          <span className="font-mono-dm text-[10px] text-[#1B4332] font-bold bg-[#1B4332]/5 px-2 py-0.5 rounded">🛡️ 91/100 Safety</span>
                                         </div>
                                       </div>
-                                      <div className="flex gap-1.5 pr-2 z-10">
+                                      <div className="flex gap-1.5 shrink-0 z-10">
                                         <button 
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setDetailModalPost(post);
                                           }}
-                                          className="h-[30px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-bold text-[10.5px] hover:bg-ivory transition-all"
+                                          className="h-[32px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11px] hover:bg-ivory shadow-sm transition-all"
                                         >
-                                          View Stops
+                                          Stops Timeline
                                         </button>
                                         <button 
                                           onClick={(e) => handleCopyTrip(post, e)}
-                                          className="h-[30px] px-4 rounded-xl bg-saffron text-white font-cabinet font-bold text-[10.5px] hover:shadow-saffron hover:scale-[1.02] transition-all"
+                                          className="h-[32px] px-4.5 rounded-xl bg-saffron text-white font-cabinet font-extrabold text-[11px] hover:shadow-saffron/20 shadow-sm hover:scale-[1.02] transition-all"
                                         >
                                           Import
                                         </button>
@@ -640,14 +741,13 @@ export default function CommunitySpots() {
                                   )}
 
                                   {post.type === 'activity' && post.activityDetails && (
-                                    <div className="mt-4 border border-[#2D6A4F]/20 bg-[#2D6A4F]/5 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-[520px] relative overflow-hidden before:absolute before:-left-3 before:top-1/2 before:-translate-y-1/2 before:w-6 before:h-6 before:rounded-full before:bg-[#FFF8F0] before:border-r before:border-[#2D6A4F]/20 after:absolute after:-right-3 after:top-1/2 after:-translate-y-1/2 after:w-6 after:h-6 after:rounded-full after:bg-[#FFF8F0] after:border-l after:border-[#2D6A4F]/20">
-                                      <div className="pl-2">
-                                        <span className="font-mono-dm text-[9px] text-[#2D6A4F] uppercase tracking-wide font-bold">Activity Pass</span>
-                                        <h5 className="font-cabinet font-bold text-[14px] text-charcoal mt-1">{post.activityDetails.name}</h5>
-                                        <div className="flex gap-3 mt-2">
-                                          <span className="font-mono-dm text-[10px] text-charcoal font-bold">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-charcoal/40">·</span>
-                                          <span className="font-mono-dm text-[10px] text-taupe">{post.activityDetails.duration}</span>
+                                    <div className="mt-4 border border-[#2D6A4F]/20 bg-[#2D6A4F]/5 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-full border-l-4 border-l-[#2D6A4F]">
+                                      <div>
+                                        <span className="font-mono-dm text-[8.5px] text-[#2D6A4F] uppercase tracking-widest font-extrabold">Activity Pass Card</span>
+                                        <h5 className="font-cabinet font-extrabold text-[14px] text-charcoal mt-1">{post.activityDetails.name}</h5>
+                                        <div className="flex gap-3 mt-2.5">
+                                          <span className="font-mono-dm text-[10px] text-charcoal font-bold bg-white px-2 py-0.5 rounded border border-sand/40">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
+                                          <span className="font-mono-dm text-[10px] text-taupe bg-white px-2 py-0.5 rounded border border-sand/40">{post.activityDetails.duration}</span>
                                         </div>
                                       </div>
                                       <button 
@@ -660,18 +760,18 @@ export default function CommunitySpots() {
                                             setAddToTripModalActivity(post);
                                           }
                                         }}
-                                        className="h-[30px] px-4 rounded-xl bg-[#2D6A4F] text-white font-cabinet font-bold text-[10.5px] hover:scale-[1.02] transition-all z-10 pr-2"
+                                        className="h-[32px] px-4.5 rounded-xl bg-[#2D6A4F] text-white font-cabinet font-extrabold text-[11px] hover:scale-[1.02] transition-all shadow-sm shrink-0"
                                       >
-                                        Add to Itinerary
+                                        Add to Trip
                                       </button>
                                     </div>
                                   )}
 
                                   {/* Tags */}
                                   {post.tags && post.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-3">
+                                    <div className="flex flex-wrap gap-2 mt-4">
                                       {post.tags.map(t => (
-                                        <span key={t} className="font-mono-dm text-[9.5px] text-saffron">
+                                        <span key={t} className="font-mono-dm text-[10px] text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded border border-[#1B4332]/10 font-bold">
                                           #{t}
                                         </span>
                                       ))}
@@ -680,13 +780,13 @@ export default function CommunitySpots() {
                                 </div>
 
                                 {/* Reactions Bar */}
-                                <div className="mt-5 pt-3.5 border-t border-sand/40 flex items-center justify-between text-taupe/70">
+                                <div className="mt-6 pt-4 border-t border-sand/40 flex items-center justify-between text-taupe/70">
                                   <div className="flex items-center gap-4">
                                     <button 
                                       onClick={(e) => handleLike(post._id || post.id, e)}
-                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-mono-dm text-[11px] ${isLiked ? 'text-saffron font-bold' : ''}`}
+                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isLiked ? 'text-saffron' : ''}`}
                                     >
-                                      <ThumbsUp size={13} className={isLiked ? 'fill-saffron text-saffron' : ''} />
+                                      <ThumbsUp size={14} className={isLiked ? 'fill-saffron text-saffron' : ''} />
                                       {post.likes?.length || 0}
                                     </button>
                                     <button 
@@ -694,51 +794,51 @@ export default function CommunitySpots() {
                                         e.stopPropagation();
                                         setExpandedCommentsPostId(isCommentsExpanded ? null : (post._id || post.id));
                                       }}
-                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-mono-dm text-[11px] ${isCommentsExpanded ? 'text-saffron font-bold' : ''}`}
+                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isCommentsExpanded ? 'text-saffron' : ''}`}
                                     >
-                                      <MessageSquare size={13} />
+                                      <MessageSquare size={14} />
                                       {post.comments?.length || 0}
                                     </button>
                                     <button 
                                       onClick={(e) => handleShare(post, e)}
                                       className="p-1 hover:bg-sand rounded-full transition-all"
-                                      title="Share Post"
+                                      title="Share Post Link"
                                     >
-                                      <Share2 size={13} />
+                                      <Share2 size={14} />
                                     </button>
                                   </div>
                                   
                                   <span className="font-mono-dm text-[9.5px] text-taupe/50">
-                                    {new Date(post.createdAt).toLocaleDateString()}
+                                    {new Date(post.createdAt || Date.now()).toLocaleDateString()}
                                   </span>
                                 </div>
                               </div>
 
                               {/* Embedded comment thread inside card */}
                               {isCommentsExpanded && (
-                                <div className="bg-[#FFF8F0] border-t border-sand/40 p-4 space-y-4" onClick={e => e.stopPropagation()}>
-                                  <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+                                <div className="bg-[#FAF5EE]/60 border-t border-sand/40 p-5 space-y-4" onClick={e => e.stopPropagation()}>
+                                  <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
                                     {post.comments?.length === 0 ? (
                                       <p className="font-cabinet text-[11px] text-taupe/65 italic">No comments yet. Send a comment to reply!</p>
                                     ) : (
                                       post.comments.map(c => (
                                         <div key={c._id || c.id} className="flex gap-2.5 items-start text-[12px]">
-                                          <div className="w-7 h-7 rounded-full bg-[#FEF3E2] border border-sand flex items-center justify-center font-cabinet font-bold text-taupe text-[11px] shrink-0">
+                                          <div className="w-8 h-8 rounded-full bg-[#FEF3E2] border border-sand flex items-center justify-center font-cabinet font-bold text-taupe text-[11px] shrink-0">
                                             {c.userName[0]}
                                           </div>
-                                          <div className="bg-white border border-sand/30 p-2.5 rounded-xl flex-1">
+                                          <div className="bg-white border border-sand/40 p-3 rounded-2xl flex-1 shadow-sm">
                                             <div className="flex items-center justify-between">
-                                              <span className="font-cabinet font-bold text-[11px] text-charcoal">{c.userName}</span>
-                                              <span className="font-mono-dm text-[8px] text-taupe/50">{new Date(c.createdAt).toLocaleDateString()}</span>
+                                              <span className="font-cabinet font-extrabold text-[11.5px] text-charcoal">{c.userName}</span>
+                                              <span className="font-mono-dm text-[8.5px] text-taupe/40">{new Date(c.createdAt).toLocaleDateString()}</span>
                                             </div>
-                                            <p className="font-jakarta text-[12px] text-taupe mt-0.5">{c.comment}</p>
+                                            <p className="font-jakarta text-[12.5px] text-taupe mt-1">{c.comment}</p>
                                           </div>
                                         </div>
                                       ))
                                     )}
                                   </div>
 
-                                  <div className="flex gap-2 pt-2 border-t border-sand/30">
+                                  <div className="flex gap-2 pt-3.5 border-t border-sand/40">
                                     <input 
                                       type="text" 
                                       placeholder="Write a comment..." 
@@ -747,151 +847,158 @@ export default function CommunitySpots() {
                                       onKeyDown={e => {
                                         if (e.key === 'Enter') handleAddComment(post._id || post.id);
                                       }}
-                                      className="flex-1 h-[34px] border border-sand rounded-xl px-3 font-cabinet text-[12px] bg-white outline-none focus:border-saffron"
+                                      className="flex-1 h-[36px] border border-sand rounded-xl px-4 font-cabinet text-[12.5px] bg-white outline-none focus:border-saffron focus:ring-1 focus:ring-saffron"
                                     />
                                     <button 
                                       onClick={() => handleAddComment(post._id || post.id)}
                                       disabled={isSubmittingComment || !commentInput.trim()}
-                                      className="h-[34px] px-4 rounded-xl bg-saffron text-white font-cabinet font-bold text-[11px]"
+                                      className="h-[36px] px-4 rounded-xl bg-saffron text-white font-cabinet font-bold text-[12px] shadow-sm disabled:opacity-50"
                                     >
                                       Send
                                     </button>
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+
+          {/* RIGHT SIDEBAR: TRENDING LIST & STICKY GEMINI ASSISTANT PANEL */}
+          <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-0">
+            
+            {/* Embedded Gemini Chat Panel (Replaced Floating Button for premium, finished look) */}
+            <div className="bg-white border border-sand rounded-3xl shadow-sm overflow-hidden flex flex-col h-[380px] hover:shadow-md transition-all duration-300">
+              {/* Header */}
+              <div className="p-4 border-b border-sand bg-gradient-to-r from-saffron to-amber-500 text-white flex items-center gap-2">
+                <Sparkles className="animate-pulse text-amber-200" size={16} />
+                <div>
+                  <h4 className="font-cabinet font-extrabold text-[13px] leading-none">Gemini AI Assistant</h4>
+                  <span className="font-mono-dm text-[8.5px] text-white/90 font-bold uppercase tracking-wider block mt-0.5">Online Helper</span>
+                </div>
+              </div>
+
+              {/* Chat body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FAF5EE]/30">
+                {aiLog.map((log, idx) => (
+                  <div key={idx} className={`flex ${log.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`p-3 rounded-2xl max-w-[85%] text-[11.5px] leading-relaxed shadow-sm ${
+                      log.sender === 'user'
+                        ? 'bg-saffron text-white rounded-tr-none'
+                        : 'bg-white border border-sand text-taupe rounded-tl-none'
+                    }`}>
+                      {log.text.split("\n").map((line, i) => <p key={i} className="mt-0.5">{line}</p>)}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
+                ))}
+                {isAiTyping && (
+                  <div className="flex justify-start">
+                    <div className="p-2.5 bg-white border border-sand rounded-2xl rounded-tl-none flex gap-1 items-center shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-saffron animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
 
-      {/* ---- FLOATING GEMINI AI CHATBOT WIDGET (Hackathon Attention Puller) ---- */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button 
-          onClick={() => setAiWidgetOpen(!aiWidgetOpen)}
-          className="w-14 h-14 rounded-full bg-gradient-to-tr from-saffron to-violet-500 text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all border border-violet-400 relative"
-          title="Open AI Guide"
-        >
-          {aiWidgetOpen ? <X size={22} /> : <MessageCircle size={22} />}
-          {!aiWidgetOpen && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#2D6A4F] border-2 border-white rounded-full flex items-center justify-center">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-            </span>
-          )}
-        </button>
+              {/* Suggestions chips */}
+              <div className="px-3 py-1.5 bg-[#FAF5EE] border-t border-sand/40 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+                {[
+                  { label: "Jaipur Tips 🏰", prompt: "Recommend tips and safety in Jaipur" },
+                  { label: "Goa Sunset 🌴", prompt: "Patnem Beach and shacks in Goa" },
+                  { label: "Leh Slush ⚠️", prompt: "Safety checklist for Leh-Manali slush" }
+                ].map(chip => (
+                  <button
+                    key={chip.label}
+                    onClick={() => {
+                      setAiInput(chip.prompt);
+                      setTimeout(() => {
+                        setAiLog(prev => [...prev, { sender: "user", text: chip.prompt }]);
+                        setIsAiTyping(true);
+                        setTimeout(() => {
+                          setIsAiTyping(false);
+                          let response = "Here is what I analyzed: Jaipur (Pink City) is highly safe (91/100). Visit Amber Fort early at 8 AM and skip monument lines by booking online!";
+                          if (chip.prompt.includes("Goa")) {
+                            response = "Goa Recommendations:\n-Patnem Beach for a quiet sunset.\n-Fontainhas Latin Quarters walk.\n-Safety: 94/100.";
+                          } else if (chip.prompt.includes("Leh")) {
+                            response = "Leh Safety Slush Check:\n-Leh-Manali highway open only for 4x4 vehicles.\n-Safety Check: Solang Valley paragliding is closed for 24h due to heavy monsoon rain.";
+                          }
+                          setAiLog(prev => [...prev, { sender: "ai", text: response }]);
+                        }, 800);
+                      }, 100);
+                    }}
+                    className="px-2.5 py-1 bg-white border border-sand rounded-full text-[9px] text-taupe font-cabinet font-extrabold hover:border-saffron hover:text-saffron transition-all whitespace-nowrap"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
 
-        {/* AI Chat Window Panel */}
-        {aiWidgetOpen && (
-          <div className="absolute bottom-16 right-0 w-[340px] h-[400px] bg-white border border-sand rounded-2xl shadow-2xl flex flex-col justify-between overflow-hidden">
-            {/* AI Header */}
-            <div className="p-4 border-b border-sand bg-gradient-to-r from-saffron/10 to-violet-500/10 flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-saffron to-violet-500 text-white flex items-center justify-center font-bold text-[12px]">🤖</div>
-              <div>
-                <h4 className="font-cabinet font-extrabold text-[13px] text-charcoal leading-none">Gemini AI Assistant</h4>
-                <span className="font-mono-dm text-[9px] text-[#2D6A4F] font-bold uppercase tracking-wider block mt-0.5">Online Helper</span>
+              {/* Chat Input */}
+              <div className="p-3 border-t border-sand bg-white flex gap-2 shrink-0">
+                <input 
+                  type="text" 
+                  placeholder="Ask AI Travel advisor..." 
+                  value={aiInput}
+                  onChange={e => setAiInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSendAiPrompt();
+                  }}
+                  className="flex-1 h-[34px] border border-sand rounded-xl px-3 font-cabinet text-[11.5px] outline-none focus:border-saffron"
+                />
+                <button 
+                  onClick={handleSendAiPrompt}
+                  disabled={!aiInput.trim()}
+                  className="h-[34px] px-3.5 rounded-xl bg-saffron text-white font-cabinet font-bold text-[11px] disabled:opacity-50"
+                >
+                  Ask
+                </button>
               </div>
             </div>
 
-            {/* Chat Log */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FFF8F0]/30">
-              {aiLog.map((log, idx) => (
-                <div key={idx} className={`flex ${log.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-2xl max-w-[85%] text-[12px] leading-relaxed ${
-                    log.sender === 'user'
-                      ? 'bg-saffron text-white rounded-tr-none'
-                      : 'bg-white border border-sand text-taupe rounded-tl-none shadow-sm'
-                  }`}>
-                    {log.text.split("\n").map((line, i) => <p key={i} className="mt-1">{line}</p>)}
-                  </div>
+            {/* Trending Tags list (LinkedIn Style) */}
+            <div className="bg-white border border-sand rounded-3xl p-5 space-y-4 shadow-sm">
+              <h4 className="font-cabinet font-extrabold text-[12.5px] text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                <Flame size={14} className="text-saffron fill-saffron" /> Trending Topics
+              </h4>
+              <div className="space-y-3 text-[12.5px] font-cabinet font-bold text-taupe">
+                <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Manali")}>
+                  <span>#ManaliAdventure</span>
+                  <span className="font-mono-dm text-[10px] text-taupe/40">340 travelers</span>
                 </div>
-              ))}
-              {isAiTyping && (
-                <div className="flex justify-start">
-                  <div className="p-3 bg-white border border-sand rounded-2xl rounded-tl-none flex gap-1 items-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-saffron animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
+                <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Japan")}>
+                  <span>#JapanCherryBlossom</span>
+                  <span className="font-mono-dm text-[10px] text-taupe/40">289 travelers</span>
                 </div>
-              )}
+                <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Goa")}>
+                  <span>#OffbeatGoa🌴</span>
+                  <span className="font-mono-dm text-[10px] text-taupe/40">156 travelers</span>
+                </div>
+                <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Budget")}>
+                  <span>#SoloUnder20k</span>
+                  <span className="font-mono-dm text-[10px] text-taupe/40">98 travelers</span>
+                </div>
+              </div>
             </div>
+          </aside>
 
-            {/* Quick Suggestion Chips */}
-            <div className="px-3 py-1.5 bg-[#FFF8F0]/80 border-t border-sand/30 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-              {[
-                { label: "Jaipur Tips 🏰", prompt: "Recommend tips and safety in Jaipur" },
-                { label: "Goa Sunset 🌴", prompt: "Patnem Beach and shacks in Goa" },
-                { label: "Leh Slush Warning ⚠️", prompt: "Safety checklist for Leh-Manali slush" },
-                { label: "Backpack Guide 💰", prompt: "Backpacking routes under 20k budget" }
-              ].map(chip => (
-                <button
-                  key={chip.label}
-                  onClick={() => {
-                    setAiInput(chip.prompt);
-                    setTimeout(() => {
-                      setAiLog(prev => [...prev, { sender: "user", text: chip.prompt }]);
-                      setIsAiTyping(true);
-                      setTimeout(() => {
-                        setIsAiTyping(false);
-                        let response = "Here is what I analyzed for your inquiry: Jaipur (Pink City) is highly safe (91/100). Visit Amber Fort early at 8 AM and skip monument lines by booking online!";
-                        if (chip.prompt.includes("Goa")) {
-                          response = "Goa Recommendations:\n-Patnem Beach for a quiet sunset.\n-Fontainhas Latin Quarters walk.\n-Safety: 94/100.";
-                        } else if (chip.prompt.includes("Leh")) {
-                          response = "Leh Safety Slush Check:\n-Leh-Manali highway open only for 4x4 vehicles.\n-Safety Check: Solang Valley paragliding is closed for 24h due to heavy monsoon rain.";
-                        } else if (chip.prompt.includes("budget")) {
-                          response = "Budget Backpacking:\n-Rajasthan loop (Jaipur-Jodhpur-Udaipur) for 7 days under ₹15,000 using local trains.";
-                        }
-                        setAiLog(prev => [...prev, { sender: "ai", text: response }]);
-                      }, 1000);
-                    }, 100);
-                  }}
-                  className="px-2.5 py-1 bg-white border border-sand rounded-full text-[10px] text-taupe font-cabinet font-semibold hover:border-saffron hover:text-saffron transition-all whitespace-nowrap"
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Input Bar */}
-            <div className="p-3 border-t border-sand bg-white flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Ask AI guide about Jaipur, safety..." 
-                value={aiInput}
-                onChange={e => setAiInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleSendAiPrompt();
-                }}
-                className="flex-1 h-[36px] border border-sand rounded-xl px-3 font-cabinet text-[12px] outline-none focus:border-saffron"
-              />
-              <button 
-                onClick={handleSendAiPrompt}
-                disabled={!aiInput.trim()}
-                className="h-[36px] px-3.5 rounded-xl bg-saffron text-white font-cabinet font-bold text-[12px] disabled:opacity-50"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* ---- MOBILE OVERLAYS & SHEETS ---- */}
-
-      {/* 1. Mobile Filter sheet */}
+      {/* ---- MOBILE FILTER DRAWER ---- */}
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end">
           <div className="bg-white w-[300px] h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-sand">
-                <h3 className="font-cabinet font-bold text-[16px] text-charcoal">Feed Filters</h3>
+                <h3 className="font-cabinet font-extrabold text-[15px] text-charcoal">Filter Feeds</h3>
                 <button onClick={() => setMobileFilterOpen(false)} className="p-1 hover:bg-sand rounded-full">
                   <X size={18} />
                 </button>
@@ -899,11 +1006,11 @@ export default function CommunitySpots() {
 
               <div className="space-y-6 mt-6">
                 <div>
-                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2">Travel Style</label>
+                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2 font-bold uppercase">Travel Style</label>
                   <select 
                     value={selectedStyle} 
                     onChange={e => setSelectedStyle(e.target.value)}
-                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px]"
+                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px] outline-none"
                   >
                     <option value="">All Styles</option>
                     {TRAVEL_STYLES.map(style => <option key={style} value={style}>{style}</option>)}
@@ -911,22 +1018,22 @@ export default function CommunitySpots() {
                 </div>
 
                 <div>
-                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2">Budget Limit</label>
+                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2 font-bold uppercase">Budget Limit</label>
                   <select 
                     value={selectedBudget} 
                     onChange={e => setSelectedBudget(e.target.value)}
-                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px]"
+                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px] outline-none"
                   >
                     {BUDGET_OPTIONS.map(opt => <option key={opt.label} value={opt.value}>{opt.label}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2">Duration</label>
+                  <label className="font-mono-dm text-[10px] text-taupe/65 block mb-2 font-bold uppercase">Duration</label>
                   <select 
                     value={selectedDuration} 
                     onChange={e => setSelectedDuration(e.target.value)}
-                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px]"
+                    className="w-full h-[40px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px] outline-none"
                   >
                     {DURATION_OPTIONS.map(opt => <option key={opt.label} value={opt.value}>{opt.label}</option>)}
                   </select>
@@ -937,13 +1044,13 @@ export default function CommunitySpots() {
             <div className="pt-6 border-t border-sand space-y-3">
               <button 
                 onClick={handleClearFilters}
-                className="w-full h-[44px] rounded-xl border border-sand text-taupe font-cabinet font-semibold text-[13px]"
+                className="w-full h-[42px] rounded-xl border border-sand text-taupe font-cabinet font-semibold text-[13px]"
               >
                 Clear All
               </button>
               <button 
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full h-[44px] rounded-xl bg-saffron text-white font-cabinet font-semibold text-[13px]"
+                className="w-full h-[42px] rounded-xl bg-saffron text-white font-cabinet font-bold text-[13px]"
               >
                 Apply Filters
               </button>
@@ -955,14 +1062,14 @@ export default function CommunitySpots() {
       {/* ---- ADD TO TRIP MODAL ---- */}
       {addToTripModalActivity && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-sand rounded-2xl p-6 w-full max-w-[400px] shadow-2xl relative">
+          <div className="bg-white border border-sand rounded-3xl p-6 w-full max-w-[400px] shadow-2xl relative">
             <button 
               onClick={() => setAddToTripModalActivity(null)} 
               className="absolute top-4 right-4 text-taupe hover:text-charcoal"
             >
               <X size={18} />
             </button>
-            <h3 className="font-display font-bold text-lg text-charcoal">Add Activity to Trip</h3>
+            <h3 className="font-display font-extrabold text-lg text-charcoal">Add Activity to Trip</h3>
             <p className="font-jakarta text-[13px] text-taupe mt-1.5">Choose one of your existing trips to append this activity to:</p>
             
             <div className="space-y-3 mt-5 max-h-[220px] overflow-y-auto pr-1">
@@ -981,7 +1088,7 @@ export default function CommunitySpots() {
                   <button 
                     key={trip._id} 
                     onClick={() => handleAddActivityToTrip(trip._id)}
-                    className="w-full p-3 border border-sand rounded-xl hover:border-saffron text-left font-cabinet font-semibold text-[13px] text-charcoal hover:bg-[#FFF8F0] transition-all flex items-center justify-between"
+                    className="w-full p-3 border border-sand rounded-xl hover:border-saffron text-left font-cabinet font-semibold text-[13px] text-charcoal hover:bg-[#FAF5EE] transition-all flex items-center justify-between"
                   >
                     <span>{trip.tripTitle || trip.location}</span>
                     <span className="font-mono-dm text-[10px] text-taupe bg-ivory px-2 py-0.5 rounded border border-sand">
@@ -995,13 +1102,13 @@ export default function CommunitySpots() {
         </div>
       )}
 
-      {/* ---- TRIP DETAIL MODAL (Reuses Itinerary visual cards) ---- */}
+      {/* ---- TRIP DETAIL TIMELINE MODAL ---- */}
       {detailModalPost && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-sand rounded-2xl w-full max-w-[800px] shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
-            <div className="p-5 border-b border-sand flex items-center justify-between shrink-0">
+          <div className="bg-white border border-sand rounded-3xl w-full max-w-[800px] shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-5 border-b border-sand flex items-center justify-between shrink-0 bg-white">
               <div>
-                <span className="font-mono-dm text-[10px] text-saffron uppercase tracking-widest font-bold">Community Trip Itinerary</span>
+                <span className="font-mono-dm text-[10px] text-saffron uppercase tracking-widest font-extrabold">Community Trip Itinerary</span>
                 <h2 className="font-display font-extrabold text-[24px] text-charcoal mt-1">{detailModalPost.title}</h2>
               </div>
               <button onClick={() => setDetailModalPost(null)} className="p-1 hover:bg-sand rounded-full">
@@ -1009,27 +1116,27 @@ export default function CommunitySpots() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#FFF8F0]">
-              <div className="bg-white border border-sand rounded-xl p-5 shadow-sm">
-                <h3 className="font-cabinet font-bold text-[16px] text-charcoal">Itinerary Overview</h3>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#FAF5EE]">
+              <div className="bg-white border border-sand rounded-2xl p-5 shadow-sm">
+                <h3 className="font-cabinet font-extrabold text-[15px] text-charcoal">Itinerary Overview</h3>
                 <p className="font-jakarta text-[13px] text-taupe mt-2 leading-relaxed">{detailModalPost.description}</p>
                 
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 bg-[#FFF8F0] rounded-xl text-center border border-sand/30">
-                    <span className="font-display font-bold text-[14px] text-charcoal">{detailModalPost.duration} days</span>
+                  <div className="p-3 bg-[#FAF5EE] rounded-xl text-center border border-sand/30">
+                    <span className="font-display font-extrabold text-[14px] text-charcoal">{detailModalPost.duration} days</span>
                     <span className="font-mono-dm text-[9px] text-taupe/60 uppercase block mt-1">Duration</span>
                   </div>
-                  <div className="p-3 bg-[#FFF8F0] rounded-xl text-center border border-sand/30">
-                    <span className="font-display font-bold text-[14px] text-saffron">₹{(detailModalPost.budget || 0).toLocaleString()}</span>
+                  <div className="p-3 bg-[#FAF5EE] rounded-xl text-center border border-sand/30">
+                    <span className="font-display font-extrabold text-[14px] text-[#2D6A4F]">₹{(detailModalPost.budget || 0).toLocaleString()}</span>
                     <span className="font-mono-dm text-[9px] text-taupe/60 uppercase block mt-1">Est. Budget</span>
                   </div>
-                  <div className="p-3 bg-[#FFF8F0] rounded-xl text-center border border-sand/30">
-                    <span className="font-display font-bold text-[14px] text-charcoal">{detailModalPost.destinationName}</span>
+                  <div className="p-3 bg-[#FAF5EE] rounded-xl text-center border border-sand/30">
+                    <span className="font-display font-extrabold text-[14px] text-charcoal">{detailModalPost.destinationName}</span>
                     <span className="font-mono-dm text-[9px] text-taupe/60 uppercase block mt-1">Region</span>
                   </div>
-                  <div className="p-3 bg-[#FFF8F0] rounded-xl text-center border border-sand/30">
-                    <span className="font-display font-bold text-[14px] text-charcoal">{detailModalPost.rating || 'N/A'}</span>
-                    <span className="font-mono-dm text-[9px] text-taupe/60 uppercase block mt-1">Community Rating</span>
+                  <div className="p-3 bg-[#FAF5EE] rounded-xl text-center border border-sand/30">
+                    <span className="font-display font-extrabold text-[14px] text-charcoal">{detailModalPost.rating || 'N/A'}</span>
+                    <span className="font-mono-dm text-[9px] text-taupe/60 uppercase block mt-1">Rating</span>
                   </div>
                 </div>
               </div>
@@ -1037,11 +1144,11 @@ export default function CommunitySpots() {
               {/* Day Timeline Rendering */}
               {detailModalPost.tripData?.dailyItinerary && (
                 <div className="space-y-6">
-                  <h3 className="font-display font-bold text-lg text-charcoal">Day-by-Day Stops</h3>
+                  <h3 className="font-display font-extrabold text-[16px] text-charcoal">Day-by-Day Stops</h3>
                   {detailModalPost.tripData.dailyItinerary.map(day => (
-                    <div key={day.day} className="bg-white border border-sand rounded-xl p-5 shadow-sm space-y-4">
+                    <div key={day.day} className="bg-white border border-sand rounded-2xl p-5 shadow-sm space-y-4">
                       <div className="pb-3 border-b border-sand flex items-center justify-between">
-                        <h4 className="font-cabinet font-bold text-[15px] text-charcoal">Day {day.day} — {day.theme}</h4>
+                        <h4 className="font-cabinet font-extrabold text-[14.5px] text-charcoal">Day {day.day} — {day.theme}</h4>
                       </div>
                       
                       <div className="space-y-3">
@@ -1049,9 +1156,9 @@ export default function CommunitySpots() {
                           <div key={i} className="flex gap-3 items-start border-l-2 border-saffron/30 pl-4 py-1">
                             <Clock size={12} className="text-saffron mt-1 shrink-0" />
                             <div>
-                              <h5 className="font-cabinet font-semibold text-[13px] text-charcoal flex items-center gap-2">
+                              <h5 className="font-cabinet font-bold text-[13px] text-charcoal flex items-center gap-2">
                                 {a.time} - {a.activity}
-                                {a.location && <span className="font-mono-dm text-[9px] text-taupe/60">📍 {a.location}</span>}
+                                {a.location && <span className="font-mono-dm text-[9px] text-taupe/65">📍 {a.location}</span>}
                               </h5>
                               <p className="font-jakarta text-[12px] text-taupe mt-1">{a.description}</p>
                             </div>
@@ -1060,8 +1167,8 @@ export default function CommunitySpots() {
                       </div>
 
                       {day.safetyNotes && (
-                        <div className="p-3 bg-[#C0392B]/5 border border-[#C0392B]/20 rounded-lg flex items-start gap-2">
-                          <span className="font-mono-dm text-[9.5px] text-[#C0392B] font-bold uppercase shrink-0 mt-0.5">Safety Tip:</span>
+                        <div className="p-3 bg-[#C0392B]/5 border border-[#C0392B]/20 rounded-xl flex items-start gap-2">
+                          <span className="font-mono-dm text-[9.5px] text-[#C0392B] font-bold uppercase shrink-0 mt-0.5">Safety Check:</span>
                           <p className="font-jakarta text-[11.5px] text-[#C0392B]">{day.safetyNotes}</p>
                         </div>
                       )}
@@ -1074,7 +1181,7 @@ export default function CommunitySpots() {
             <div className="p-5 border-t border-sand shrink-0 bg-white flex justify-between items-center">
               <button 
                 onClick={() => setDetailModalPost(null)}
-                className="h-[40px] px-6 rounded-full border border-sand text-taupe font-cabinet font-semibold text-[13px]"
+                className="h-[40px] px-6 rounded-full border border-sand text-taupe font-cabinet font-extrabold text-[13px]"
               >
                 Close View
               </button>
@@ -1124,7 +1231,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
   const handleSubmitPost = async () => {
     if (!title || !description || !destinationName) {
-      toast.error("Please fill in the required fields (Title, Description, Destination).");
+      toast.error("Please fill in the required fields (Title, Description, Destination Name).");
       return;
     }
 
@@ -1168,9 +1275,9 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 font-jakarta">
-      <div className="bg-white border border-sand rounded-2xl w-full max-w-[500px] shadow-2xl relative flex flex-col max-h-[90vh]">
+      <div className="bg-white border border-sand rounded-3xl w-full max-w-[500px] shadow-2xl relative flex flex-col max-h-[90vh]">
         <div className="p-5 border-b border-sand flex items-center justify-between shrink-0">
-          <h3 className="font-display font-bold text-[20px] text-charcoal">Share Travel Card</h3>
+          <h3 className="font-display font-extrabold text-[20px] text-charcoal">Share Travel Card</h3>
           <button onClick={onClose} className="p-1 hover:bg-sand rounded-full">
             <X size={18} />
           </button>
@@ -1179,8 +1286,8 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Post Type Selector */}
           <div>
-            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Card Type</label>
-            <div className="flex gap-2 p-1 bg-ivory rounded-xl border border-sand">
+            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold">Card Type</label>
+            <div className="flex gap-2 p-1 bg-[#FAF5EE] rounded-xl border border-sand">
               {["experience", "trip", "activity"].map(type => (
                 <button 
                   key={type}
@@ -1201,7 +1308,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
           {/* Select Trip if postType is Trip */}
           {postType === "trip" && (
             <div>
-              <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Select Itinerary</label>
+              <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold">Select Itinerary</label>
               <select 
                 value={selectedTripId}
                 onChange={e => {
@@ -1212,7 +1319,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
                     setDestinationName(trip.location);
                   }
                 }}
-                className="w-full h-[44px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px] outline-none"
+                className="w-full h-[44px] px-3 border border-sand rounded-xl bg-white text-charcoal font-cabinet text-[13px] outline-none focus:border-saffron"
               >
                 <option value="">-- Choose one of your trips --</option>
                 {trips.map(trip => (
@@ -1224,7 +1331,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
           {/* Title */}
           <div>
-            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Card Title *</label>
+            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold font-bold">Card Title *</label>
             <input 
               type="text" 
               placeholder="e.g., Hidden sunset spot or 4 Days in Kyoto" 
@@ -1236,7 +1343,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
           {/* Destination */}
           <div>
-            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Destination Location *</label>
+            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold">Destination Location *</label>
             <input 
               type="text" 
               placeholder="e.g. Kyoto, Japan or Goa, India" 
@@ -1248,7 +1355,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
           {/* Description */}
           <div>
-            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Description & Tips *</label>
+            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold">Description & Tips *</label>
             <textarea 
               placeholder="Write travel instructions, packing tips, or local advice..." 
               value={description}
@@ -1261,7 +1368,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
           {postType !== "trip" && (
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5">Cost (₹)</label>
+                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5 font-bold">Cost (₹)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 2500" 
@@ -1271,7 +1378,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
                 />
               </div>
               <div>
-                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5">Duration (Days)</label>
+                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5 font-bold">Duration (Days)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 1" 
@@ -1281,11 +1388,11 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
                 />
               </div>
               <div>
-                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5">Rating (1-5)</label>
+                <label className="font-mono-dm text-[9.5px] text-taupe/65 uppercase block mb-1.5 font-bold">Rating (1-5)</label>
                 <select 
                   value={rating}
                   onChange={e => setRating(e.target.value)}
-                  className="w-full h-[40px] border border-sand rounded-xl px-3 bg-white text-charcoal font-cabinet text-[13px]"
+                  className="w-full h-[40px] border border-sand rounded-xl px-3 bg-white text-charcoal font-cabinet text-[13px] outline-none"
                 >
                   {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Stars</option>)}
                 </select>
@@ -1295,7 +1402,7 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
 
           {/* Tags */}
           <div>
-            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2">Tags (comma-separated)</label>
+            <label className="font-mono-dm text-[10px] text-taupe/65 uppercase tracking-wider block mb-2 font-bold">Tags (comma-separated)</label>
             <input 
               type="text" 
               placeholder="e.g. Japan, Adventure, Budget, StreetFood" 
@@ -1309,19 +1416,19 @@ function ShareExperienceModal({ onClose, trips, onSuccess }) {
         <div className="p-5 border-t border-sand shrink-0 bg-white rounded-b-2xl flex justify-between gap-4">
           <button 
             onClick={onClose}
-            className="flex-1 h-[46px] rounded-xl border border-sand text-taupe font-cabinet font-semibold text-[13px]"
+            className="flex-1 h-[44px] rounded-xl border border-sand text-taupe font-cabinet font-semibold text-[13px]"
           >
             Cancel
           </button>
           <button 
             onClick={handleSubmitPost}
             disabled={isSubmitting}
-            className="flex-1 h-[46px] rounded-xl bg-saffron text-white font-cabinet font-bold text-[13px] flex items-center justify-center gap-2"
+            className="flex-1 h-[44px] rounded-xl bg-saffron text-white font-cabinet font-bold text-[13px] flex items-center justify-center gap-2 shadow-sm"
           >
             {isSubmitting ? (
               <><Loader2 size={16} className="animate-spin" /> Publishing...</>
             ) : (
-              "Attach & Send"
+              "Publish Post"
             )}
           </button>
         </div>
