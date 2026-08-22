@@ -358,5 +358,3 @@ export function DangerZoneSection({ onDeactivate, onDelete }) {
     </SectionCard>
   );
 }
-
-// added by Rishikesh

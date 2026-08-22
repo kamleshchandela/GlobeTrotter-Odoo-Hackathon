@@ -236,5 +236,3 @@ export default function MyTripsTab() {
     </div>
   );
 }
-
-// added by Rishikesh

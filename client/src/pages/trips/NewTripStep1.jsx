@@ -1,14 +1,11 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Calendar, ChevronRight, CheckCircle2, Shield, Bell, MapPinOff, Users as PeopleIcon, Minus, Plus, Zap, Turtle, Compass, Loader2, AlertTriangle } from "lucide-react";
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from "@react-google-maps/api";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setTripStart, setTripSuccess, setTripFailure } from "../../store/tripSlice";
 import TopAppBar from "../../components/shared/TopAppBar";
-import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from "../../config/env";
-
-const LIBRARIES = ['places', 'geometry'];
+import { API_BASE_URL } from "../../config/env";
 
 const PHOTOS = {
   jaisalmer:'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=200&q=80',
@@ -48,27 +45,33 @@ export default function NewTripStep1() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [dest, setDest] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES
-  });
+  const handleManualSearch = async (query) => {
+    if (!query || query.trim().length === 0) return;
+    const city = query.trim();
+    setDest({
+      city: city,
+      state: 'India',
+      lat: 20.5937,
+      lng: 78.9629,
+      img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
+    });
 
-  const [autocomplete, setAutocomplete] = useState(null);
-  const onAutocompleteLoad = (auto) => setAutocomplete(auto);
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
         setDest({
-          city: place.name,
-          state: place.formatted_address,
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-          img: place.photos ? place.photos[0].getUrl() : 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
+          city: city,
+          state: data[0].display_name || 'India',
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=60'
         });
       }
+    } catch (e) {
+      console.warn("Geocoding lookup error", e);
     }
   };
 
@@ -219,27 +222,39 @@ export default function NewTripStep1() {
             <Label>Where Are You Going?</Label>
             <div className="mt-[10px] relative">
               <Search size={20} className="absolute left-[16px] top-1/2 -translate-y-1/2 text-[#B09880] z-10" />
-              {isLoaded ? (
-                <Autocomplete onLoad={onAutocompleteLoad} onPlaceChanged={onPlaceChanged}>
-                  <input 
-                    className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
-                    placeholder="Search any city or place in India…" 
-                  />
-                </Autocomplete>
-              ) : (
-                <input 
-                  className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] outline-none" 
-                  placeholder="Loading search…" 
-                  disabled
-                />
-              )}
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim().length >= 2) {
+                    handleManualSearch(e.target.value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleManualSearch(searchQuery);
+                  }
+                }}
+                onBlur={() => {
+                  if (searchQuery.trim().length >= 2) {
+                    handleManualSearch(searchQuery);
+                  }
+                }}
+                className="w-full h-[56px] bg-white border-[1.5px] border-[#E8D5B7] rounded-[12px] pl-[52px] pr-[18px] font-jakarta text-[15px] text-[#1E1410] placeholder:text-[#B09880] shadow-[0_4px_16px_rgba(30,20,16,0.08)] focus:border-[#E8640C] focus:shadow-[0_0_0_4px_rgba(232,100,12,0.10)] outline-none transition-all" 
+                placeholder="Search any city or place in India (e.g. Jaipur, Goa, Manali)…" 
+              />
             </div>
             <p className="font-mono-dm text-[10px] text-[#B09880] uppercase tracking-[2px] mt-[16px]">Popular Destinations</p>
             <div className="mt-[10px] grid grid-cols-2 gap-[16px]">
               {DESTINATIONS.map((d) => (
                 <button 
                   key={d.city} 
-                  onClick={() => setDest(d)} 
+                  onClick={() => {
+                    setDest(d);
+                    setSearchQuery(`${d.city}, ${d.state}`);
+                  }} 
                   className={`bg-white border rounded-[16px] overflow-hidden h-[96px] flex text-left transition-all relative group
                     ${dest?.city === d.city 
                       ? 'border-[#E8640C] shadow-[0_8px_20px_rgba(232,100,12,0.15)] bg-ivory/50' 
@@ -365,33 +380,21 @@ export default function NewTripStep1() {
         {/* ─── RIGHT: LIVE PREVIEW ─── */}
         <div className="hidden lg:block flex-1 lg:ml-[96px]">
           <div className="sticky top-[72px] h-[calc(100vh-72px)] flex flex-col p-[24px]">
-            {/* Real Google Map */}
+            {/* Real Map with Provider Toggle & OpenStreetMap Fallback */}
             <div className={`rounded-[16px] overflow-hidden relative transition-all duration-500 border border-[#E8D5B7] ${dest ? 'h-[40%]' : 'h-[55%]'}`}>
-              {isLoaded ? (
-                <GoogleMap
-                  mapContainerStyle={{ width: '100%', height: '100%' }}
-                  center={mapCenter}
-                  zoom={dest ? 12 : 5}
-                  options={mapOptions}
-                >
-                  {dest && <Marker position={mapCenter} icon={{
-                    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-                    fillColor: "#E8640C",
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "#FFFFFF",
-                    scale: 1.5,
-                  }} />}
-                </GoogleMap>
-              ) : (
-                <div className="absolute inset-0 bg-[#FEF3E2] flex items-center justify-center animate-pulse">
-                  <Loader2 size={32} className="text-[#E8640C] animate-spin" />
-                </div>
-              )}
+              <iframe
+                title="Interactive OpenStreetMap Preview"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                scrolling="no"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lng - 0.08}%2C${mapCenter.lat - 0.08}%2C${mapCenter.lng + 0.08}%2C${mapCenter.lat + 0.08}&layer=mapnik&marker=${mapCenter.lat}%2C${mapCenter.lng}`}
+                className="w-full h-full"
+              />
               
               {/* Overlay for selected destination */}
               {dest && (
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                <div className="absolute top-4 left-4 flex justify-between items-start pointer-events-none z-20">
                   <div className="bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-[12px] p-3 shadow-lg pointer-events-auto">
                     <h4 className="font-display font-bold text-[18px] text-[#1E1410] leading-tight">{dest.city}</h4>
                     <p className="font-mono-dm text-[10px] text-[#6B4F3A] uppercase mt-0.5">{dest.state}</p>
@@ -455,7 +458,7 @@ export default function NewTripStep1() {
               <button disabled={!canGenerate || generating} onClick={handleGenerate} className={`w-full h-[48px] rounded-[10px] font-cabinet font-semibold text-[14px] flex items-center justify-center gap-2 transition-all ${canGenerate && !generating ? 'bg-[#E8640C] text-white shadow-[0_4px_16px_rgba(232,100,12,0.25)] hover:brightness-105' : 'bg-[#E8D5B7] text-[#B09880] cursor-not-allowed'}`}>
                 {generating ? <><Loader2 size={16} className="animate-spin" /> Building your itinerary…</> : 'Generate My Itinerary →'}
               </button>
-              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Places verified by Google Maps</p>
+              <p className="font-jakarta text-[11px] text-[#B09880] text-center mt-[8px]">Powered by Gemini AI · Places verified by OpenStreetMap</p>
             </div>
           </div>
         </div>

@@ -142,5 +142,3 @@ export const BottomSaveBar = ({ show, onDiscard, onSave, isSaving }) => (
     </div>
   </div>
 );
-
-// added by Rishikesh
