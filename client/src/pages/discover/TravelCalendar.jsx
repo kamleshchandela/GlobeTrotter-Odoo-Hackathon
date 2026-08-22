@@ -650,44 +650,36 @@ export default function TravelCalendar() {
                               setAddModalOpen(true);
                             }
                           }}
-                          className={`bg-white/95 border rounded-2xl p-3.5 min-h-[95px] flex flex-col justify-between hover:border-saffron hover:shadow-xl hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer ${
+                          className={`border rounded-2xl p-3 min-h-[90px] flex flex-col justify-between hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer ${
                             dayEvents.length > 0 
-                              ? 'bg-gradient-to-br from-white to-[#FEF3E2]/40 border-saffron/40 shadow-sm' 
-                              : 'border-sand/70'
+                              ? 'bg-emerald-50/65 border-emerald-300 text-emerald-950 hover:border-emerald-500 hover:shadow-[0_8px_30px_rgba(16,185,129,0.12)]' 
+                              : 'bg-white border-sand/70 text-charcoal hover:border-saffron hover:shadow-md'
                           }`}
                         >
                           <div className="flex justify-between items-start">
-                            <span className="font-cabinet font-extrabold text-[12.5px] text-charcoal">{day.dayNum}</span>
+                            <span className="font-cabinet font-extrabold text-[12.5px]">{day.dayNum}</span>
                             {dayEvents.length > 0 && (
-                              <span className="font-mono-dm text-[8.5px] text-saffron bg-[#E8640C]/10 border border-[#E8640C]/20 px-1.5 py-0.5 rounded-full truncate tracking-tight max-w-[80px]">
+                              <span className="font-mono-dm text-[8.5px] text-emerald-800 bg-emerald-100/80 border border-emerald-200/50 px-1.5 py-0.5 rounded-full truncate tracking-tight max-w-[85px]">
                                 📍 {dayEvents[0].location || dayEvents[0].tripTitle}
                               </span>
                             )}
                           </div>
 
-                          {/* Render Color Coded Event Capsules in cells */}
-                          <div className="space-y-1 mt-2">
-                            {dayEvents.slice(0, 2).map((evt, idx) => {
-                              let capsuleBg = "bg-[#E8640C]/10 text-[#E8640C] border-[#E8640C]/20";
-                              if (evt.type === "transport") capsuleBg = "bg-[#1B4332]/10 text-[#1B4332] border-[#1B4332]/25";
-                              if (evt.type === "hotel") capsuleBg = "bg-violet-600/10 text-violet-600 border-violet-600/25";
-                              if (evt.type === "meal") capsuleBg = "bg-[#4D908E]/10 text-[#4D908E] border-[#4D908E]/25";
-
-                              return (
-                                <div key={idx} className={`flex items-center gap-1 text-[9.5px] px-1.5 py-0.5 rounded border font-cabinet font-bold truncate ${capsuleBg}`}>
-                                  <span className="truncate">{evt.title}</span>
-                                </div>
-                              );
-                            })}
-                            {dayEvents.length > 2 && (
-                              <span className="font-mono-dm text-[9px] text-saffron bg-[#E8640C]/5 border border-[#E8640C]/10 px-1 py-0.2 rounded block font-bold">
-                                +{dayEvents.length - 2} more stops
-                              </span>
-                            )}
-                          </div>
-
-                          {daySpend > 0 && (
-                            <span className="font-mono-dm text-[9.5px] text-[#1B4332] font-extrabold mt-1 block">₹{daySpend.toLocaleString()}</span>
+                          {/* Minimalist text summary instead of heavy capsules */}
+                          {dayEvents.length > 0 ? (
+                            <div className="space-y-1.5 mt-2 flex-1">
+                              <div className="text-[10px] text-emerald-800/80 font-cabinet font-extrabold text-left flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                {dayEvents.length} Stops Planned
+                              </div>
+                              {daySpend > 0 && (
+                                <span className="font-mono-dm text-[9.5px] text-[#1B4332] font-extrabold block text-left">
+                                  ₹{daySpend.toLocaleString()} spend
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex-1" />
                           )}
                         </div>
                       );
