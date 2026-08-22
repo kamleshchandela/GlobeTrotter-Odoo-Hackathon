@@ -14,3 +14,5 @@ const ProtectedRoute = ({ redirectTo = "/auth/login" }) => {
 };
 
 export default ProtectedRoute;
+
+// added by Rishikesh
