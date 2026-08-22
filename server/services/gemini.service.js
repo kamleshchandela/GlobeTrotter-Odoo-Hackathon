@@ -21,7 +21,7 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
 
     const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
@@ -70,7 +70,7 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
 export const generateItinerary = async (tripData) => {
   try {
     const prompt = `
-      Generate a realistic, detailed travel itinerary for India with parameters:
+      Generate a realistic travel itinerary for India with parameters:
       - Destination: ${tripData.location}
       - Duration: ${tripData.duration} days
       - Budget/Stay: ${tripData.stay}
@@ -79,10 +79,12 @@ export const generateItinerary = async (tripData) => {
       - Interests: ${tripData.interests.join(", ")}
       - Vibe: ${tripData.vibe}
 
-      Only suggest real places. Return ONLY valid JSON with structure:
+      Limit to 3 activities per day with crisp descriptions.
+      Return ONLY a raw JSON object with key "tripTitle", "overview", "dailyItinerary", "estimatedCosts", "essentialPacking". No markdown, no prose.
+      JSON structure:
       {
         "tripTitle": "Catchy title",
-        "overview": "Summary of the trip atmosphere and expectations",
+        "overview": "Short summary",
         "dailyItinerary": [
           {
             "day": 1,
@@ -91,12 +93,12 @@ export const generateItinerary = async (tripData) => {
               {
                 "time": "09:30 AM",
                 "activity": "Activity title",
-                "description": "Crisp 2-sentence description of key highlights and insider tips.",
+                "description": "Short highlight.",
                 "location": "Specific existing place name (e.g. City Palace, Udaipur)"
               }
             ],
             "foodSuggestions": ["Restaurant 1", "Restaurant 2"],
-            "safetyNotes": "Location-specific safety tips for the day."
+            "safetyNotes": "Location safety tip."
           }
         ],
         "estimatedCosts": {
@@ -118,7 +120,7 @@ export const generateItinerary = async (tripData) => {
       "AIzaSyB74Hnt8oTLeZ_lPlpoa7MIMpNMovcyhfY"
     ].filter((key, idx, self) => key && self.indexOf(key) === idx);
 
-    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"];
+    const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
     let response = null;
     let lastError = null;
 
@@ -159,32 +161,42 @@ export const generateItinerary = async (tripData) => {
     }
 
     const text = result.candidates[0].content.parts[0].text;
-    const cleanJson = text.replace(/```json|```/gi, "").trim();
-    const parsedItinerary = JSON.parse(cleanJson);
+    
+    // Robust JSON extraction
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Could not extract valid JSON from Gemini output.");
+    }
 
-    // Fast Non-Blocking Place Grounding with 2.5s max timeout cap
+    const parsedItinerary = JSON.parse(jsonMatch[0]);
+
+    // Fast Non-Blocking Place Grounding with 1.0s max timeout cap
     const placePromises = [];
-    for (const day of parsedItinerary.dailyItinerary) {
-      for (const activity of day.activities) {
-        if (activity.location) {
-          placePromises.push(
-            getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
-              if (groundedData) {
-                activity.placeId = groundedData.placeId;
-                activity.lat = groundedData.lat;
-                activity.lng = groundedData.lng;
-                activity.photoUrl = groundedData.photoUrl;
-              }
-            })
-          );
+    if (parsedItinerary.dailyItinerary && Array.isArray(parsedItinerary.dailyItinerary)) {
+      for (const day of parsedItinerary.dailyItinerary) {
+        if (day.activities && Array.isArray(day.activities)) {
+          for (const activity of day.activities) {
+            if (activity.location) {
+              placePromises.push(
+                getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
+                  if (groundedData) {
+                    activity.placeId = groundedData.placeId;
+                    activity.lat = groundedData.lat;
+                    activity.lng = groundedData.lng;
+                    activity.photoUrl = groundedData.photoUrl;
+                  }
+                })
+              );
+            }
+          }
         }
       }
     }
 
-    // Wait max 2.5 seconds for place grounding, or proceed immediately
+    // Cap grounding wait time to 1.0s max so response returns almost instantly
     await Promise.race([
       Promise.all(placePromises),
-      new Promise(resolve => setTimeout(resolve, 2500))
+      new Promise(resolve => setTimeout(resolve, 1000))
     ]);
 
     return parsedItinerary;
