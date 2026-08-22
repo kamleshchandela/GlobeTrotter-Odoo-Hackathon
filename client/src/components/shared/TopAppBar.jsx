@@ -35,6 +35,7 @@ export default function TopAppBar({
             {[
               { label: 'Home', path: '/home' },
               { label: 'Explore', path: '/explore' },
+              { label: 'Community', path: '/community' },
               { label: 'Healthcare', path: '/healthcare' },
               { label: 'Trips', path: '/trips/new' },
             ].map(({ label, path }) => {
@@ -100,6 +101,7 @@ export default function TopAppBar({
             {[
               { label: 'Home', path: '/home' },
               { label: 'Explore', path: '/explore' },
+              { label: 'Community', path: '/community' },
               { label: 'Healthcare', path: '/healthcare' },
               { label: 'Trips', path: '/trips/new' },
               { label: 'Account', path: '/account' },

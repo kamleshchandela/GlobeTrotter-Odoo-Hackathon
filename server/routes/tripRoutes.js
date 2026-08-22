@@ -65,4 +65,18 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
+router.put('/:id', protect, async (req, res) => {
+  try {
+    const trip = await Trip.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      req.body,
+      { new: true }
+    );
+    if (!trip) return res.status(404).json({ message: 'Trip not found' });
+    res.json(trip);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
