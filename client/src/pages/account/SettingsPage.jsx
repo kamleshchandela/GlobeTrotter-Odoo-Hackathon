@@ -144,3 +144,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+// added by Rishikesh
