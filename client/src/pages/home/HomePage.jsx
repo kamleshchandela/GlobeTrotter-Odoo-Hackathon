@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Bell, Calendar, Sun, Shield, Clock, ChevronRight, TrendingUp, HeartPulse, CheckCircle2, Circle, Users, Compass, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, MapPin, Bell, Calendar, Sun, Shield, Clock, ChevronRight, TrendingUp, HeartPulse, CheckCircle2, Circle, Users, Compass, Sparkles, ArrowRight, Loader2, Trash2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
 import TopAppBar from '../../components/shared/TopAppBar';
@@ -25,9 +25,19 @@ const SectionLabel = ({ children }) => (
   <p className="font-mono-dm text-[10px] uppercase tracking-[2px] text-[#B09880] mb-[2px]">{children}</p>
 );
 
+import { useDispatch } from 'react-redux';
+import { fetchTrips, deleteTrip } from '../../store/tripSlice';
+import toast from 'react-hot-toast';
+
 const Home = () => {
   const user = useSelector((state) => state.auth.user);
-  const firstName = user?.fullName?.split(' ')[0] || 'Traveler';
+  const { trips, loading } = useSelector((state) => state.trip);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchTrips());
+  }, [dispatch]);
+
   return (
     <div className="min-h-screen bg-[#FFF8F0] relative font-jakarta">
       <Helmet>
@@ -46,23 +56,7 @@ const Home = () => {
         {/* Banner Image - Slideshow Hero Component */}
         <C1_WelcomeHero />
 
-        {/* Global Search and Filters Controls Bar */}
-        <div className="w-full flex flex-col md:flex-row gap-3 items-center justify-between bg-white border border-[#E8D5B7]/40 rounded-[20px] p-4 shadow-[0_4px_20px_rgba(30,20,16,0.03)]">
-          <div className="relative w-full md:max-w-[400px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B09880]" size={18} />
-            <input
-              type="text"
-              placeholder="Search destinations, states, safety scores..."
-              className="w-full h-[44px] pl-10 pr-4 rounded-full border border-[#E8D5B7]/50 focus:border-[#E8640C] focus:outline-none bg-[#FFF8F0]/30 font-jakarta text-[14px]"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto shrink-0 pb-1 md:pb-0">
-            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Group by</button>
-            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Filter</button>
-            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Sort by...</button>
-          </div>
-        </div>
+
 
         {/* Top Regional Selections */}
         <div>
@@ -83,6 +77,62 @@ const Home = () => {
           {/* Main Dashboard Layout showing Safety snapshot alongside history */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
             <div className="flex flex-col gap-6">
+              {/* Dynamic list of previous trips */}
+              <div className="flex flex-col gap-4">
+                {loading ? (
+                  <div className="flex items-center justify-center p-8 bg-white border border-[#E8D5B7]/40 rounded-[24px]">
+                    <Loader2 className="animate-spin text-[#E8640C]" size={24} />
+                  </div>
+                ) : trips && trips.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {trips.map((trip) => (
+                      <div 
+                        key={trip._id}
+                        className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-5 shadow-[0_4px_20px_rgba(30,20,16,0.03)] hover:shadow-[0_8px_30px_rgba(30,20,16,0.08)] hover:border-[#E8640C]/25 transition-all flex flex-col justify-between h-[160px] relative group"
+                      >
+                        <Link to={`/trips/${trip._id}`} className="absolute inset-0 z-0 rounded-[24px]" />
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (window.confirm("Are you sure you want to delete this trip?")) {
+                              dispatch(deleteTrip(trip._id))
+                                .unwrap()
+                                .then(() => toast.success("Trip deleted successfully"))
+                                .catch((err) => toast.error(err || "Failed to delete trip"));
+                            }
+                          }}
+                          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white border border-[#E8D5B7]/60 flex items-center justify-center text-[#B09880] hover:text-[#C0392B] hover:border-[#C0392B]/50 transition-colors shadow-sm"
+                          title="Delete Trip"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                        <div className="z-0 relative pointer-events-none">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FFF8F0] border border-[#E8D5B7]/30 font-mono-dm text-[8px] text-[#E8640C] uppercase tracking-wider mb-2">
+                            {trip.duration} Days
+                          </span>
+                          <h4 className="font-cabinet font-bold text-[16px] text-[#1E1410] truncate group-hover:text-[#E8640C] transition-colors">
+                            {trip.tripTitle || trip.location}
+                          </h4>
+                          <p className="font-jakarta text-[12px] text-[#6B4F3A] mt-1 truncate flex items-center gap-1">
+                            <MapPin size={12} className="text-[#E8640C]" />
+                            <span>{trip.location} · {trip.budget}</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#FFF8F0] z-0 relative pointer-events-none">
+                          <span className="font-mono-dm text-[10px] text-[#B09880]">Saved Details</span>
+                          <ChevronRight size={14} className="text-[#B09880] group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-8 text-center shadow-[0_4px_24px_rgba(30,20,16,0.03)]">
+                    <p className="font-jakarta text-[13px] text-[#6B4F3A]">No previous trips found. Plan your first adventure!</p>
+                  </div>
+                )}
+              </div>
+              
               <C3_SafetySnapshot />
               <C2_HowItWorks />
             </div>
@@ -435,13 +485,13 @@ const C5_Trending = () => {
     { img: PHOTOS.meghalaya, title: "Meghalaya Valley", loc: "Northeast India", tags: ["Forests", "Bridges"] },
     { img: PHOTOS.ladakh, title: "Leh-Ladakh Heights", loc: "Himalayan Range", tags: ["Peaks", "Cold Desert"] },
     { img: PHOTOS.kerala, title: "Alleppey Backwaters", loc: "Kerala Coast", tags: ["Houseboats", "Lakes"] },
-    { url: "https://images.unsplash.com/photo-1600100397608-f010b423b971?auto=format&fit=crop&w=600&q=80", title: "Junagadh Girnar", loc: "Gujarat Hills", tags: ["Temples", "Forest"] },
+    { img: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80", title: "Junagadh Girnar", loc: "Gujarat Hills", tags: ["Temples", "Forest"] },
     { img: PHOTOS.jaisalmer, title: "Jaisalmer Fort", loc: "Rajasthan Desert", tags: ["Dunes", "Culture"] },
     { img: PHOTOS.varanasi, title: "Varanasi Ghats", loc: "Uttar Pradesh", tags: ["Spiritual", "Ganga"] },
     { img: PHOTOS.ranakpur, title: "Ranakpur Temples", loc: "Rajasthan Forest", tags: ["Carvings", "Peace"] },
     { img: PHOTOS.kumbhalgarh, title: "Kumbhalgarh Wall", loc: "Mewar Kingdom", tags: ["Fortress", "History"] },
-    { img: PHOTOS.bundi, title: "Bundi stepwells", loc: "Rajasthan Oasis", tags: ["Architecture", "Heritage"] },
-    { img: PHOTOS.chettinad, title: "Chettinad Mansions", loc: "Tamil Nadu Coast", tags: ["Palaces", "Feasts"] }
+    { img: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80", title: "Bundi stepwells", loc: "Rajasthan Oasis", tags: ["Architecture", "Heritage"] },
+    { img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80", title: "Chettinad Mansions", loc: "Tamil Nadu Coast", tags: ["Palaces", "Feasts"] }
   ];
 
   const carouselRef = React.useRef(null);
@@ -475,17 +525,17 @@ const C5_Trending = () => {
       {/* Container with hidden scrollbars and snapping logic */}
       <div 
         ref={carouselRef}
-        className="flex gap-[48px] overflow-x-auto pb-6 pt-4 scroll-smooth snap-x select-none pl-12"
+        className="flex gap-[48px] overflow-x-auto overflow-y-hidden pb-6 pt-4 scroll-smooth snap-x select-none pl-12"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
       >
         {trending.map((t, i) => (
-          <div key={i} className="shrink-0 relative snap-center flex items-end">
+          <div key={i} className="shrink-0 relative snap-center flex items-end h-[240px]">
             {/* Netflix-style giant background number */}
             <span 
-              className="absolute left-[-42px] bottom-[-20px] font-cabinet font-extrabold text-[120px] leading-none select-none pointer-events-none text-transparent z-10 transition-all duration-300 group-hover:scale-105"
+              className="absolute left-[-42px] bottom-[-15px] font-cabinet font-extrabold text-[120px] leading-none select-none pointer-events-none text-transparent z-10 transition-all duration-300 group-hover:scale-105"
               style={{
                 WebkitTextStroke: '2px rgba(232, 100, 12, 0.45)',
                 fontFamily: 'Cabinet Grotesk, sans-serif'
@@ -495,7 +545,7 @@ const C5_Trending = () => {
             </span>
 
             {/* Travel Card */}
-            <div className="w-[280px] sm:w-[310px] h-[210px] rounded-[24px] overflow-hidden relative shadow-[0_8px_24px_rgba(30,20,16,0.06)] group cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_16px_36px_rgba(30,20,16,0.12)] border border-[#E8D5B7]/25 z-20">
+            <div className="w-[280px] sm:w-[310px] h-[210px] rounded-[24px] overflow-hidden relative shadow-[0_8px_24px_rgba(30,20,16,0.06)] group cursor-pointer transition-all duration-300 hover:shadow-[0_16px_36px_rgba(30,20,16,0.12)] border border-[#E8D5B7]/25 z-20">
               <img src={t.img || t.url} alt={t.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
