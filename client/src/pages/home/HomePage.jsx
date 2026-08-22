@@ -41,37 +41,69 @@ const Home = () => {
 
       <div className="fixed inset-0 pointer-events-none opacity-[0.04] mix-blend-multiply z-50" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} />
       <TopAppBar variant="logo" />
-      <div className="mx-auto max-w-[1440px] px-[24px] lg:px-[48px] pt-[8px]">
-        {/* Welcome Banner */}
-        <div className="w-full bg-gradient-to-r from-[#E8640C] to-[#F0A500] rounded-[14px] px-[24px] py-[14px] mb-[24px] flex items-center justify-between shadow-[0_4px_16px_rgba(232,100,12,0.2)]">
-          <div className="flex items-center gap-[10px]">
-            <Shield size={20} fill="white" className="text-transparent" />
-            <div>
-              <h3 className="font-cabinet font-semibold text-[14px] text-white leading-tight">Welcome, {firstName}. Your safety network is setting up.</h3>
-              <p className="font-jakarta text-[12px] text-white/75 mt-0.5">Complete your safety setup to activate full protection.</p>
+      
+      <div className="mx-auto max-w-[1200px] px-[16px] md:px-[24px] pt-[12px] pb-[60px] flex flex-col gap-[28px]">
+        {/* Banner Image - Slideshow Hero Component */}
+        <C1_WelcomeHero />
+
+        {/* Global Search and Filters Controls Bar */}
+        <div className="w-full flex flex-col md:flex-row gap-3 items-center justify-between bg-white border border-[#E8D5B7]/40 rounded-[20px] p-4 shadow-[0_4px_20px_rgba(30,20,16,0.03)]">
+          <div className="relative w-full md:max-w-[400px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B09880]" size={18} />
+            <input
+              type="text"
+              placeholder="Search destinations, states, safety scores..."
+              className="w-full h-[44px] pl-10 pr-4 rounded-full border border-[#E8D5B7]/50 focus:border-[#E8640C] focus:outline-none bg-[#FFF8F0]/30 font-jakarta text-[14px]"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto shrink-0 pb-1 md:pb-0">
+            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Group by</button>
+            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Filter</button>
+            <button className="h-[40px] px-[18px] bg-[#FFF8F0] border border-[#E8D5B7]/50 rounded-full font-cabinet font-semibold text-[13px] text-[#6B4F3A] hover:bg-[#FEF3E2] transition-colors whitespace-nowrap">Sort by...</button>
+          </div>
+        </div>
+
+        {/* Top Regional Selections */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#1E1410] tracking-tight">Top Regional Selections</h3>
+            <span className="font-mono-dm text-[11px] text-[#B09880]">Popular Spots</span>
+          </div>
+          <C5_Trending />
+        </div>
+
+        {/* Previous Trips Section */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-cabinet font-bold text-[18px] md:text-[22px] text-[#1E1410] tracking-tight">Previous Trips</h3>
+            <span className="font-mono-dm text-[11px] text-[#B09880]">History Log</span>
+          </div>
+          
+          {/* Main Dashboard Layout showing Safety snapshot alongside history */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+            <div className="flex flex-col gap-6">
+              <C3_SafetySnapshot />
+              <C2_HowItWorks />
+            </div>
+            
+            {/* Sidebar Controls */}
+            <div className="flex flex-col gap-6 lg:sticky lg:top-[104px]">
+              <R1_Doctors />
+              <R3_Notifications />
             </div>
           </div>
-          <Link to="/safety" className="h-[36px] bg-white rounded-[10px] px-[16px] font-cabinet font-semibold text-[13px] text-[#E8640C] shadow-[0_2px_8px_rgba(0,0,0,0.1)] hover:scale-105 transition-transform flex items-center">Complete Setup</Link>
         </div>
-        <main className="flex flex-col lg:grid lg:grid-cols-[280px_1fr_320px] gap-[16px] pb-20 items-start">
-          <aside className="w-full lg:sticky lg:top-[104px] flex flex-col pb-4">
-            <L1_Greeting user={user} />
-            <L2_SafetyCard />
-            <L3_GuardianNetwork />
-            <L4_RecentAlerts />
-          </aside>
-          <section className="flex flex-col pt-4 lg:pt-0 w-full min-w-0">
-            <C1_WelcomeHero />
-            <C2_HowItWorks />
-            <C3_SafetySnapshot />
-            <C5_Trending />
-          </section>
-          <aside className="w-full lg:sticky lg:top-[104px] flex flex-col pt-4 lg:pt-0 pb-4">
-            <R1_Doctors />
-            <R2_TravelProfile user={user} />
-            <R3_Notifications />
-          </aside>
-        </main>
+        
+        {/* Floating Action Button to plan trip */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <Link
+            to="/trips/new"
+            className="flex items-center gap-2 bg-[#E8640C] text-white px-6 py-4 rounded-full font-cabinet font-bold text-[15px] shadow-[0_10px_30px_rgba(232,100,12,0.4)] hover:scale-105 transition-transform"
+          >
+            <span>+ Plan a trip</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -224,65 +256,174 @@ const L4_RecentAlerts = () => (
 );
 
 /* ── CENTER COLUMN ── */
-const C1_WelcomeHero = () => (
-  <div className="w-full h-[220px] rounded-[20px] overflow-hidden relative shadow-[0_8px_32px_rgba(30,20,16,0.12)] group">
-    <img src={PHOTOS.jaisalmer} alt="Sunset at Jaisalmer Fort, Rajasthan" className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out" />
-    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[rgba(30,20,16,0.65)] to-transparent" />
-    <div className="absolute bottom-[20px] left-[20px]">
-      <p className="font-mono-dm text-[11px] text-white/65 uppercase tracking-widest">Start Your Journey</p>
-      <h2 className="font-display font-bold text-[26px] text-white leading-none mt-1">Where in India are you going?</h2>
-      <p className="font-jakarta text-[13px] text-white/75 mt-1.5 max-w-[400px] leading-relaxed">Plan your first safe trip across India.<br/>AI-powered itinerary. Real-time safety. Local guardians.</p>
-      <Link to="/trips/new" className="mt-[16px] h-[52px] w-max rounded-[28px] bg-[#E8640C] text-white px-[24px] font-cabinet font-semibold text-[14px] flex items-center gap-1.5 shadow-[0_4px_20px_rgba(232,100,12,0.40)] hover:scale-105 transition-transform">Plan My First AI Trip <ArrowRight size={14} /></Link>
-    </div>
-    <div className="absolute bottom-[20px] right-[20px] flex items-center gap-1.5">
-      <Shield size={18} className="text-white/60" /><span className="font-mono-dm text-[10px] text-white/60">Safety included with every trip</span>
-    </div>
-  </div>
-);
+const C1_WelcomeHero = () => {
+  const slideshowImages = [
+    { url: PHOTOS.jaisalmer, title: "Jaisalmer Fort, Rajasthan", vibe: "Desert Romance" },
+    { url: PHOTOS.varanasi, title: "Ganga Ghats, Varanasi", vibe: "Spiritual Awakening" },
+    { url: PHOTOS.meghalaya, title: "Double Decker Bridge, Meghalaya", vibe: "Nature Trails" },
+    { url: PHOTOS.ladakh, title: "Pangong Lake, Ladakh", vibe: "Adventure Peak" },
+    { url: PHOTOS.kerala, title: "Munnar Tea Estates, Kerala", vibe: "Serene Backwaters" }
+  ];
 
-const C2_HowItWorks = () => (
-  <div className="mt-[24px]">
-    <SectionLabel>Get Started In 3 Steps</SectionLabel>
-    <div className="mt-[14px] grid grid-cols-1 md:grid-cols-3 gap-[12px]">
-      {[
-        { num:'01', title:'Plan your trip', desc:'Enter your destination, budget, and interests. Gemini AI builds your personalized itinerary.', icon:MapPin, color:'#E8640C', bg:'rgba(232,100,12,0.10)' },
-        { num:'02', title:'Activate your safety', desc:'Request a verified local guardian. Get real-time alerts for your destination.', icon:Shield, color:'#2D6A4F', bg:'rgba(45,106,79,0.10)' },
-        { num:'03', title:'Travel freely', desc:'Discover hidden gems, find local doctors, and explore India with confidence.', icon:Compass, color:'#F0A500', bg:'rgba(240,165,0,0.10)' }
-      ].map((step, i) => (
-        <div key={i} className="bg-white border border-[#E8D5B7] rounded-[16px] p-[20px] shadow-[0_2px_8px_rgba(30,20,16,0.07)] relative hover:scale-[1.015] hover:border-[#E8640C]/30 transition-all">
-          <span className="absolute top-[16px] left-[16px] font-display font-bold text-[36px] text-[#E8D5B7]/30 leading-none pointer-events-none">{step.num}</span>
-          <div className="w-[44px] h-[44px] rounded-[10px] flex items-center justify-center relative z-10" style={{ backgroundColor: step.bg }}><step.icon size={22} color={step.color} /></div>
-          <h4 className="mt-[10px] font-cabinet font-bold text-[16px] text-[#1E1410] relative z-10">{step.title}</h4>
-          <p className="mt-[6px] font-jakarta text-[13px] text-[#6B4F3A] leading-relaxed relative z-10">{step.desc}</p>
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
+    }, 4500); // Slide every 4.5 seconds for a cinematic feel
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="w-full h-[420px] rounded-[28px] overflow-hidden relative shadow-[0_20px_50px_rgba(30,20,16,0.18)] group bg-[#140C08]">
+      {/* Dynamic Background Slideshow with Cross-Fade Effect */}
+      {slideshowImages.map((slide, idx) => (
+        <div
+          key={idx}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+            idx === activeIndex ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        >
+          <img
+            src={slide.url}
+            alt={slide.title}
+            className={`absolute inset-0 w-full h-full object-cover transform transition-transform duration-[4500ms] ease-out ${
+              idx === activeIndex ? "scale-105" : "scale-100"
+            }`}
+          />
+          {/* Subtle overlay helper for readability */}
+          <div className="absolute top-[24px] left-[24px] bg-black/30 backdrop-blur-md rounded-full px-[14px] py-[6px] border border-white/10 shadow-sm z-25 flex items-center gap-1.5">
+            <MapPin size={12} className="text-[#F0A500]" />
+            <span className="font-mono-dm text-[10px] font-bold text-[#FEF3E2] uppercase tracking-wider">
+              {slide.title}
+            </span>
+          </div>
         </div>
       ))}
+
+      {/* Premium Cinematic Ambient Bright-Contrast Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(20,12,8,0.75)] via-[rgba(20,12,8,0.25)] to-transparent" />
+
+      {/* Hero Content */}
+      <div className="absolute inset-x-0 bottom-0 p-[32px] md:p-[40px] flex flex-col justify-end h-full z-20">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-2 h-2 rounded-full bg-[#E8640C] animate-ping" />
+          <p className="font-mono-dm text-[11px] text-[#F0A500] uppercase tracking-[3px] font-bold">
+            Start Your Journey
+          </p>
+        </div>
+        <h2 className="font-display font-bold text-[32px] md:text-[42px] text-white leading-tight max-w-[650px] drop-shadow-md">
+          Where in India are you going?
+        </h2>
+        <p className="font-jakarta text-[14px] text-white/85 mt-2 max-w-[550px] leading-relaxed drop-shadow-md">
+          Plan your first safe trip across India. Fully customized AI-powered day itineraries enriched with verified safety scores and local helper networks.
+        </p>
+        
+        <div className="mt-[28px] flex items-center gap-[20px] flex-wrap">
+          <Link
+            to="/trips/new"
+            className="h-[52px] rounded-full bg-[#E8640C] hover:bg-[#F0731E] text-white px-[32px] font-cabinet font-bold text-[15px] flex items-center gap-2.5 shadow-[0_8px_30px_rgba(232,100,12,0.45)] hover:scale-105 transition-all duration-300"
+          >
+            Plan My First AI Trip <ArrowRight size={16} />
+          </Link>
+          
+          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
+            <Shield size={16} className="text-[#4ADE80]" />
+            <span className="font-mono-dm text-[11px] text-white/90">
+              Emergency SOS & Guardians Active
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Slideshow Indicators */}
+      <div className="absolute bottom-[32px] right-[40px] flex items-center gap-2 z-20">
+        {slideshowImages.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveIndex(idx)}
+            className={`h-[6px] rounded-full transition-all duration-300 ${
+              idx === activeIndex ? "w-[32px] bg-[#E8640C]" : "w-[8px] bg-white/40 hover:bg-white/85"
+            }`}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
     </div>
-    <div className="mt-[16px] w-full bg-[#FEF3E2] border border-[#E8D5B7] rounded-[12px] p-[14px] flex items-center justify-between shadow-sm">
-      <div className="flex items-center gap-2"><Sparkles size={16} className="text-[#E8640C]" /><span className="font-cabinet font-semibold text-[14px] text-[#1E1410]">Ready to start?</span></div>
-      <Link to="/trips/new" className="h-[36px] flex items-center rounded-[100px] bg-[#E8640C] text-white px-[16px] font-cabinet font-semibold text-[13px] hover:scale-105 transition-transform shadow-[0_4px_12px_rgba(232,100,12,0.25)]">Plan My First Trip</Link>
+  );
+};
+
+const C2_HowItWorks = () => (
+  <div className="mt-[32px]">
+    <div className="flex items-center justify-between mb-4">
+      <SectionLabel>Your Travel Journey</SectionLabel>
+      <span className="text-[11px] font-mono-dm text-[#B09880]">Guided Steps</span>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
+      {[
+        { num:'01', title:'Custom AI Itinerary', desc:'Provide destination and interests. Our system crafts details powered by Gemini.', icon:MapPin, color:'#E8640C', bg:'#FFF3EB' },
+        { num:'02', title:'Verified Safety Net', desc:'Instant access to verified local guardians and automatic SOS alerting features.', icon:Shield, color:'#2D6A4F', bg:'#EBF5EE' },
+        { num:'03', title:'Explore Safely', desc:'Access verified medical care, explore offbeat gems, and navigate with confidence.', icon:Compass, color:'#F0A500', bg:'#FFFBEB' }
+      ].map((step, i) => (
+        <div key={i} className="bg-white border border-[#E8D5B7]/40 rounded-[20px] p-[24px] shadow-[0_4px_20px_rgba(30,20,16,0.03)] relative transition-all duration-300 hover:shadow-[0_8px_30px_rgba(30,20,16,0.06)] hover:border-[#E8640C]/20 group">
+          <span className="absolute top-[20px] right-[24px] font-display font-bold text-[28px] text-[#E8D5B7]/40 leading-none group-hover:text-[#E8640C]/20 transition-colors">{step.num}</span>
+          <div className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: step.bg }}><step.icon size={22} color={step.color} /></div>
+          <h4 className="mt-[16px] font-cabinet font-bold text-[16px] text-[#1E1410]">{step.title}</h4>
+          <p className="mt-[8px] font-jakarta text-[13px] text-[#6B4F3A] leading-relaxed">{step.desc}</p>
+        </div>
+      ))}
     </div>
   </div>
 );
 
 const C3_SafetySnapshot = () => (
-  <div className="mt-[28px] w-full bg-[#FEF3E2] border border-[#E8D5B7] rounded-[20px] p-[24px] flex shadow-[0_2px_8px_rgba(30,20,16,0.04)] flex-col sm:flex-row gap-6 sm:gap-0">
-    <div className="w-full sm:w-[60%] pr-0 sm:pr-6">
-      <SectionLabel>Safety At Your Current Location</SectionLabel>
-      <h3 className="font-cabinet font-bold text-[18px] text-[#1E1410] mt-1">Udaipur, Rajasthan</h3>
-      <div className="mt-[12px] flex items-end gap-3"><span className="font-mono-dm text-[11px] text-[#6B4F3A] mb-1">Safety Score</span><span className="font-display font-bold text-[28px] text-[#2D6A4F] leading-none">87 / 100</span></div>
-      <div className="mt-[8px] w-full h-[6px] bg-[#E8D5B7] rounded-full overflow-hidden"><div className="h-full bg-[#2D6A4F] rounded-full w-[87%]" /></div>
-      <div className="mt-[14px] flex flex-col gap-[10px]">
-        {[{color:"#4ADE80",name:"Tourist Safety",stat:"Generally Safe"},{color:"#4ADE80",name:"Healthcare Access",stat:"Hospital 1.2 km"},{color:"#F0A500",name:"Crowd Conditions",stat:"Moderate in Old City"}].map((c,i)=>(
-          <div key={i} className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-[8px] h-[8px] rounded-full" style={{backgroundColor:c.color}}/><span className="font-cabinet font-semibold text-[13px] text-[#1E1410]">{c.name}</span></div><span className="font-jakarta text-[13px] text-[#6B4F3A]">{c.stat}</span></div>
-        ))}
+  <div className="mt-[32px] w-full bg-[#FFFFFF] border border-[#E8D5B7]/40 rounded-[24px] p-[28px] flex shadow-[0_4px_24px_rgba(30,20,16,0.03)] flex-col sm:flex-row gap-8">
+    <div className="w-full sm:w-[55%] flex flex-col justify-between">
+      <div>
+        <SectionLabel>Live Location Security</SectionLabel>
+        <h3 className="font-cabinet font-bold text-[22px] text-[#1E1410] mt-1">Udaipur, Rajasthan</h3>
+        
+        <div className="mt-[16px] flex items-baseline gap-2">
+          <span className="font-display font-bold text-[36px] text-[#2D6A4F] leading-none">87</span>
+          <span className="font-mono-dm text-[14px] text-[#B09880]">/ 100 Safety Score</span>
+        </div>
+        <div className="mt-[12px] w-full h-[6px] bg-[#E8D5B7]/30 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[#4ADE80] to-[#2D6A4F] rounded-full w-[87%]" />
+        </div>
+
+        <div className="mt-[20px] flex flex-col gap-[12px]">
+          {[
+            {color:"#2D6A4F",name:"Tourist Safety Rating",stat:"High (Safe)"},
+            {color:"#2D6A4F",name:"Healthcare Facilities",stat:"Hospital 1.2 km"},
+            {color:"#F0A500",name:"Peak Hour Crowds",stat:"Moderate"}
+          ].map((c,i)=>(
+            <div key={i} className="flex items-center justify-between text-[13px]">
+              <div className="flex items-center gap-2">
+                <span className="w-[8px] h-[8px] rounded-full" style={{backgroundColor:c.color}}/>
+                <span className="font-cabinet font-medium text-[#1E1410]">{c.name}</span>
+              </div>
+              <span className="font-jakarta text-[#6B4F3A] font-medium">{c.stat}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <p className="mt-[12px] font-jakarta text-[12px] text-[#B09880] italic">Start a trip to see destination-specific safety data.</p>
-      <Link to="/safety" className="mt-[12px] flex items-center gap-1 group w-max"><span className="font-cabinet font-medium text-[12px] text-[#E8640C]">View Full Safety Report</span><ChevronRight size={12} className="text-[#E8640C] group-hover:translate-x-0.5 transition-transform"/></Link>
+      
+      <div className="mt-[24px] pt-4 border-t border-[#E8D5B7]/30">
+        <Link to="/safety" className="flex items-center gap-1 group text-[#E8640C] font-cabinet font-bold text-[13px]">
+          <span>View Safety Analytics & Reports</span>
+          <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform"/>
+        </Link>
+      </div>
     </div>
-    <div className="w-full sm:w-[40%] h-[150px] sm:h-auto relative rounded-[12px] overflow-hidden border border-[#E8D5B7]">
-      <img src={PHOTOS.mapThumb} alt="Interactive safety map showing Udaipur landmarks" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-[#E8640C] opacity-10 mix-blend-color" />
-      <div className="absolute inset-0 flex items-center justify-center"><MapPin size={28} className="text-[#E8640C] drop-shadow-md" fill="currentColor" /></div>
+    
+    <div className="w-full sm:w-[45%] h-[200px] sm:h-auto relative rounded-[20px] overflow-hidden border border-[#E8D5B7]/40 shadow-inner group">
+      <img src={PHOTOS.mapThumb} alt="Interactive safety map showing Udaipur landmarks" loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+      <div className="absolute inset-0 bg-[#E8640C]/5" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-[50px] h-[50px] rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+          <MapPin size={22} className="text-[#E8640C]" fill="currentColor" />
+        </div>
+      </div>
     </div>
   </div>
 );
@@ -291,24 +432,83 @@ const C3_SafetySnapshot = () => (
 
 const C5_Trending = () => {
   const trending = [
-    { img:PHOTOS.meghalaya, title:"Meghalaya", loc:"Northeast India", tags:["Forest","Offbeat"] },
-    { img:PHOTOS.ladakh, title:"Leh-Ladakh", loc:"Jammu & Kashmir", tags:["Mountains","Remote"] },
-    { img:PHOTOS.kerala, title:"Alleppey", loc:"Kerala", tags:["Backwaters","Serene"] },
-    { img:PHOTOS.chettinad, title:"Chettinad", loc:"Tamil Nadu", tags:["Heritage","Culture"] }
+    { img: PHOTOS.meghalaya, title: "Meghalaya Valley", loc: "Northeast India", tags: ["Forests", "Bridges"] },
+    { img: PHOTOS.ladakh, title: "Leh-Ladakh Heights", loc: "Himalayan Range", tags: ["Peaks", "Cold Desert"] },
+    { img: PHOTOS.kerala, title: "Alleppey Backwaters", loc: "Kerala Coast", tags: ["Houseboats", "Lakes"] },
+    { url: "https://images.unsplash.com/photo-1600100397608-f010b423b971?auto=format&fit=crop&w=600&q=80", title: "Junagadh Girnar", loc: "Gujarat Hills", tags: ["Temples", "Forest"] },
+    { img: PHOTOS.jaisalmer, title: "Jaisalmer Fort", loc: "Rajasthan Desert", tags: ["Dunes", "Culture"] },
+    { img: PHOTOS.varanasi, title: "Varanasi Ghats", loc: "Uttar Pradesh", tags: ["Spiritual", "Ganga"] },
+    { img: PHOTOS.ranakpur, title: "Ranakpur Temples", loc: "Rajasthan Forest", tags: ["Carvings", "Peace"] },
+    { img: PHOTOS.kumbhalgarh, title: "Kumbhalgarh Wall", loc: "Mewar Kingdom", tags: ["Fortress", "History"] },
+    { img: PHOTOS.bundi, title: "Bundi stepwells", loc: "Rajasthan Oasis", tags: ["Architecture", "Heritage"] },
+    { img: PHOTOS.chettinad, title: "Chettinad Mansions", loc: "Tamil Nadu Coast", tags: ["Palaces", "Feasts"] }
   ];
+
+  const carouselRef = React.useRef(null);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    let scrollAmt = 0;
+    const interval = setInterval(() => {
+      if (el.scrollWidth - el.clientWidth <= el.scrollLeft + 10) {
+        scrollAmt = 0;
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        scrollAmt += 320;
+        el.scrollTo({ left: scrollAmt, behavior: 'smooth' });
+      }
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="mt-[28px]">
-      <div className="flex justify-between items-center"><SectionLabel>Trending In India</SectionLabel><Link to="/explore" className="flex items-center gap-1 group"><span className="font-cabinet font-medium text-[12px] text-[#E8640C]">See All</span><ChevronRight size={12} className="text-[#E8640C] group-hover:translate-x-0.5 transition-transform"/></Link></div>
-      <div className="mt-[14px] flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x">
-        {trending.map((t,i) => (
-          <div key={i} className="shrink-0 w-[280px] sm:w-[320px] h-[180px] rounded-[16px] overflow-hidden relative shadow-[0_4px_16px_rgba(30,20,16,0.10)] group cursor-pointer hover:scale-[1.015] transition-all snap-center">
-            <img src={t.img} alt={t.title} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-[16px] left-[16px]">
-              <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/18 border border-white/30 backdrop-blur-sm font-mono-dm text-[10px] text-white uppercase tracking-wider mb-1">Trending</span>
-              <h4 className="font-display font-bold text-[20px] text-white leading-tight mt-1">{t.title}</h4>
-              <p className="font-mono-dm text-[11px] text-white/60 mt-0.5">{t.loc}</p>
-              <div className="mt-1.5 flex gap-1.5">{t.tags.map((tag,j) => <span key={j} className="px-1.5 py-0.5 rounded bg-white/15 border border-white/30 font-mono-dm text-[10px] text-white backdrop-blur-sm">{tag}</span>)}</div>
+    <div className="mt-[32px]">
+      <div className="flex justify-between items-center mb-4">
+        <SectionLabel>Top 10 Indian Journeys</SectionLabel>
+        <Link to="/explore" className="flex items-center gap-1 group text-[#E8640C] font-cabinet font-bold text-[13px]">
+          <span>Explore All</span>
+          <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform"/>
+        </Link>
+      </div>
+      
+      {/* Container with hidden scrollbars and snapping logic */}
+      <div 
+        ref={carouselRef}
+        className="flex gap-[48px] overflow-x-auto pb-6 pt-4 scroll-smooth snap-x select-none pl-12"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {trending.map((t, i) => (
+          <div key={i} className="shrink-0 relative snap-center flex items-end">
+            {/* Netflix-style giant background number */}
+            <span 
+              className="absolute left-[-42px] bottom-[-20px] font-cabinet font-extrabold text-[120px] leading-none select-none pointer-events-none text-transparent z-10 transition-all duration-300 group-hover:scale-105"
+              style={{
+                WebkitTextStroke: '2px rgba(232, 100, 12, 0.45)',
+                fontFamily: 'Cabinet Grotesk, sans-serif'
+              }}
+            >
+              {i + 1}
+            </span>
+
+            {/* Travel Card */}
+            <div className="w-[280px] sm:w-[310px] h-[210px] rounded-[24px] overflow-hidden relative shadow-[0_8px_24px_rgba(30,20,16,0.06)] group cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_16px_36px_rgba(30,20,16,0.12)] border border-[#E8D5B7]/25 z-20">
+              <img src={t.img || t.url} alt={t.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+
+              <div className="absolute bottom-[20px] left-[20px] right-[20px]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/20 border border-white/10 backdrop-blur-md font-mono-dm text-[8px] text-white uppercase tracking-wider mb-1">Ranked #{i+1}</span>
+                <h4 className="font-display font-bold text-[19px] text-white leading-tight mt-1">{t.title}</h4>
+                <p className="font-mono-dm text-[11px] text-white/70 mt-0.5">{t.loc}</p>
+                <div className="mt-2.5 flex gap-1.5 flex-wrap">
+                  {t.tags.map((tag, j) => (
+                    <span key={j} className="px-2 py-0.5 rounded-full bg-white/10 border border-white/5 font-mono-dm text-[9px] text-white backdrop-blur-md">{tag}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -319,63 +519,75 @@ const C5_Trending = () => {
 
 /* ── RIGHT SIDEBAR ── */
 const R1_Doctors = () => (
-  <div className="bg-white border border-[#E8D5B7] rounded-[16px] p-[16px] shadow-[0_2px_8px_rgba(30,20,16,0.07)]">
-    <div className="flex justify-between items-center"><SectionLabel>Doctors Near You</SectionLabel><Link to="/healthcare" className="font-cabinet font-medium text-[11px] text-[#E8640C]">View All</Link></div>
-    <div className="mt-[12px] flex flex-col gap-[10px]">
-      {[{img:PHOTOS.doc1,name:'Dr. Kavita Sharma',spec:'General Physician',dist:'0.8 km'},{img:PHOTOS.doc2,name:'Dr. Arjun Reddy',spec:'Emergency Med',dist:'1.4 km'}].map((d,i)=>(
-        <React.Fragment key={i}>
-          {i>0 && <div className="w-full h-px bg-[#E8D5B7]/50 my-1"/>}
-          <div className="flex items-center">
-            <img src={d.img} className="w-[44px] h-[44px] rounded-full object-cover border-[1.5px] border-[#E8D5B7] shrink-0" alt={`Verified Doctor: ${d.name}`} loading="lazy" />
-            <div className="ml-[12px] flex-1 min-w-0">
-              <h4 className="font-cabinet font-semibold text-[14px] text-[#1E1410] truncate">{d.name}</h4>
-              <p className="font-jakarta text-[12px] text-[#6B4F3A]">{d.spec}</p>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#2D6A4F]/10 text-[#2D6A4F] font-mono-dm text-[9px] rounded mt-0.5"><CheckCircle2 size={9}/> Verified</span>
-            </div>
-            <div className="flex flex-col items-end gap-1.5 ml-2">
-              <span className="font-mono-dm text-[11px] text-[#E8640C]">{d.dist}</span>
-              <Link to="/healthcare" className="w-auto px-3 h-[30px] rounded-[8px] bg-[#E8640C] text-white font-cabinet font-semibold text-[11px] shadow-[0_4px_12px_rgba(232,100,12,0.25)] hover:scale-105 transition-transform flex items-center justify-center whitespace-nowrap">Book Appointment</Link>
+  <div className="bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[20px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+    <div className="flex justify-between items-center mb-4">
+      <SectionLabel>Verified Medical Care</SectionLabel>
+      <Link to="/healthcare" className="font-cabinet font-bold text-[11px] text-[#E8640C] hover:underline">View Map</Link>
+    </div>
+    <div className="flex flex-col gap-[16px]">
+      {[
+        {img:PHOTOS.doc1,name:'Dr. Kavita Sharma',spec:'General Physician',dist:'0.8 km'},
+        {img:PHOTOS.doc2,name:'Dr. Arjun Reddy',spec:'Emergency Response',dist:'1.4 km'}
+      ].map((d,i)=>(
+        <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-[16px] hover:bg-[#FFF8F0] transition-colors duration-300">
+          <div className="flex items-center gap-3">
+            <img src={d.img} className="w-[48px] h-[48px] rounded-full object-cover border border-[#E8D5B7] shrink-0 shadow-sm" alt={d.name} />
+            <div className="min-w-0">
+              <h4 className="font-cabinet font-bold text-[13px] text-[#1E1410] leading-tight truncate">{d.name}</h4>
+              <p className="font-jakarta text-[12px] text-[#6B4F3A] mt-0.5 truncate">{d.spec}</p>
+              <span className="inline-flex items-center gap-1 text-[#2D6A4F] font-cabinet text-[10px] font-bold mt-1 bg-[#2D6A4F]/10 px-2 py-0.5 rounded-full">
+                <CheckCircle2 size={10} className="text-[#2D6A4F]" /> Verified
+              </span>
             </div>
           </div>
-        </React.Fragment>
+          <div className="text-right flex flex-col items-end gap-1">
+            <span className="font-mono-dm text-[10px] text-[#B09880]">{d.dist}</span>
+            <Link to="/healthcare" className="px-3 py-1 bg-[#E8640C] text-white font-cabinet font-bold text-[10px] rounded-full hover:bg-[#F0731E] transition-colors shadow-sm">Book</Link>
+          </div>
+        </div>
       ))}
     </div>
-    <Link to="/healthcare" className="mt-[12px] flex items-center gap-1 group w-max"><span className="font-cabinet font-medium text-[12px] text-[#E8640C]">Find More Doctors</span><ChevronRight size={12} className="text-[#E8640C] group-hover:translate-x-0.5 transition-transform"/></Link>
   </div>
 );
 
 const R2_TravelProfile = ({ user }) => (
-  <div className="mt-[20px] bg-white border border-[#E8D5B7] rounded-[16px] p-[20px] shadow-[0_2px_8px_rgba(30,20,16,0.07)]">
-    <div className="flex items-center">
-      <div className="w-[56px] h-[56px] rounded-full bg-ivory border-[2px] border-[#E8D5B7] shrink-0 flex items-center justify-center overflow-hidden">
-        <span className="font-display font-bold text-[24px] text-[#E8D5B7]">{(user?.fullName || user?.name || 'T')[0]}</span>
+  <div className="mt-[20px] bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[24px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+    <div className="flex items-center gap-3">
+      <div className="w-[60px] h-[60px] rounded-full bg-[#FFF8F0] border-2 border-[#E8D5B7] shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
+        <span className="font-display font-bold text-[26px] text-[#E8640C]">{(user?.fullName || user?.name || 'T')[0]}</span>
       </div>
-      <div className="ml-[12px]">
-        <h3 className="font-cabinet font-bold text-[16px] text-[#1E1410]">{user?.fullName || user?.name || 'Traveler'}</h3>
-        <p className="font-mono-dm text-[11px] text-[#6B4F3A] mt-0.5">Solo Traveler · Udaipur</p>
-        <p className="font-jakarta text-[12px] text-[#B09880] mt-0.5 truncate max-w-[180px]">{user?.email}</p>
+      <div className="min-w-0">
+        <h3 className="font-cabinet font-bold text-[16px] text-[#1E1410] truncate">{user?.fullName || user?.name || 'Traveler'}</h3>
+        <p className="font-mono-dm text-[11px] text-[#6B4F3A] mt-0.5">Verified Solo Traveler</p>
+        <p className="font-jakarta text-[11px] text-[#B09880] mt-0.5 truncate">{user?.email}</p>
       </div>
     </div>
-    <div className="w-full h-px bg-[#E8D5B7] my-[16px]" />
-    <div className="grid grid-cols-2 gap-[10px]">
-      {[{val:"0",label:"Trips"},{val:"0",label:"Gems Saved"},{val:"0",label:"Guardians"},{val:"0",label:"Reviews"}].map((s,i) => (
-        <div key={i} className="bg-[#FEF3E2] rounded-[12px] p-[12px] text-center"><p className="font-display font-bold text-[22px] text-[#E8D5B7] leading-none">{s.val}</p><p className="font-mono-dm text-[10px] text-[#B09880] uppercase mt-1">{s.label}</p></div>
+    <div className="w-full h-px bg-[#E8D5B7]/30 my-[20px]" />
+    <div className="grid grid-cols-2 gap-[12px]">
+      {[
+        {val:"0",label:"Trips Started"},
+        {val:"0",label:"Saved Spots"},
+        {val:"0",label:"Guardians"},
+        {val:"0",label:"Total Reviews"}
+      ].map((s,i) => (
+        <div key={i} className="bg-[#FFF8F0] rounded-[16px] p-[12px] text-center border border-[#E8D5B7]/20">
+          <p className="font-display font-bold text-[22px] text-[#E8640C] leading-none">{s.val}</p>
+          <p className="font-mono-dm text-[9px] text-[#B09880] uppercase mt-1 tracking-wider">{s.label}</p>
+        </div>
       ))}
-    </div>
-    <div className="mt-[14px] bg-[#FEF3E2] border-l-[3px] border-l-[#E8640C] rounded-[10px] p-[12px] flex items-start gap-2">
-      <Sparkles size={14} className="text-[#E8640C] shrink-0 mt-0.5" />
-      <div><p className="font-jakarta text-[12px] text-[#6B4F3A] leading-snug">Plan your first trip to start building your travel story.</p><Link to="/trips/new" className="mt-2 flex items-center gap-1 group w-max"><span className="font-cabinet font-medium text-[12px] text-[#E8640C]">Plan a Trip</span><ChevronRight size={12} className="text-[#E8640C] group-hover:translate-x-0.5 transition-transform"/></Link></div>
     </div>
   </div>
 );
 
 const R3_Notifications = () => (
-  <div className="mt-[20px] bg-white border border-[#E8D5B7] rounded-[16px] p-[16px] shadow-[0_2px_8px_rgba(30,20,16,0.07)]">
-    <SectionLabel>Notifications</SectionLabel>
-    <div className="mt-[16px] flex flex-col items-center text-center py-2">
-      <Bell size={24} className="text-[#E8D5B7]" />
-      <h3 className="mt-[10px] font-cabinet font-semibold text-[13px] text-[#6B4F3A]">No notifications yet</h3>
-      <p className="mt-[6px] font-jakarta text-[12px] text-[#B09880] max-w-[240px] leading-relaxed">Safety alerts, trip updates, and guardian messages will appear here.</p>
+  <div className="mt-[20px] bg-white border border-[#E8D5B7]/40 rounded-[24px] p-[20px] shadow-[0_4px_24px_rgba(30,20,16,0.03)] w-full">
+    <SectionLabel>Live Alert Center</SectionLabel>
+    <div className="mt-[16px] flex flex-col items-center text-center py-4">
+      <div className="w-[44px] h-[44px] rounded-full bg-[#FFF8F0] flex items-center justify-center mb-3">
+        <Bell size={20} className="text-[#B09880]" />
+      </div>
+      <h3 className="font-cabinet font-bold text-[13px] text-[#1E1410]">All Quiet for Now</h3>
+      <p className="mt-[6px] font-jakarta text-[12px] text-[#B09880] max-w-[200px]">Real-time safety signals and chat messages will populate here.</p>
     </div>
   </div>
 );
