@@ -7,7 +7,8 @@ import {
   Sparkles, Star, Plus, Calendar, Clock, DollarSign, ArrowRight,
   Filter, Check, SlidersHorizontal, RefreshCw, Send, Paperclip, Smile,
   Hash, Users, HelpCircle, Heart, Flame, ShieldAlert, Award, Compass, MessageCircle, AlertCircle,
-  Briefcase, Landmark, BookOpen, SendHorizontal, Image, FileText, CheckCircle2
+  Briefcase, Landmark, BookOpen, SendHorizontal, Image, FileText, CheckCircle2,
+  PlusCircle, ShieldCheck
 } from "lucide-react";
 import TopAppBar from "../../components/shared/TopAppBar";
 import toast, { Toaster } from "react-hot-toast";
@@ -291,11 +292,11 @@ export default function CommunitySpots() {
         const query = prompt.toLowerCase();
         
         if (query.includes("jaipur")) {
-          response = "Jaipur (Pink City) is highly safe (91/100). Tips:\n- 🏰 Visit Amber Fort early at 8 AM.\n- 🛍️ Shop block-print textiles at Johri Bazar.\n- 🍽️ Dine at Chokhi Dhani for authentic Rajasthani food.";
+          response = "Jaipur (Pink City) is highly safe (91/100). Tips:\n- Visit Amber Fort early at 8 AM.\n- Shop block-print textiles at Johri Bazar.\n- Dine at Chokhi Dhani for authentic Rajasthani food.";
         } else if (query.includes("tokyo") || query.includes("japan")) {
-          response = "Tokyo offers incredible urban transit. Tips:\n- 🚉 Use Suica/Pasmo card on the Metro.\n- 🍣 Try Tsukiji outer market for fresh sushi.\n- 🎌 Plan a side day-trip to Mt. Fuji (Kawaguchiko).";
+          response = "Tokyo offers incredible urban transit. Tips:\n- Use Suica/Pasmo card on the Metro.\n- Try Tsukiji outer market for fresh sushi.\n- Plan a day-trip to Mt. Fuji (Kawaguchiko).";
         } else if (query.includes("goa")) {
-          response = "Goa recommendations:\n- 🌴 Spend a quiet sunset at Patnem Beach.\n- ⛪ Explore Latin Quarters in Fontainhas, Panaji.\n- 🍛 Try local Pork Vindaloo at beach shacks.";
+          response = "Goa recommendations:\n- Spend a quiet sunset at Patnem Beach.\n- Explore Latin Quarters in Fontainhas, Panaji.\n- Try local Pork Vindaloo at beach shacks.";
         } else if (query.includes("budget")) {
           response = "For budget travel in India, consider Himachal Pradesh or Rajasthan. Average hostelling is ₹500/night, and local transport/food will run under ₹1,500/day.";
         }
@@ -359,60 +360,53 @@ export default function CommunitySpots() {
       <TopAppBar variant="logo" />
       <Toaster position="top-right" />
 
-      {/* ---- HEADER STICKY CONTROLS BAR (Matches wireframe layout) ---- */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-sand shrink-0 shadow-sm relative z-20">
-        <div className="max-w-[1280px] mx-auto px-6 py-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+      {/* ---- HEADER STICKY CONTROLS BAR ---- */}
+      <div className="bg-white/90 backdrop-blur-lg border-b border-sand/60 shrink-0 shadow-[0_1px_8px_rgba(0,0,0,0.06)] relative z-20">
+        <div className="max-w-[1280px] mx-auto px-6 py-3 flex flex-col md:flex-row gap-3 items-center justify-between">
           
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Compass className="text-saffron animate-spin-slow" size={24} />
-            <h1 className="font-display font-extrabold text-[20px] text-charcoal tracking-tight leading-none">Traveler Community</h1>
+          <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-saffron to-amber-500 flex items-center justify-center shadow-sm">
+              <Compass className="text-white" size={16} />
+            </div>
+            <div>
+              <h1 className="font-display font-extrabold text-[18px] text-charcoal tracking-tight leading-none">Traveler Community</h1>
+              <p className="font-mono-dm text-[9px] text-taupe/50 font-bold uppercase tracking-widest mt-0.5">Discover · Share · Connect</p>
+            </div>
           </div>
 
           {/* Search bar input */}
-          <div className="w-full md:flex-1 max-w-[500px] h-[40px] bg-[#FAF5EE] border border-sand rounded-xl flex items-center px-4 gap-3 focus-within:border-saffron focus-within:ring-1 focus-within:ring-saffron transition-all">
-            <Search size={15} className="text-taupe" />
+          <div className="w-full md:flex-1 max-w-[460px] h-[38px] bg-[#FAF5EE] border border-sand/70 rounded-xl flex items-center px-3.5 gap-2.5 focus-within:border-saffron focus-within:bg-white focus-within:ring-1 focus-within:ring-saffron/30 transition-all">
+            <Search size={14} className="text-taupe/60 shrink-0" />
             <input 
               type="text" 
-              placeholder="Search destinations, experiences, itineraries..." 
+              placeholder="Search destinations, trips, stories..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-transparent outline-none w-full font-cabinet font-bold text-[12.5px] text-charcoal placeholder:text-taupe/40"
+              className="bg-transparent outline-none w-full font-cabinet text-[12px] text-charcoal placeholder:text-taupe/35"
             />
-            {search && <X size={14} className="text-taupe cursor-pointer" onClick={() => setSearch("")} />}
+            {search && <X size={13} className="text-taupe/60 cursor-pointer hover:text-charcoal transition-colors shrink-0" onClick={() => setSearch("")} />}
           </div>
 
-          {/* Group By, Filter, Sort By Actions row */}
+          {/* Sort/Filter Controls */}
           <div className="flex gap-2 w-full md:w-auto shrink-0 justify-end">
-            <select 
-              value={groupBy}
-              onChange={e => setGroupBy(e.target.value)}
-              className="h-[38px] px-3 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11.5px] focus:border-saffron outline-none shadow-sm cursor-pointer"
-            >
-              <option value="none">Group By: None</option>
-              <option value="destination">Destination</option>
-              <option value="travelStyle">Travel Style</option>
-              <option value="budget">Budget Range</option>
-              <option value="duration">Duration</option>
-            </select>
-
             <select 
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-[38px] px-3 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11.5px] focus:border-saffron outline-none shadow-sm cursor-pointer"
+              className="h-[36px] px-3 rounded-xl border border-sand/70 bg-white text-taupe font-cabinet font-bold text-[11px] focus:border-saffron outline-none cursor-pointer hover:border-sand transition-all"
             >
-              <option value="recommended">Sort: Recommended</option>
+              <option value="recommended">Recommended</option>
               <option value="recent">Most Recent</option>
-              <option value="popular">Popularity</option>
-              <option value="rating">Rating</option>
-              <option value="budget_low">Budget: Low-High</option>
-              <option value="budget_high">Budget: High-Low</option>
+              <option value="popular">Trending</option>
+              <option value="rating">Top Rated</option>
+              <option value="budget_low">Budget: Low → High</option>
+              <option value="budget_high">Budget: High → Low</option>
             </select>
 
             <button 
               onClick={() => setMobileFilterOpen(true)}
-              className="h-[38px] px-4 rounded-xl border border-sand bg-white hover:bg-ivory text-taupe font-cabinet font-extrabold text-[11.5px] flex items-center gap-1.5 shadow-sm"
+              className="h-[36px] px-3.5 rounded-xl border border-sand/70 bg-white hover:bg-[#FAF5EE] text-taupe font-cabinet font-bold text-[11px] flex items-center gap-1.5 hover:border-sand transition-all"
             >
-              <Filter size={13} /> Filter
+              <SlidersHorizontal size={13} /> Filters
             </button>
           </div>
         </div>
@@ -422,39 +416,39 @@ export default function CommunitySpots() {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1280px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* LEFT SIDEBAR: PROFILE & STATS (LinkedIn Style) */}
+          {/* LEFT SIDEBAR: PROFILE & STATS */}
           <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-0">
-            <div className="bg-white border border-sand rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-              {/* Card Banner Background */}
-              <div className="h-20 bg-gradient-to-r from-saffron to-amber-500" />
+            <div className="bg-white border border-sand/60 rounded-3xl overflow-hidden shadow-sm">
+              {/* Banner — rich saffron gradient with subtle texture */}
+              <div className="h-[72px] bg-gradient-to-br from-[#F59E0B] via-saffron to-[#D97706] relative overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.08]" style={{backgroundImage: 'repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%)', backgroundSize: '12px 12px'}} />
+              </div>
               
               {/* Profile info block */}
-              <div className="p-5 text-center -mt-10 border-b border-sand">
-                <div className="w-16 h-16 rounded-full bg-white border-2 border-white shadow-md mx-auto flex items-center justify-center font-cabinet font-extrabold text-[22px] text-charcoal">
-                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "👤"}
+              <div className="px-5 pb-4 text-center -mt-9 border-b border-sand/50">
+                <div className="w-[62px] h-[62px] rounded-full bg-white border-[2.5px] border-white shadow-lg mx-auto flex items-center justify-center font-cabinet font-extrabold text-[20px] text-charcoal">
+                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "G"}
                 </div>
-                <h3 className="font-display font-extrabold text-[15.5px] text-charcoal mt-3">
+                <h3 className="font-display font-extrabold text-[15px] text-charcoal mt-2.5 leading-tight">
                   {isAuthenticated ? authUser?.name : "Guest Traveler"}
                 </h3>
-                <span className="font-mono-dm text-[9.5px] text-saffron bg-[#FEF3E2] border border-[#FEF3E2] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider mt-1.5 inline-block">
+                <span className="font-mono-dm text-[8.5px] text-saffron bg-[#FEF3E2] border border-amber-100 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-widest mt-1.5 inline-block">
                   Level 3 Contributor
                 </span>
               </div>
 
-              {/* Sidebar stats link */}
-              <div className="p-4 space-y-3.5 text-[12.5px] font-cabinet font-semibold text-taupe bg-[#FAF5EE]/30">
-                <div className="flex justify-between items-center">
-                  <span>Itineraries Shared</span>
-                  <span className="text-saffron font-bold">12</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Total Views</span>
-                  <span className="text-charcoal font-bold">1.4k</span>
-                </div>
-                <div className="flex justify-between items-center border-t border-sand/50 pt-2.5">
-                  <span>Safety Contributions</span>
-                  <span className="text-[#2D6A4F] font-bold">98% Verified</span>
-                </div>
+              {/* Stats */}
+              <div className="p-4 space-y-0">
+                {[
+                  { label: 'Itineraries Shared', value: '12', color: 'text-saffron' },
+                  { label: 'Total Views', value: '1.4k', color: 'text-charcoal' },
+                  { label: 'Safety Contributions', value: '98% Verified', color: 'text-[#2D6A4F]' },
+                ].map(({ label, value, color }, i, arr) => (
+                  <div key={label} className={`flex justify-between items-center py-3 font-cabinet text-[12px] ${i < arr.length - 1 ? 'border-b border-sand/40' : ''}`}>
+                    <span className="text-taupe/75 font-semibold">{label}</span>
+                    <span className={`${color} font-extrabold`}>{value}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -465,10 +459,10 @@ export default function CommunitySpots() {
               </h4>
               <div className="space-y-2.5 text-[12.5px] font-cabinet font-bold text-taupe">
                 <Link to="/explore" className="flex items-center gap-2 hover:text-saffron transition-colors">
-                  🧭 Discover Dashboard
+                  <Compass size={13} className="shrink-0" /> Discover Dashboard
                 </Link>
                 <Link to="/history" className="flex items-center gap-2 hover:text-saffron transition-colors">
-                  📅 Your Saved Collection
+                  <Bookmark size={13} className="shrink-0" /> Your Saved Collection
                 </Link>
                 <button 
                   onClick={() => {
@@ -481,7 +475,7 @@ export default function CommunitySpots() {
                   }}
                   className="flex items-center gap-2 hover:text-saffron transition-colors w-full text-left"
                 >
-                  📝 Publish New Travel Card
+                  <PlusCircle size={13} className="shrink-0" /> Publish New Travel Card
                 </button>
               </div>
             </div>
@@ -490,13 +484,13 @@ export default function CommunitySpots() {
           {/* CENTER PANEL: FEED STREAM */}
           <main className="lg:col-span-6 space-y-6">
             
-            {/* Start a Post / Experience Card (LinkedIn style) */}
-            <div className="bg-white border border-sand rounded-3xl p-4.5 shadow-sm space-y-4">
-              <div className="flex gap-3 items-center">
-                <div className="w-10 h-10 rounded-full bg-[#FEF3E2] border border-sand flex items-center justify-center font-cabinet font-extrabold text-[15px] text-charcoal shrink-0">
+            {/* Start a Post — Premium composer card */}
+            <div className="bg-white border border-sand/70 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+              {/* Input row */}
+              <div className="flex gap-3 items-center p-4">
+                <div className="w-9 h-9 rounded-full bg-[#FEF3E2] border border-sand/60 flex items-center justify-center font-cabinet font-extrabold text-[13px] text-charcoal shrink-0">
                   {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "G"}
                 </div>
-                
                 <button 
                   onClick={() => {
                     if (!isAuthenticated) {
@@ -506,76 +500,67 @@ export default function CommunitySpots() {
                       setShareModalOpen(true);
                     }
                   }}
-                  className="flex-1 h-[40px] bg-[#FAF5EE] border border-sand rounded-full text-left px-5 font-cabinet font-semibold text-[12.5px] text-taupe/50 hover:bg-ivory transition-colors cursor-pointer"
+                  className="flex-1 h-[38px] bg-[#FAF5EE] border border-sand/60 rounded-full text-left px-4 font-cabinet text-[12px] text-taupe/45 hover:bg-[#F5EDE0] hover:border-sand transition-all cursor-pointer"
                 >
                   Share a travel log, activity pass, or itinerary...
                 </button>
               </div>
 
-              <div className="flex justify-between items-center border-t border-sand/40 pt-3">
+              {/* Action row */}
+              <div className="flex border-t border-sand/40">
                 <button 
                   onClick={() => {
-                    if (!isAuthenticated) {
-                      toast.error("Please login to share.");
-                      navigate("/auth/login");
-                    } else {
-                      setPostType("experience");
-                      setShareModalOpen(true);
-                    }
+                    if (!isAuthenticated) { toast.error("Please login."); navigate("/auth/login"); }
+                    else { setPostType("experience"); setShareModalOpen(true); }
                   }}
-                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-taupe/70 hover:text-[#3A86C8] hover:bg-[#EFF6FF]/60 font-cabinet font-bold text-[11px] transition-all border-r border-sand/40"
                 >
-                  <Image size={15} className="text-[#3A86C8]" />
-                  <span>Photo / Log</span>
+                  <Image size={13} />
+                  <span>Photo &amp; Log</span>
                 </button>
-                
                 <button 
                   onClick={() => {
-                    if (!isAuthenticated) {
-                      toast.error("Please login to share.");
-                      navigate("/auth/login");
-                    } else {
-                      setPostType("trip");
-                      setShareModalOpen(true);
-                    }
+                    if (!isAuthenticated) { toast.error("Please login."); navigate("/auth/login"); }
+                    else { setPostType("trip"); setShareModalOpen(true); }
                   }}
-                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-taupe/70 hover:text-[#10B981] hover:bg-[#ECFDF5]/60 font-cabinet font-bold text-[11px] transition-all border-r border-sand/40"
                 >
-                  <FileText size={15} className="text-[#10B981]" />
-                  <span>Itinerary file</span>
+                  <FileText size={13} />
+                  <span>Itinerary</span>
                 </button>
-
                 <button 
                   onClick={() => {
-                    if (!isAuthenticated) {
-                      toast.error("Please login to share.");
-                      navigate("/auth/login");
-                    } else {
-                      setPostType("activity");
-                      setShareModalOpen(true);
-                    }
+                    if (!isAuthenticated) { toast.error("Please login."); navigate("/auth/login"); }
+                    else { setPostType("activity"); setShareModalOpen(true); }
                   }}
-                  className="flex items-center gap-2 text-taupe hover:text-saffron font-cabinet font-bold text-[11.5px] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-taupe/70 hover:text-amber-600 hover:bg-amber-50/60 font-cabinet font-bold text-[11px] transition-all"
                 >
-                  <Landmark size={15} className="text-amber-500" />
+                  <Landmark size={13} />
                   <span>Activity Pass</span>
                 </button>
               </div>
             </div>
 
             {/* Content filter category navigation pills */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-sand/45">
-              {["All", "trip", "experience", "activity", "destination"].map(type => (
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
+              {[
+                { key: 'All', label: 'All Feeds', icon: null },
+                { key: 'trip', label: 'Itineraries', icon: FileText },
+                { key: 'experience', label: 'Stories', icon: Image },
+                { key: 'activity', label: 'Activities', icon: Landmark },
+                { key: 'destination', label: 'Destinations', icon: MapPin },
+              ].map(({ key, label, icon: Icon }) => (
                 <button 
-                  key={type}
-                  onClick={() => setSelectedType(type === 'All' ? 'All' : type)}
-                  className={`h-[30px] px-4.5 rounded-full font-cabinet font-extrabold text-[11px] transition-all shrink-0 capitalize ${
-                    (selectedType === type) 
-                      ? "bg-[#1B4332] text-white shadow-sm" 
-                      : "bg-white border border-sand text-taupe hover:bg-ivory"
+                  key={key}
+                  onClick={() => setSelectedType(key)}
+                  className={`h-[30px] px-3.5 rounded-full font-cabinet font-bold text-[11px] tracking-wide transition-all shrink-0 flex items-center gap-1.5 ${
+                    selectedType === key
+                      ? 'bg-charcoal text-white shadow-sm'
+                      : 'bg-white border border-sand/70 text-taupe/70 hover:border-charcoal/30 hover:text-charcoal'
                   }`}
                 >
-                  {type === 'trip' ? '🎫 Itineraries' : type === 'experience' ? '📸 Stories' : type === 'activity' ? '🪂 Activities' : type === 'destination' ? '📍 Destinations' : 'All Feeds'}
+                  {Icon && <Icon size={10} />}
+                  {label}
                 </button>
               ))}
             </div>
@@ -635,50 +620,14 @@ export default function CommunitySpots() {
                           return (
                             <article 
                               key={post._id || post.id} 
-                              className={`bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col`}
+                              className="bg-white border border-sand/70 rounded-3xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.015)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row md:min-h-[260px]"
                             >
-                              {/* Post Header */}
-                              <div className="p-5 flex justify-between items-start">
-                                <div className="flex gap-3 items-center">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[14px] border border-sand shrink-0 bg-[#FEF3E2] text-charcoal`}>
-                                    {post.authorName === 'Gemini-AI-Guide' ? '🤖' : post.authorName[0]}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-1.5">
-                                      <h4 className="font-cabinet font-extrabold text-[13.5px] text-charcoal leading-none">
-                                        {post.authorName}
-                                      </h4>
-                                      {post.authorName === 'Gemini-AI-Guide' && (
-                                        <span className="bg-violet-100 text-violet-700 text-[8px] font-mono-dm uppercase font-extrabold px-1.5 py-0.5 rounded border border-violet-200">AI Partner</span>
-                                      )}
-                                    </div>
-                                    <span className="font-mono-dm text-[9.5px] text-taupe/50 block mt-1">
-                                      {new Date(post.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · verified traveler
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <Bookmark 
-                                  size={16} 
-                                  className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0 cursor-pointer`}
-                                  onClick={(e) => handleSave(post._id || post.id, e)}
-                                />
-                              </div>
-
-                              {/* Post Image Banner */}
+                              {/* Left Side: Photo */}
                               {post.coverImage && (
-                                <div className="w-full h-[220px] relative overflow-hidden shrink-0 bg-sand/30 border-y border-sand/40">
+                                <div className="w-full md:w-[260px] min-h-[180px] md:min-h-full relative overflow-hidden bg-sand/20 shrink-0 border-r border-sand/30">
                                   <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
                                   
-                                  {/* Safety Stamp */}
-                                  {post.rating && (
-                                    <div className="absolute top-4 right-4 h-[24px] px-2.5 rounded-full bg-white/95 border border-sand shadow-sm flex items-center gap-1">
-                                      <Star size={11} className="text-accent fill-accent" />
-                                      <span className="font-cabinet font-bold text-[11px] text-charcoal">{post.rating}</span>
-                                    </div>
-                                  )}
-
-                                  <div className="absolute bottom-4 left-4 h-[22px] px-2.5 rounded-full bg-charcoal/70 backdrop-blur border border-white/20 flex items-center">
+                                  <div className="absolute bottom-3 left-3 h-[20px] px-2 rounded-full bg-charcoal/70 backdrop-blur border border-white/15 flex items-center">
                                     <span className="font-mono-dm text-[8.5px] text-white uppercase tracking-wider font-extrabold">
                                       {post.type}
                                     </span>
@@ -686,39 +635,68 @@ export default function CommunitySpots() {
                                 </div>
                               )}
 
-                              {/* Card Content Body */}
-                              <div className="p-5 flex-1 flex flex-col justify-between">
+                              {/* Right Side: Text & Actions */}
+                              <div className="p-5 flex-1 flex flex-col justify-between min-w-0">
                                 <div>
-                                  <h3 className="font-display font-extrabold text-[17px] text-charcoal leading-snug">
-                                    {post.title}
-                                  </h3>
+                                  {/* Author / Header */}
+                                  <div className="flex justify-between items-start gap-2 mb-2.5">
+                                    <div className="flex gap-2.5 items-center">
+                                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-cabinet font-extrabold text-[10px] border border-sand bg-[#FEF3E2] text-charcoal shrink-0">
+                                        {post.authorName === 'Gemini-AI-Guide' ? 'AI' : post.authorName[0]}
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-1.5">
+                                          <h4 className="font-cabinet font-extrabold text-[12.5px] text-charcoal leading-none">
+                                            {post.authorName}
+                                          </h4>
+                                          {post.authorName === 'Gemini-AI-Guide' && (
+                                            <span className="bg-violet-100 text-violet-700 text-[8px] font-mono-dm uppercase font-extrabold px-1.5 py-0.5 rounded border border-violet-200">AI</span>
+                                          )}
+                                        </div>
+                                        <span className="font-mono-dm text-[8.5px] text-taupe/50 mt-0.5 block">
+                                          {new Date(post.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <Bookmark 
+                                      size={15} 
+                                      className={`${isSaved ? 'text-saffron fill-saffron' : 'text-taupe/40'} hover:text-saffron transition-all shrink-0 cursor-pointer`}
+                                      onClick={(e) => handleSave(post._id || post.id, e)}
+                                    />
+                                  </div>
+
+                                  <div className="flex items-baseline justify-between gap-3">
+                                    <h3 className="font-display font-extrabold text-[16.5px] text-charcoal leading-tight truncate">
+                                      {post.title}
+                                    </h3>
+                                    {post.rating && (
+                                      <div className="flex items-center gap-0.5 shrink-0 text-accent font-cabinet font-bold text-[11px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                                        <Star size={10.5} className="fill-accent" />
+                                        <span>{post.rating}</span>
+                                      </div>
+                                    )}
+                                  </div>
 
                                   {post.destinationName && (
-                                    <div className="flex items-center gap-1 mt-1 text-taupe/65">
-                                      <MapPin size={11.5} className="text-saffron" />
-                                      <span className="font-cabinet font-semibold text-[11.5px]">{post.destinationName}</span>
+                                    <div className="flex items-center gap-1 mt-0.5 text-taupe/65">
+                                      <MapPin size={10.5} className="text-saffron" />
+                                      <span className="font-cabinet font-semibold text-[11px]">{post.destinationName}</span>
                                     </div>
                                   )}
 
-                                  <p className="font-jakarta text-[13px] text-taupe mt-3 leading-relaxed whitespace-pre-wrap">
+                                  <p className="font-jakarta text-[12.5px] text-taupe mt-2.5 leading-relaxed line-clamp-3">
                                     {post.description}
                                   </p>
 
                                   {/* Dynamic visual attachments for Travel Posts */}
                                   {post.type === 'trip' && (
-                                    <div className="mt-4 border border-sand bg-emerald-50/20 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-full relative overflow-hidden border-l-4 border-l-[#1B4332]">
-                                      <div>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-mono-dm text-[8.5px] text-taupe/60 uppercase tracking-widest font-extrabold">Itinerary Ticket Stub</span>
-                                          <CheckCircle2 size={10} className="text-emerald-600" />
-                                        </div>
-                                        <h5 className="font-cabinet font-extrabold text-[14.5px] text-charcoal mt-1 flex items-center gap-1.5">
-                                          {post.duration} Days Plan <ArrowRight size={12} className="text-saffron" /> {post.destinationName}
+                                    <div className="mt-3 bg-[#FAF5EE] border border-sand/65 rounded-xl p-3 flex justify-between items-center gap-3">
+                                      <div className="min-w-0">
+                                        <h5 className="font-cabinet font-extrabold text-[12.5px] text-charcoal truncate">
+                                          {post.duration} Days Plan · Est: ₹{(post.budget || 0).toLocaleString()}
                                         </h5>
-                                        <div className="flex gap-3 mt-2.5">
-                                          <span className="font-mono-dm text-[10px] text-emerald-800 font-bold bg-emerald-100/50 px-2 py-0.5 rounded">Est: ₹{(post.budget || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-[#1B4332] font-bold bg-[#1B4332]/5 px-2 py-0.5 rounded">🛡️ 91/100 Safety</span>
-                                        </div>
+                                        <span className="font-mono-dm text-[9px] text-[#2D6A4F] font-bold flex items-center gap-1"><ShieldCheck size={9} /> 91/100 Safe Spot</span>
                                       </div>
                                       <div className="flex gap-1.5 shrink-0 z-10">
                                         <button 
@@ -726,13 +704,13 @@ export default function CommunitySpots() {
                                             e.stopPropagation();
                                             setDetailModalPost(post);
                                           }}
-                                          className="h-[32px] px-3.5 rounded-xl border border-sand bg-white text-taupe font-cabinet font-extrabold text-[11px] hover:bg-ivory shadow-sm transition-all"
+                                          className="h-[28px] px-2.5 rounded-lg border border-sand bg-white text-taupe font-cabinet font-extrabold text-[10px] hover:bg-ivory shadow-xs"
                                         >
-                                          Stops Timeline
+                                          Stops
                                         </button>
                                         <button 
                                           onClick={(e) => handleCopyTrip(post, e)}
-                                          className="h-[32px] px-4.5 rounded-xl bg-saffron text-white font-cabinet font-extrabold text-[11px] hover:shadow-saffron/20 shadow-sm hover:scale-[1.02] transition-all"
+                                          className="h-[28px] px-3.5 rounded-lg bg-saffron text-white font-cabinet font-extrabold text-[10px] hover:scale-[1.02] shadow-xs"
                                         >
                                           Import
                                         </button>
@@ -741,13 +719,12 @@ export default function CommunitySpots() {
                                   )}
 
                                   {post.type === 'activity' && post.activityDetails && (
-                                    <div className="mt-4 border border-[#2D6A4F]/20 bg-[#2D6A4F]/5 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-full border-l-4 border-l-[#2D6A4F]">
-                                      <div>
-                                        <span className="font-mono-dm text-[8.5px] text-[#2D6A4F] uppercase tracking-widest font-extrabold">Activity Pass Card</span>
-                                        <h5 className="font-cabinet font-extrabold text-[14px] text-charcoal mt-1">{post.activityDetails.name}</h5>
-                                        <div className="flex gap-3 mt-2.5">
-                                          <span className="font-mono-dm text-[10px] text-charcoal font-bold bg-white px-2 py-0.5 rounded border border-sand/40">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
-                                          <span className="font-mono-dm text-[10px] text-taupe bg-white px-2 py-0.5 rounded border border-sand/40">{post.activityDetails.duration}</span>
+                                    <div className="mt-3 bg-[#FAF5EE] border border-sand/65 rounded-xl p-3 flex justify-between items-center gap-3">
+                                      <div className="min-w-0">
+                                        <h5 className="font-cabinet font-extrabold text-[12.5px] text-charcoal truncate">{post.activityDetails.name}</h5>
+                                        <div className="flex gap-2 mt-0.5">
+                                          <span className="font-mono-dm text-[9px] text-charcoal font-bold">Cost: ₹{(post.activityDetails.cost || 0).toLocaleString()}</span>
+                                          <span className="font-mono-dm text-[9px] text-taupe">· {post.activityDetails.duration}</span>
                                         </div>
                                       </div>
                                       <button 
@@ -760,7 +737,7 @@ export default function CommunitySpots() {
                                             setAddToTripModalActivity(post);
                                           }
                                         }}
-                                        className="h-[32px] px-4.5 rounded-xl bg-[#2D6A4F] text-white font-cabinet font-extrabold text-[11px] hover:scale-[1.02] transition-all shadow-sm shrink-0"
+                                        className="h-[28px] px-3.5 rounded-lg bg-[#2D6A4F] text-white font-cabinet font-extrabold text-[10px] hover:scale-[1.02] shadow-xs shrink-0"
                                       >
                                         Add to Trip
                                       </button>
@@ -769,9 +746,9 @@ export default function CommunitySpots() {
 
                                   {/* Tags */}
                                   {post.tags && post.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-4">
-                                      {post.tags.map(t => (
-                                        <span key={t} className="font-mono-dm text-[10px] text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded border border-[#1B4332]/10 font-bold">
+                                    <div className="flex flex-wrap gap-1.5 mt-3">
+                                      {post.tags.slice(0, 3).map(t => (
+                                        <span key={t} className="font-mono-dm text-[9px] text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded border border-[#1B4332]/10 font-bold">
                                           #{t}
                                         </span>
                                       ))}
@@ -780,13 +757,13 @@ export default function CommunitySpots() {
                                 </div>
 
                                 {/* Reactions Bar */}
-                                <div className="mt-6 pt-4 border-t border-sand/40 flex items-center justify-between text-taupe/70">
-                                  <div className="flex items-center gap-4">
+                                <div className="mt-4 pt-3 border-t border-sand/40 flex items-center justify-between text-taupe/70">
+                                  <div className="flex items-center gap-3.5">
                                     <button 
                                       onClick={(e) => handleLike(post._id || post.id, e)}
-                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isLiked ? 'text-saffron' : ''}`}
+                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-cabinet font-extrabold text-[11px] ${isLiked ? 'text-saffron' : ''}`}
                                     >
-                                      <ThumbsUp size={14} className={isLiked ? 'fill-saffron text-saffron' : ''} />
+                                      <ThumbsUp size={13} className={isLiked ? 'fill-saffron text-saffron' : ''} />
                                       {post.likes?.length || 0}
                                     </button>
                                     <button 
@@ -794,23 +771,18 @@ export default function CommunitySpots() {
                                         e.stopPropagation();
                                         setExpandedCommentsPostId(isCommentsExpanded ? null : (post._id || post.id));
                                       }}
-                                      className={`flex items-center gap-1.5 hover:text-saffron transition-all font-cabinet font-extrabold text-[11.5px] ${isCommentsExpanded ? 'text-saffron' : ''}`}
+                                      className={`flex items-center gap-1 hover:text-saffron transition-all font-cabinet font-extrabold text-[11px] ${isCommentsExpanded ? 'text-saffron' : ''}`}
                                     >
-                                      <MessageSquare size={14} />
+                                      <MessageSquare size={13} />
                                       {post.comments?.length || 0}
                                     </button>
                                     <button 
                                       onClick={(e) => handleShare(post, e)}
                                       className="p-1 hover:bg-sand rounded-full transition-all"
-                                      title="Share Post Link"
                                     >
-                                      <Share2 size={14} />
+                                      <Share2 size={13} />
                                     </button>
                                   </div>
-                                  
-                                  <span className="font-mono-dm text-[9.5px] text-taupe/50">
-                                    {new Date(post.createdAt || Date.now()).toLocaleDateString()}
-                                  </span>
                                 </div>
                               </div>
 
@@ -873,14 +845,20 @@ export default function CommunitySpots() {
           {/* RIGHT SIDEBAR: TRENDING LIST & STICKY GEMINI ASSISTANT PANEL */}
           <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-0">
             
-            {/* Embedded Gemini Chat Panel (Replaced Floating Button for premium, finished look) */}
-            <div className="bg-white border border-sand rounded-3xl shadow-sm overflow-hidden flex flex-col h-[380px] hover:shadow-md transition-all duration-300">
+            {/* Embedded Gemini Chat Panel */}
+            <div className="bg-white border border-sand/60 rounded-3xl shadow-sm overflow-hidden flex flex-col h-[380px] transition-shadow duration-300 hover:shadow-md">
               {/* Header */}
-              <div className="p-4 border-b border-sand bg-gradient-to-r from-saffron to-amber-500 text-white flex items-center gap-2">
-                <Sparkles className="animate-pulse text-amber-200" size={16} />
+              <div className="p-3.5 border-b border-sand/40 bg-gradient-to-r from-[#1B1B2F] to-[#2D2A5E] text-white flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                  <Sparkles size={13} className="text-amber-300" />
+                </div>
                 <div>
-                  <h4 className="font-cabinet font-extrabold text-[13px] leading-none">Gemini AI Assistant</h4>
-                  <span className="font-mono-dm text-[8.5px] text-white/90 font-bold uppercase tracking-wider block mt-0.5">Online Helper</span>
+                  <h4 className="font-cabinet font-extrabold text-[12.5px] leading-none">AI Travel Assistant</h4>
+                  <span className="font-mono-dm text-[8px] text-white/50 font-bold uppercase tracking-widest block mt-0.5">Powered by Gemini</span>
+                </div>
+                <div className="ml-auto flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono-dm text-[8px] text-white/50 font-bold">Online</span>
                 </div>
               </div>
 
@@ -911,9 +889,9 @@ export default function CommunitySpots() {
               {/* Suggestions chips */}
               <div className="px-3 py-1.5 bg-[#FAF5EE] border-t border-sand/40 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
                 {[
-                  { label: "Jaipur Tips 🏰", prompt: "Recommend tips and safety in Jaipur" },
-                  { label: "Goa Sunset 🌴", prompt: "Patnem Beach and shacks in Goa" },
-                  { label: "Leh Slush ⚠️", prompt: "Safety checklist for Leh-Manali slush" }
+                  { label: "Jaipur Tips", prompt: "Recommend tips and safety in Jaipur" },
+                  { label: "Goa Sunset", prompt: "Patnem Beach and shacks in Goa" },
+                  { label: "Leh Slush", prompt: "Safety checklist for Leh-Manali slush" }
                 ].map(chip => (
                   <button
                     key={chip.label}
@@ -978,7 +956,7 @@ export default function CommunitySpots() {
                   <span className="font-mono-dm text-[10px] text-taupe/40">289 travelers</span>
                 </div>
                 <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Goa")}>
-                  <span>#OffbeatGoa🌴</span>
+                  <span>#OffbeatGoa</span>
                   <span className="font-mono-dm text-[10px] text-taupe/40">156 travelers</span>
                 </div>
                 <div className="flex justify-between items-center cursor-pointer hover:text-saffron transition-colors" onClick={() => setSearch("Budget")}>
@@ -1158,7 +1136,7 @@ export default function CommunitySpots() {
                             <div>
                               <h5 className="font-cabinet font-bold text-[13px] text-charcoal flex items-center gap-2">
                                 {a.time} - {a.activity}
-                                {a.location && <span className="font-mono-dm text-[9px] text-taupe/65">📍 {a.location}</span>}
+                                {a.location && <span className="font-mono-dm text-[9px] text-taupe/65 flex items-center gap-0.5"><MapPin size={8} className="inline" /> {a.location}</span>}
                               </h5>
                               <p className="font-jakarta text-[12px] text-taupe mt-1">{a.description}</p>
                             </div>
