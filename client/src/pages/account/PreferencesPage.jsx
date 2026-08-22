@@ -296,3 +296,5 @@ export default function PreferencesPage() {
     </div>
   );
 }
+
+// added by Rishikesh
