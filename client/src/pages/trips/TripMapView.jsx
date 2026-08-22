@@ -114,99 +114,16 @@ export default function TripMapView() {
 
       {/* Map Area */}
       <div className="flex-1 relative">
-        {/* Map Provider Selector */}
-        <div className="absolute top-4 left-[360px] z-30 flex items-center bg-white/90 backdrop-blur-md border border-[#E8D5B7] rounded-full p-1 shadow-md">
-          <button
-            type="button"
-            onClick={() => setUseOsmFallback(false)}
-            className={`px-3 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${!useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
-          >
-            Google Maps
-          </button>
-          <button
-            type="button"
-            onClick={() => setUseOsmFallback(true)}
-            className={`px-3 py-1 rounded-full font-cabinet font-semibold text-[11px] transition-colors ${useOsmFallback ? 'bg-[#E8640C] text-white' : 'text-[#6B4F3A] hover:text-[#1E1410]'}`}
-          >
-            OpenStreetMap (Free)
-          </button>
-        </div>
-
-        {useOsmFallback ? (
-          <iframe
-            title="Interactive Map View"
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
-            className="w-full h-full"
-          />
-        ) : isLoaded && !loadError ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            center={center}
-            zoom={13}
-            options={mapOptions}
-          >
-            {/* Activity Markers */}
-            {toggles[0] && dayData?.activities.map((a, i) => (
-              a.lat && (
-                <Marker
-                  key={i}
-                  position={{ lat: a.lat, lng: a.lng }}
-                  label={(i + 1).toString()}
-                  onClick={() => setSelectedActivity(a)}
-                  icon={{
-                    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-                    fillColor: "#E8640C",
-                    fillOpacity: 1,
-                    strokeWeight: 1,
-                    strokeColor: "#FFFFFF",
-                    scale: 1.2,
-                    labelOrigin: { x: 12, y: 10 }
-                  }}
-                />
-              )
-            ))}
-
-            {/* Decoded Polylines between activities */}
-            {toggles[4] && polylines.map((path, idx) => (
-              <Polyline
-                key={idx}
-                path={path}
-                options={{
-                  strokeColor: "#E8640C",
-                  strokeOpacity: 0.8,
-                  strokeWeight: 4,
-                }}
-              />
-            ))}
-            
-            {/* Fallback straight line if no polylines decoded */}
-            {toggles[4] && polylines.length === 0 && dayData && (
-              <Polyline
-                path={dayData.activities.filter(a => a.lat).map(a => ({ lat: a.lat, lng: a.lng }))}
-                options={{
-                  strokeColor: "#E8640C",
-                  strokeOpacity: 0.5,
-                  strokeWeight: 2,
-                  icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4 }, offset: '0', repeat: '20px' }]
-                }}
-              />
-            )}
-          </GoogleMap>
-        ) : (
-          <iframe
-            title="Interactive Map View"
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
-            className="w-full h-full"
-          />
-        )}
+        {/* OpenStreetMap Only */}
+        <iframe
+          title="Interactive Map View"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          scrolling="no"
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 0.1}%2C${center.lat - 0.1}%2C${center.lng + 0.1}%2C${center.lat + 0.1}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
+          className="w-full h-full"
+        />
 
         {/* Map Controls — Top Right */}
         <div className="absolute top-[16px] right-[16px] bg-white border border-[#E8D5B7] rounded-[12px] p-[8px] shadow-[0_4px_16px_rgba(30,20,16,0.12)] flex flex-col gap-[6px] z-20">
