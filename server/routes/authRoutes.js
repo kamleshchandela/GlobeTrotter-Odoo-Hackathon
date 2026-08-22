@@ -14,3 +14,5 @@ router.put('/complete-profile', protect, completeProfile);
 router.put('/profile', protect, updateProfile);
 
 export default router;
+
+// added by Rishikesh
