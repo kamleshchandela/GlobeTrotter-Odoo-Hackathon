@@ -48,12 +48,6 @@ export default function NewTripStep1() {
   const [searchQuery, setSearchQuery] = useState("");
   const [useOsmFallback, setUseOsmFallback] = useState(true);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES
-  });
-
   const handleManualSearch = async (query) => {
     if (!query || query.trim().length === 0) return;
     const city = query.trim();
