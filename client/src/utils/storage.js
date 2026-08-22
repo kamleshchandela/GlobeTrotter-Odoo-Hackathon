@@ -39,3 +39,5 @@ export const storage = {
   removeSession: (key) => sessionStorage.removeItem(key),
   clearSession: () => sessionStorage.clear(),
 };
+
+// added by Rishikesh
