@@ -418,7 +418,6 @@ export default function TripItinerary() {
               {!currentTrip._id && (
                 <button onClick={handleSaveTrip} className="w-full h-[42px] rounded-[10px] bg-[#E8640C] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Save size={14} /> Save Trip</button>
               )}
-              <Link to={location.pathname.replace('itinerary', 'map')} className="w-full h-[42px] rounded-[10px] bg-white border-[1.5px] border-[#E8640C] text-[#E8640C] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><MapIcon size={14} /> View on Map</Link>
               <button onClick={downloadPDF} className="w-full h-[42px] rounded-[10px] bg-white border border-[#E8D5B7] text-[#6B4F3A] font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Download size={14} /> Download PDF</button>
               <Link to="/safety/sos" className="w-full h-[42px] rounded-[10px] bg-[#C0392B] text-white font-cabinet font-semibold text-[13px] flex items-center justify-center gap-[6px]"><Shield size={14} /> SOS</Link>
             </div>

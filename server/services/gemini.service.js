@@ -38,7 +38,7 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
   if (process.env.GOOGLE_MAPS_API_KEY) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",
@@ -110,179 +110,180 @@ const getGoogleMapsPlaceInfo = async (placeName, location) => {
 export const generateItinerary = async (tripData) => {
   try {
     const prompt = `
-      Generate a realistic travel itinerary for India with parameters:
+      Generate a highly detailed, realistic, and rich travel itinerary for India with parameters:
       - Destination: ${tripData.location}
       - Duration: ${tripData.duration} days
-      - Budget/Stay: ${tripData.stay}
-      - Transport: ${tripData.transport}
-      - Dietary: ${tripData.dietary}
+      - Budget/Stay Preference: ${tripData.stay}
+      - Transport Mode: ${tripData.transport}
+      - Dietary Preference: ${tripData.dietary}
       - Interests: ${tripData.interests.join(", ")}
-      - Vibe: ${tripData.vibe}
+      - Travel Vibe: ${tripData.vibe}
 
-      Limit to 3 activities per day with crisp descriptions.
-      Return ONLY a raw JSON object with key "tripTitle", "overview", "dailyItinerary", "estimatedCosts", "essentialPacking". No markdown, no prose.
+      IMPORTANT REQUIREMENTS FOR MAXIMUM DETAIL:
+      1. Provide 4 to 5 distinct activities for each day.
+      2. For each activity, write an engaging 3-sentence description highlighting history, key discoveries, and insider tips.
+      3. For each day, provide specific food suggestions with famous local restaurant names and signature dishes.
+      4. For each day, include location-specific safety notes.
+      5. Provide an estimated cost breakdown (in ₹) for accommodation, food, transport, and activities, plus total range.
+
+      Return ONLY a raw JSON object with keys "tripTitle", "overview", "safetyMetrics", "dailyItinerary", "estimatedCosts", "essentialPacking". No markdown, no prose wrapper.
       JSON structure:
       {
-        "tripTitle": "Catchy title",
-        "overview": "Summary of the trip atmosphere and expectations",
+        "tripTitle": "Catchy, evocative title",
+        "overview": "Rich 3-sentence summary of the trip atmosphere, highlights, and expectations",
         "safetyMetrics": {
-          "guardiansCount": 24, // realistic estimated count of active safety guardians in this destination area
-          "hospitalDistanceKm": 1.4, // realistic distance in km to the nearest major hospital
-          "safetyScore": 89 // safety rating index from 1-100 based on area crime indexes and infrastructure
+          "guardiansCount": 24,
+          "hospitalDistanceKm": 1.4,
+          "safetyScore": 89
         },
         "dailyItinerary": [
           {
             "day": 1,
-            "theme": "Day theme",
+            "theme": "Evocative theme for the day",
             "activities": [
               {
-                "time": "09:30 AM",
-                "activity": "Activity title",
-                "description": "Short highlight.",
+                "time": "09:00 AM",
+                "activity": "Detailed activity title",
+                "description": "Engaging description detailing history and insider tips.",
                 "location": "Specific existing place name (e.g. City Palace, Udaipur)"
               }
             ],
-            "foodSuggestions": ["Restaurant 1", "Restaurant 2"],
-            "safetyNotes": "Location safety tip."
+            "foodSuggestions": ["Famous Restaurant 1 (Known for Signature Dish)", "Local Eatery 2"],
+            "safetyNotes": "Detailed location-specific safety tips and neighborhood advice."
           }
         ],
         "estimatedCosts": {
           "total": "Range in ₹",
           "breakdown": {
-            "accommodation": "Range",
-            "food": "Range",
-            "transport": "Range",
-            "activities": "Range"
+            "accommodation": "Range in ₹",
+            "food": "Range in ₹",
+            "transport": "Range in ₹",
+            "activities": "Range in ₹"
           }
         },
-        "essentialPacking": ["Item 1", "Item 2"]
+        "essentialPacking": ["Item 1", "Item 2", "Item 3", "Item 4"]
       }
     `;
 
     let text = null;
 
-    // 1. TRY GROQ HARDWARE ACCELERATED LLM FIRST (Sub-2-Second Speed!)
-    const groqKey = process.env.GROQ_API_KEY;
-    if (groqKey) {
-      const groqModels = ["openai/gpt-oss-120b", "groq/compound", "qwen/qwen3.6-27b"];
+    // 1. PRIMARY: USE GOOGLE GEMINI API FOR HIGH-QUALITY RICH PLACE INFORMATION
+    const apiKeys = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_SECONDARY
+    ].filter((key, idx, self) => key && self.indexOf(key) === idx);
 
-      for (const gModel of groqModels) {
+    const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+
+    keyLoop:
+    for (const apiKey of apiKeys) {
+      for (const model of modelsToTry) {
         try {
-          const gRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: "POST",
-            headers: {
-              "Authorization": `Bearer ${groqKey}`,
-              "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: gModel,
-              messages: [{ role: "user", content: prompt }],
-              response_format: { type: "json_object" }
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.7
+              }
             })
           });
 
-          if (gRes.ok) {
-            const gData = await gRes.json();
-            if (gData.choices && gData.choices.length > 0) {
-              text = gData.choices[0].message.content;
-              console.log(`[FAST-LLM] Generated via Groq model (${gModel}) successfully!`);
-              break;
+          if (res.ok) {
+            const result = await res.json();
+            if (result.candidates && result.candidates.length > 0) {
+              text = result.candidates[0].content.parts[0].text;
+              console.log(`[GEMINI-AI] Rich itinerary generated via Gemini model (${model}) successfully!`);
+              break keyLoop;
             }
+          } else {
+            const errData = await res.json();
+            console.warn(`Gemini key ${apiKey.slice(0, 10)}... model ${model} failed:`, errData.error?.message);
           }
-        } catch (gErr) {
-          console.warn(`Groq model ${gModel} failed, trying next...`, gErr.message);
+        } catch (err) {
+          console.warn(`Gemini model ${model} fetch exception:`, err.message);
         }
       }
     }
 
-    // 2. FALLBACK TO GEMINI IF GROQ IS UNAVAILABLE
+    // 2. FALLBACK TO GROQ IF GEMINI IS UNAVAILABLE
     if (!text) {
-      console.log("[LLM FALLBACK] Groq unavailable, falling back to Gemini...");
-      const apiKeys = [
-        process.env.GEMINI_API_KEY,
-        process.env.GEMINI_API_KEY_SECONDARY
-      ].filter((key, idx, self) => key && self.indexOf(key) === idx);
-
-      const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
-
-      keyLoop:
-      for (const apiKey of apiKeys) {
-        for (const model of modelsToTry) {
+      console.log("[LLM FALLBACK] Gemini unavailable, falling back to Groq...");
+      const groqKey = process.env.GROQ_API_KEY;
+      if (groqKey) {
+        const groqModels = ["openai/gpt-oss-120b", "groq/compound", "qwen/qwen3.6-27b"];
+        for (const gModel of groqModels) {
           try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            const gRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Authorization": `Bearer ${groqKey}`,
+                "Content-Type": "application/json"
+              },
               body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                model: gModel,
+                messages: [{ role: "user", content: prompt }],
+                response_format: { type: "json_object" }
               })
             });
 
-            if (res.ok) {
-              const result = await res.json();
-              if (result.candidates && result.candidates.length > 0) {
-                text = result.candidates[0].content.parts[0].text;
-                break keyLoop;
+            if (gRes.ok) {
+              const gData = await gRes.json();
+              if (gData.choices && gData.choices.length > 0) {
+                text = gData.choices[0].message.content;
+                console.log(`[GROQ-FALLBACK] Generated via Groq model (${gModel}) successfully!`);
+                break;
               }
             }
-          } catch (err) {
-            console.warn(`Gemini model ${model} fetch exception:`, err.message);
+          } catch (gErr) {
+            console.warn(`Groq model ${gModel} failed:`, gErr.message);
           }
         }
       }
     }
 
     if (!text) {
-      throw new Error("AI request failed across Groq and Gemini candidate keys/models.");
+      throw new Error("AI request failed across Gemini and Groq candidate keys/models.");
     }
 
-    // Extract JSON payload
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Sanitize control characters and extract JSON payload
+    const sanitizedText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
+    const jsonMatch = sanitizedText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("Could not extract valid JSON from AI output.");
     }
 
     const parsedItinerary = JSON.parse(jsonMatch[0]);
 
-    // Fast Non-Blocking Place Grounding with 1.0s max timeout cap
+    // Thorough Place Grounding with 4.5s max timeout cap to fetch full photo URLs & coordinates
     const placePromises = [];
-    for (const day of parsedItinerary.dailyItinerary) {
-      for (const activity of day.activities) {
-        if (activity.location) {
-          placePromises.push(
-            getGoogleMapsPlaceInfo(activity.location, tripData.location).then(async (groundedData) => {
-              if (groundedData) {
-                activity.placeId = groundedData.placeId;
-                activity.lat = groundedData.lat;
-                activity.lng = groundedData.lng;
-                activity.photoUrl = groundedData.photoUrl;
-              }
-              
-              // Fallback to Unsplash Source if photoUrl is empty or fails
-              if (!activity.photoUrl) {
-                const searchKeyword = encodeURIComponent(`${activity.location} ${tripData.location}`);
-                activity.photoUrl = `https://images.unsplash.com/photo-1506461883276-594a12b11cc3?auto=format&fit=crop&w=600&q=80`; // Safe architectural default
-                try {
-                  const unsplashRes = await fetch(`https://api.unsplash.com/search/photos?query=${searchKeyword}&per_page=1&client_id=eM58fP_gT7XqZ3iN5fP1N-Z-rB9B9z0n1O1w4s4n1eI`);
-                  if (unsplashRes.ok) {
-                    const unsplashData = await unsplashRes.json();
-                    if (unsplashData.results && unsplashData.results.length > 0) {
-                      activity.photoUrl = unsplashData.results[0].urls.small;
-                    }
+    if (parsedItinerary.dailyItinerary && Array.isArray(parsedItinerary.dailyItinerary)) {
+      for (const day of parsedItinerary.dailyItinerary) {
+        if (day.activities && Array.isArray(day.activities)) {
+          for (const activity of day.activities) {
+            if (activity.location) {
+              placePromises.push(
+                getGoogleMapsPlaceInfo(activity.location, tripData.location).then(groundedData => {
+                  if (groundedData) {
+                    activity.placeId = groundedData.placeId;
+                    activity.lat = groundedData.lat;
+                    activity.lng = groundedData.lng;
+                    activity.photoUrl = groundedData.photoUrl;
                   }
-                } catch (e) {
-                  // Keep safe default architectural image if search fails
-                }
-              }
-            })
-          );
+                })
+              );
+            }
+          }
         }
       }
     }
 
-    // Wait max 4 seconds for place grounding and Unsplash fallback, or proceed immediately
+    // Allow thorough place grounding up to 4.5s for complete place info & photos
     await Promise.race([
       Promise.all(placePromises),
-      new Promise(resolve => setTimeout(resolve, 4000))
+      new Promise(resolve => setTimeout(resolve, 4500))
     ]);
 
     return parsedItinerary;
