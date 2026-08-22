@@ -88,11 +88,16 @@ src/
 
 ---
 
-## 👤 Author
-**Himmat Mundhe**  
-- [Portfolio](https://himmat-portfolio.vercel.app/)
-- [LinkedIn](https://www.linkedin.com/in/himmat-mundhe-17b5a1213)
-- [GitHub](https://github.com/himmatmundhe07)
+## 👥 Development Team & Roles
+
+* **Kamlesh Chandela** (Project Lead, AI Services & Travel Planner)
+  * GitHub: [@kamleshchandela](https://github.com/kamleshchandela)
+* **Himmat Mundhe** (UI/UX Architect, Layouts & Themes)
+  * GitHub: [@himmatmundhe07](https://github.com/himmatmundhe07)
+* **Rishikesh Singh** (Backend & Security Coordinator)
+  * GitHub: [@RishikeshSingh-dev](https://github.com/RishikeshSingh-dev)
+* **Souvik Biswas** (Safety Systems, SOS & Maps Specialist)
+  * GitHub: [@SouvikBiswas-dev](https://github.com/SouvikBiswas-dev)
 
 ---
 
