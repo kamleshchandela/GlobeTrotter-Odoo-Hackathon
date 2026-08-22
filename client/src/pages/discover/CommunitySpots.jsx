@@ -34,6 +34,12 @@ const DURATION_OPTIONS = [
   { label: "15+ days", value: "15_plus_days" }
 ];
 
+const stripEmojis = (text) => {
+  if (!text) return "";
+  // Regular expression to strip all emoji characters
+  return text.replace(/[\u{1F300}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, "").trim();
+};
+
 export default function CommunitySpots() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -426,11 +432,11 @@ export default function CommunitySpots() {
               
               {/* Profile info block */}
               <div className="px-5 pb-4 text-center -mt-9 border-b border-sand/50">
-                <div className="w-[62px] h-[62px] rounded-full bg-white border-[2.5px] border-white shadow-lg mx-auto flex items-center justify-center font-cabinet font-extrabold text-[20px] text-charcoal">
-                  {isAuthenticated ? (authUser?.name?.[0]?.toUpperCase() || "U") : "G"}
+                <div className="w-[62px] h-[62px] rounded-full bg-[#FEF3E2] border-[2.5px] border-white shadow-md mx-auto flex items-center justify-center font-cabinet font-extrabold text-[20px] text-charcoal relative z-10">
+                  {isAuthenticated ? ((authUser?.fullName || authUser?.name)?.[0]?.toUpperCase() || "U") : "G"}
                 </div>
                 <h3 className="font-display font-extrabold text-[15px] text-charcoal mt-2.5 leading-tight">
-                  {isAuthenticated ? authUser?.name : "Guest Traveler"}
+                  {isAuthenticated ? (authUser?.fullName || authUser?.name || "Traveler") : "Guest Traveler"}
                 </h3>
                 <span className="font-mono-dm text-[8.5px] text-saffron bg-[#FEF3E2] border border-amber-100 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-widest mt-1.5 inline-block">
                   Level 3 Contributor
@@ -668,7 +674,7 @@ export default function CommunitySpots() {
 
                                   <div className="flex items-baseline justify-between gap-3">
                                     <h3 className="font-display font-extrabold text-[16.5px] text-charcoal leading-tight truncate">
-                                      {post.title}
+                                      {stripEmojis(post.title)}
                                     </h3>
                                     {post.rating && (
                                       <div className="flex items-center gap-0.5 shrink-0 text-accent font-cabinet font-bold text-[11px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
