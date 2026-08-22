@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout } from "./store/authSlice";
 import Loader from "./components/shared/Loader";
 import { API_BASE_URL } from "./config/env";
+import TravelCalendar from "./pages/discover/TravelCalendar";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Backdrop, CircularProgress } from '@mui/material';
 
@@ -31,6 +32,7 @@ const theme = createTheme({
 function App() {
   const dispatch = useDispatch();
   const { token, isAuthenticated, loading: authLoading } = useSelector((state) => state.auth);
+  const { isCalendarOpen } = useSelector((state) => state.ui);
 
   useEffect(() => {
     if (token && !isAuthenticated) {
@@ -81,6 +83,11 @@ function App() {
             {DiscoverRoutes()}
             {SafetyRoutes()}
           </Routes>
+          {isCalendarOpen && (
+            <div className="fixed inset-0 z-[100] w-full h-full bg-white">
+              <TravelCalendar />
+            </div>
+          )}
         </Suspense>
       </BrowserRouter>
     </ThemeProvider>
