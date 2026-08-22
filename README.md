@@ -468,9 +468,9 @@ The application will be available at `http://localhost:5173`.
 * **Himmat Mundhe** (UI/UX Architect, Layouts & Themes)
   * GitHub: [@himmatmundhe07](https://github.com/himmatmundhe07)
 * **Rishikesh Singh** (Backend & Security Coordinator)
-  * GitHub: [@RishikeshSingh-dev](https://github.com/RishikeshSingh-dev) *(Verify GitHub profile)*
+  * GitHub: [@RishikeshSingh-dev](https://github.com/rishi919-rgb) *(Verify GitHub profile)*
 * **Souvik Biswas** (Safety Systems, SOS & Maps Specialist)
-  * GitHub: [@SouvikBiswas-dev](https://github.com/SouvikBiswas-dev) *(Verify GitHub profile)*
+  * GitHub: [@SouvikBiswas-dev](https://github.com/souvik6222) *(Verify GitHub profile)*
 
 ---
 
